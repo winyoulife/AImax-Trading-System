@@ -49,6 +49,8 @@ data/*.xlsx
 # Config files with sensitive info
 config/secrets.json
 config/api_keys.json
+config/telegram_secrets.txt
+telegram_secrets.txt
 
 # Temporary files
 *.tmp

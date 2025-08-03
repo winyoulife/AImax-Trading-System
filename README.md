@@ -16,6 +16,7 @@ AImax是一個基於1小時MACD策略的智能交易監控系統，結合回測�
 - **1小時MACD策略** - 基於金叉/死叉的成熟策略
 - **即時監控** - 每小時自動檢測新的交易信號
 - **Telegram通知** - 即時推送詳細的交易分析
+- **雙向Telegram機器人** - 手機指令查詢和自動信號推送
 - **詳細信號分析** - 包含信號強度、風險評估、操作建議
 - **回測功能** - 完整的歷史數據回測和統計分析
 
@@ -45,7 +46,16 @@ pip install -r requirements.txt
 
 ### 使用方式
 
-#### 1. 即時監控系統（推薦）
+#### 1. Telegram雙向機器人（推薦）
+```bash
+# 首次使用需要設置機器人
+python scripts/setup_telegram_bot.py
+
+# 啟動整合監控系統（自動信號推送 + 指令回覆）
+python scripts/integrated_telegram_monitor.py
+```
+
+#### 2. 即時監控系統（GUI版本）
 ```bash
 python scripts/live_macd_monitor_gui.py
 ```
@@ -84,13 +94,32 @@ python scripts/compare_macd_vs_ma.py
 - ⚖️ **謹慎觀察，適量操作**
 - ⚠️ **高風險信號，建議觀望**
 
-## 📱 Telegram通知
+## 📱 Telegram機器人功能
 
-系統支援自動Telegram通知，包含：
-- 即時交易信號推送
-- 詳細技術分析報告
-- 系統狀態更新
-- 回測總結報告
+### 🤖 雙向互動機器人
+AImax提供完整的Telegram雙向機器人，支援：
+
+#### 📡 自動推送功能
+- **交易信號通知** - MACD金叉/死叉即時推送
+- **價格警報** - 價格變化超過5%自動通知
+- **每日總結** - 每天早上9點發送市場總結
+- **系統狀態** - 重要系統事件通知
+
+#### 💬 指令查詢功能
+支援中英文指令：
+- `狀態` / `/status` - 查看系統運行狀態
+- `價格` / `/price` - 獲取當前BTC價格
+- `指標` / `/macd` - 顯示MACD技術指標
+- `信號` / `/signals` - 查看最新交易信號
+- `獲利` / `/profit` - 顯示獲利統計
+- `幫助` / `/help` - 顯示所有可用指令
+
+#### 🔧 設置步驟
+1. 運行設置助手：`python scripts/setup_telegram_bot.py`
+2. 按提示創建Telegram機器人並獲取Token
+3. 啟動整合監控：`python scripts/integrated_telegram_monitor.py`
+
+詳細設置說明請參考：[Telegram機器人使用指南](docs/telegram_bot_guide.md)
 
 ## 📁 項目結構
 
@@ -103,8 +132,12 @@ AImax/
 │   ├── data/                     # 數據服務
 │   │   └── live_macd_service.py  # 即時數據獲取
 │   └── notifications/            # 通知服務
-│       └── telegram_service.py   # Telegram通知
+│       ├── telegram_service.py   # Telegram通知服務
+│       └── telegram_bot.py       # 雙向Telegram機器人
 ├── scripts/                      # 執行腳本
+│   ├── integrated_telegram_monitor.py  # 整合Telegram監控系統
+│   ├── setup_telegram_bot.py    # Telegram機器人設置助手
+│   ├── run_telegram_bot.py      # 基本Telegram機器人
 │   ├── live_macd_monitor_gui.py  # 即時監控系統
 │   ├── clean_macd_backtest_gui.py # 乾淨版回測
 │   ├── compare_macd_vs_ma.py     # 策略比較
