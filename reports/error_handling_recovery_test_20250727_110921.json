@@ -1,0 +1,92 @@
+{
+  "test_summary": {
+    "start_time": "2025-07-27T11:08:59.599519",
+    "end_time": "2025-07-27T11:09:21.749720",
+    "duration_seconds": 22.150201,
+    "total_tests": 30,
+    "passed_tests": 30,
+    "failed_tests": 0,
+    "success_rate": 100.0
+  },
+  "component_results": {
+    "error_handler": {
+      "tests": {
+        "basic_error_handling": true,
+        "error_categorization": true,
+        "recovery_action_determination": true,
+        "error_statistics": true,
+        "error_export": true
+      },
+      "passed": 5,
+      "total": 5,
+      "success_rate": 100.0
+    },
+    "recovery_manager": {
+      "tests": {
+        "component_registration": true,
+        "health_monitoring": true,
+        "failure_detection": true,
+        "recovery_execution": true,
+        "circuit_breaker": true,
+        "statistics": true
+      },
+      "passed": 6,
+      "total": 6,
+      "success_rate": 100.0
+    },
+    "health_monitor": {
+      "tests": {
+        "system_metrics": true,
+        "health_status": true,
+        "diagnostics": true,
+        "custom_checks": true,
+        "export_report": true
+      },
+      "passed": 5,
+      "total": 5,
+      "success_rate": 100.0
+    },
+    "alert_system": {
+      "tests": {
+        "basic_alerts": true,
+        "alert_levels": true,
+        "alert_channels": true,
+        "alert_rules": true,
+        "acknowledgment": true,
+        "statistics": true,
+        "export": true
+      },
+      "passed": 7,
+      "total": 7,
+      "success_rate": 100.0
+    },
+    "error_decorator": {
+      "tests": {
+        "decorator_basic": true,
+        "decorator_with_callbacks": true
+      },
+      "passed": 2,
+      "total": 2,
+      "success_rate": 100.0
+    },
+    "auto_reconnector": {
+      "tests": {
+        "reconnector_creation": true,
+        "reconnection_logic": true
+      },
+      "passed": 2,
+      "total": 2,
+      "success_rate": 100.0
+    },
+    "integration_scenarios": {
+      "tests": {
+        "error_to_alert": true,
+        "health_to_recovery": true,
+        "full_workflow": true
+      },
+      "passed": 3,
+      "total": 3,
+      "success_rate": 100.0
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "ai_models": {
+    "market_scanner": {
+      "model_name": "llama2:7b",
+      "system_prompt": "你是專業的加密貨幣市場掃描員。快速分析市場數據，識別交易機會。保持回應簡潔，專注於關鍵信號。",
+      "max_tokens": 200,
+      "temperature": 0.3
+    },
+    "deep_analyst": {
+      "model_name": "llama2:7b",
+      "system_prompt": "你是專業的技術分析師。基於市場掃描員的報告進行深度分析。提供技術指標解讀和風險評估。",
+      "max_tokens": 300,
+      "temperature": 0.2
+    },
+    "decision_maker": {
+      "model_name": "llama2:7b",
+      "system_prompt": "你是最終決策者。綜合市場掃描員和分析師的報告，做出明確的交易決策：BUY/SELL/HOLD。",
+      "max_tokens": 200,
+      "temperature": 0.1
+    }
+  },
+  "collaboration_settings": {
+    "enable_parallel_processing": true,
+    "max_concurrent_ai": 2,
+    "timeout_seconds": 30,
+    "retry_attempts": 2
+  },
+  "fallback_settings": {
+    "enable_fallback": true,
+    "fallback_model": "llama2:7b",
+    "fallback_timeout": 15
+  },
+  "performance_optimization": {
+    "use_smaller_models": true,
+    "reduce_token_limits": true,
+    "enable_caching": true,
+    "parallel_where_possible": true
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "statistics": {
+    "basic_stats": {
+      "total_trades": 3,
+      "winning_trades": 2,
+      "losing_trades": 1,
+      "win_rate": 66.67,
+      "total_return": 1300,
+      "total_return_pct": 13.0,
+      "initial_capital": 10000,
+      "final_capital": 11300
+    },
+    "risk_metrics": {
+      "volatility": 76.31,
+      "sharpe_ratio": 13.98,
+      "max_drawdown": -1.9,
+      "profit_factor": 3.75,
+      "avg_win": 750.0,
+      "avg_loss": -200.0
+    },
+    "period": {
+      "start_date": "2024-01-01",
+      "end_date": "2024-01-17",
+      "model_name": "XGBoost",
+      "strategy": "智能網格交易"
+    }
+  },
+  "metadata": {
+    "generated_at": "2025-07-29T15:37:08.649019",
+    "generator": "AImax Backtest Reporter v1.0"
+  }
+}

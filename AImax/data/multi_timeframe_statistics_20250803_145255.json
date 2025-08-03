@@ -1,0 +1,66 @@
+{
+  "position": 1,
+  "position_status": "持倉",
+  "buy_count": 3,
+  "sell_count": 2,
+  "complete_pairs": 2,
+  "open_positions": 1,
+  "next_trade_sequence": 3,
+  "total_profit": 4132.0999999996275,
+  "average_profit": 2066.0499999998137,
+  "average_hold_time": 14.5,
+  "trade_pairs": [
+    {
+      "buy_sequence": 1,
+      "sell_sequence": 1,
+      "buy_time": "2025-07-30 11:00:00",
+      "sell_time": "2025-07-31 01:00:00",
+      "buy_price": 3517744.9,
+      "sell_price": 3514299.8,
+      "profit": -3445.100000000093
+    },
+    {
+      "buy_sequence": 2,
+      "sell_sequence": 2,
+      "buy_time": "2025-07-31 07:00:00",
+      "sell_time": "2025-07-31 22:00:00",
+      "buy_price": 3521738.7,
+      "sell_price": 3529315.9,
+      "profit": 7577.199999999721
+    }
+  ],
+  "trade_history": [
+    {
+      "type": "buy",
+      "sequence": 1,
+      "timestamp": "2025-07-30 11:00:00",
+      "price": 3517744.9
+    },
+    {
+      "type": "sell",
+      "sequence": 1,
+      "timestamp": "2025-07-31 01:00:00",
+      "price": 3514299.8,
+      "paired_with": 1
+    },
+    {
+      "type": "buy",
+      "sequence": 2,
+      "timestamp": "2025-07-31 07:00:00",
+      "price": 3521738.7
+    },
+    {
+      "type": "sell",
+      "sequence": 2,
+      "timestamp": "2025-07-31 22:00:00",
+      "price": 3529315.9,
+      "paired_with": 2
+    },
+    {
+      "type": "buy",
+      "sequence": 3,
+      "timestamp": "2025-08-01 20:00:00",
+      "price": 3487154.3
+    }
+  ]
+}

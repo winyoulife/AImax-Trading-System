@@ -1,0 +1,46 @@
+{
+  "success": true,
+  "total_tests": 24,
+  "passed_tests": 6,
+  "success_rate": 0.25,
+  "test_duration": 0.6942915916442871,
+  "timestamp": "2025-07-27T10:58:10.147005",
+  "system_health": "需改進",
+  "detailed_results": {
+    "component_initialization": {
+      "ai_manager": false,
+      "risk_manager": false,
+      "max_client": false,
+      "backtest_reporter": false,
+      "backtest_gui": false,
+      "trading_monitor": false,
+      "decision_visualizer": false
+    },
+    "data_flow": {
+      "data_acquisition": false,
+      "ai_analysis": false,
+      "risk_assessment": false
+    },
+    "component_interaction": {
+      "ai_risk_interaction": false,
+      "gui_interaction": false,
+      "backtest_interaction": false
+    },
+    "end_to_end_workflow": {
+      "workflow_數據獲取": true,
+      "workflow_AI分析": true,
+      "workflow_風險評估": true,
+      "workflow_信號生成": true,
+      "workflow_交易執行": true,
+      "workflow_結果記錄": true,
+      "backtest_workflow": false,
+      "monitoring_workflow": false
+    },
+    "performance": {},
+    "error_handling": {
+      "ai_error_handling": false,
+      "risk_error_handling": false,
+      "gui_error_handling": false
+    }
+  }
+}

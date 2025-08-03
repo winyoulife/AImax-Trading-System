@@ -1,0 +1,43 @@
+{
+  "ai_models": {
+    "market_scanner": {
+      "model_name": "llama2:7b",
+      "role": "市場掃描員",
+      "description": "快速市場監控和機會識別",
+      "max_tokens": 300,
+      "temperature": 0.3,
+      "timeout_seconds": 10,
+      "system_prompt": "你是一個專業的市場掃描員。你的任務是快速分析市場數據，識別潛在的交易機會。請保持簡潔明確，專注於關鍵信號。"
+    },
+    "deep_analyst": {
+      "model_name": "qwen:7b",
+      "role": "深度分析師",
+      "description": "中文技術分析專家",
+      "max_tokens": 400,
+      "temperature": 0.2,
+      "timeout_seconds": 20,
+      "system_prompt": "你是資深技術分析師。基於市場數據進行技術分析，評估指標，提供簡潔的中文分析報告。"
+    },
+    "decision_maker": {
+      "model_name": "qwen:7b",
+      "role": "最終決策者",
+      "description": "中文交易決策官",
+      "max_tokens": 300,
+      "temperature": 0.1,
+      "timeout_seconds": 15,
+      "system_prompt": "你是交易決策者。基於分析報告做出交易決策：BUY、SELL或HOLD。提供清晰的中文決策理由。"
+    }
+  },
+  "collaboration_settings": {
+    "enable_parallel_processing": true,
+    "decision_timeout_seconds": 60,
+    "conflict_resolution_method": "weighted_voting",
+    "minimum_confidence_threshold": 0.6
+  },
+  "fallback_settings": {
+    "enable_fallback": true,
+    "fallback_model": "llama2:7b",
+    "max_retries": 3,
+    "retry_delay_seconds": 2
+  }
+}

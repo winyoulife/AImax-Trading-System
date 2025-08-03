@@ -1,0 +1,425 @@
+{
+  "success": true,
+  "timestamp": "2025-07-27T08:23:29.707640",
+  "summary": {
+    "total_models_evaluated": 3,
+    "evaluation_criteria": [
+      "整體性能分數 (40%)",
+      "預測準確率 (25%)",
+      "穩定性分數 (20%)",
+      "一致性分數 (10%)",
+      "可靠性分數 (5%)"
+    ],
+    "best_overall_model": null
+  },
+  "comparison_metrics": {
+    "lstm": {
+      "accuracy_score": -0.053501872497377256,
+      "stability_score": 6.124852399719554e-09,
+      "direction_accuracy": 0.5287356321839081,
+      "convergence_score": 0.0,
+      "overall_score": 0.1321839092709475
+    },
+    "ensemble": {
+      "accuracy_score": 0.26666666666666666,
+      "stability_score": 0.7175527434315817,
+      "consistency_score": 0.7922600301733447,
+      "reliability_score": 0.8110230004454506,
+      "overall_score": 0.7489938463444036
+    }
+  },
+  "statistical_analysis": {},
+  "model_ranking": [],
+  "selection_recommendation": {},
+  "detailed_analysis": {
+    "model_comparison_matrix": {},
+    "performance_trends": {},
+    "strength_weakness_analysis": {},
+    "improvement_suggestions": {}
+  },
+  "visualization_data": {
+    "radar_chart_data": {},
+    "bar_chart_data": {
+      "models": [],
+      "scores": [],
+      "colors": []
+    },
+    "heatmap_data": {},
+    "trend_data": {
+      "timestamps": [
+        "2025-01-01",
+        "2025-01-15",
+        "2025-01-27"
+      ],
+      "performance_trends": {}
+    }
+  },
+  "validation_results": {
+    "lstm": {
+      "success": true,
+      "metrics": {
+        "mse": 1.5810964525212154e+22,
+        "mae": 91035739236.47609,
+        "rmse": 125741657875.23303,
+        "r2_score": -1.0535018724973773,
+        "direction_accuracy": 0.5287356321839081,
+        "stability_score": 6.124852399719554e-09,
+        "time_window_effectiveness": {
+          "window_10": -88.5767987338834,
+          "window_30": -11.128856633035776,
+          "window_60": -2.0284159098542536
+        },
+        "confidence_intervals": {
+          "percentile_5": 11639410719.927227,
+          "percentile_25": 23916616389.513855,
+          "percentile_50": 46739469236.306564,
+          "percentile_75": 151076958973.83978,
+          "percentile_95": 269888570338.0449,
+          "standard_error": 86737873543.6861,
+          "mean_absolute_error": 91035739236.47609
+        },
+        "convergence_check": {
+          "converged": "False",
+          "train_trend": -0.07327282392617428,
+          "val_trend": 0.0067291866197730565,
+          "overfitting_ratio": 0.5752934935324463,
+          "final_train_loss": 0.27723878622055054,
+          "final_val_loss": 0.15949366986751556,
+          "epochs_trained": 10
+        },
+        "validation_timestamp": "2025-07-27T08:23:29.193351"
+      },
+      "summary": {
+        "overall_score": 0.1321839092709475,
+        "strengths": [],
+        "weaknesses": [
+          "擬合度較差 (R² = -1.054)",
+          "預測結果不穩定 (穩定性: 0.000)",
+          "模型收斂性問題",
+          "預測誤差較大 (MAE: 91035739236)"
+        ],
+        "recommendations": [
+          "考慮增加LSTM層數或單元數",
+          "嘗試調整序列長度參數",
+          "增加更多相關特徵",
+          "增加Dropout層或調整Dropout率",
+          "使用BatchNormalization",
+          "減少學習率",
+          "調整學習率和優化器參數",
+          "增加訓練epochs",
+          "使用學習率調度器",
+          "檢查數據質量和預處理",
+          "嘗試不同的特徵工程方法",
+          "考慮集成多個模型"
+        ]
+      },
+      "full_report": {
+        "model_type": "LSTM",
+        "validation_timestamp": "2025-07-27T08:23:29.193351",
+        "overall_score": 0.1321839092709475,
+        "performance_grade": "需要改進 (F)",
+        "detailed_metrics": {
+          "mse": 1.5810964525212154e+22,
+          "mae": 91035739236.47609,
+          "rmse": 125741657875.23303,
+          "r2_score": -1.0535018724973773,
+          "direction_accuracy": 0.5287356321839081,
+          "stability_score": 6.124852399719554e-09,
+          "time_window_effectiveness": {
+            "window_10": -88.5767987338834,
+            "window_30": -11.128856633035776,
+            "window_60": -2.0284159098542536
+          },
+          "confidence_intervals": {
+            "percentile_5": 11639410719.927227,
+            "percentile_25": 23916616389.513855,
+            "percentile_50": 46739469236.306564,
+            "percentile_75": 151076958973.83978,
+            "percentile_95": 269888570338.0449,
+            "standard_error": 86737873543.6861,
+            "mean_absolute_error": 91035739236.47609
+          },
+          "convergence_check": {
+            "converged": "False",
+            "train_trend": -0.07327282392617428,
+            "val_trend": 0.0067291866197730565,
+            "overfitting_ratio": 0.5752934935324463,
+            "final_train_loss": 0.27723878622055054,
+            "final_val_loss": 0.15949366986751556,
+            "epochs_trained": 10
+          },
+          "validation_timestamp": "2025-07-27T08:23:29.193351"
+        },
+        "analysis": {
+          "strengths": [],
+          "weaknesses": [
+            "擬合度較差 (R² = -1.054)",
+            "預測結果不穩定 (穩定性: 0.000)",
+            "模型收斂性問題",
+            "預測誤差較大 (MAE: 91035739236)"
+          ],
+          "recommendations": [
+            "考慮增加LSTM層數或單元數",
+            "嘗試調整序列長度參數",
+            "增加更多相關特徵",
+            "增加Dropout層或調整Dropout率",
+            "使用BatchNormalization",
+            "減少學習率",
+            "調整學習率和優化器參數",
+            "增加訓練epochs",
+            "使用學習率調度器",
+            "檢查數據質量和預處理",
+            "嘗試不同的特徵工程方法",
+            "考慮集成多個模型"
+          ]
+        },
+        "model_config": {
+          "sequence_length": 60,
+          "features": [
+            "close",
+            "volume",
+            "high",
+            "low"
+          ],
+          "prediction_horizon": 1,
+          "lstm_units": [
+            50,
+            50
+          ],
+          "dropout_rate": 0.2,
+          "batch_size": 32,
+          "epochs": 100,
+          "validation_split": 0.2,
+          "learning_rate": 0.001
+        }
+      }
+    },
+    "ensemble": {
+      "success": true,
+      "validation_metrics": {
+        "prediction_count": 30,
+        "success_rate": 1.0,
+        "score_statistics": {
+          "mean": 49.05666666666668,
+          "std": 7.619238077976619,
+          "min": 40.900000000000006,
+          "max": 59.25,
+          "median": 50.0,
+          "q25": 40.900000000000006,
+          "q75": 58.9375
+        },
+        "signal_distribution": {
+          "counts": {
+            "HOLD": 30
+          },
+          "percentages": {
+            "HOLD": 1.0
+          },
+          "total": 30,
+          "diversity": 1
+        },
+        "confidence_analysis": {
+          "statistics": {
+            "mean": 86.88940739688695,
+            "std": 8.495388210932857,
+            "min": 70.95597211894405,
+            "max": 100.0,
+            "median": 88.56904786701183,
+            "q25": 75.61421178910416,
+            "q75": 91.5548775968447
+          },
+          "distribution": {
+            "high_confidence": "21",
+            "medium_confidence": "9",
+            "low_confidence": "0"
+          },
+          "percentages": {
+            "high_confidence": 0.7,
+            "medium_confidence": 0.3,
+            "low_confidence": 0.0
+          }
+        },
+        "component_consistency": {
+          "component_metrics": {
+            "technical_analysis": {
+              "mean": 54.36666666666667,
+              "std": 8.983256029351992,
+              "consistency_score": 0.8476982005726907
+            },
+            "market_sentiment": {
+              "mean": 48.266666666666666,
+              "std": 10.996767201722918,
+              "consistency_score": 0.8197155733621847
+            },
+            "volatility_analysis": {
+              "mean": 41.666666666666664,
+              "std": 7.340905181848414,
+              "consistency_score": 0.8719778636460692
+            }
+          },
+          "correlations": {
+            "technical_analysis_vs_market_sentiment": 0.9012902315494923,
+            "technical_analysis_vs_volatility_analysis": -0.1432164894879311,
+            "market_sentiment_vs_volatility_analysis": 0.27734343822047536
+          },
+          "overall_consistency": 0.8464638791936482
+        },
+        "weight_effectiveness": {
+          "component_contributions": {
+            "technical_analysis": {
+              "weight": 0.4,
+              "correlation_with_final": 0.892400955953891,
+              "average_contribution": 21.746666666666677,
+              "contribution_variance": 12.91182222222222
+            },
+            "market_sentiment": {
+              "weight": 0.35,
+              "correlation_with_final": 0.9970110890696369,
+              "average_contribution": 16.893333333333334,
+              "contribution_variance": 14.813788888888883
+            },
+            "volatility_analysis": {
+              "weight": 0.25,
+              "correlation_with_final": 0.31342563950709956,
+              "average_contribution": 10.416666666666666,
+              "contribution_variance": 3.368055555555556
+            }
+          },
+          "weight_balance": {
+            "entropy": 1.0805276263041719,
+            "normalized_entropy": 0.9835386309160417,
+            "weight_variance": 0.0038888888888888896,
+            "balance_score": 0.9835386309160417
+          },
+          "effectiveness_score": 0.7342792281768759
+        },
+        "model_agreement": 0.7922600301733447,
+        "prediction_stability": {
+          "score_stability": {
+            "mean_change": 9.724137931034479,
+            "max_change": 18.349999999999994,
+            "stability_score": 0.5069930069930071
+          },
+          "signal_stability": {
+            "change_count": 0,
+            "change_rate": 0.0,
+            "stability_score": 1.0
+          },
+          "confidence_stability": {
+            "mean_change": 10.975804919035296,
+            "max_change": 24.38578821089584,
+            "stability_score": 0.645665223301738
+          }
+        },
+        "accuracy_metrics": {
+          "accuracy": 0.26666666666666666,
+          "correct_predictions": 8,
+          "total_predictions": 30,
+          "precision_recall": {
+            "SELL": {
+              "precision": 0,
+              "recall": 0.0,
+              "f1_score": 0,
+              "support": 13
+            },
+            "BUY": {
+              "precision": 0,
+              "recall": 0.0,
+              "f1_score": 0,
+              "support": 9
+            },
+            "HOLD": {
+              "precision": 0.26666666666666666,
+              "recall": 1.0,
+              "f1_score": 0.4210526315789474,
+              "support": 8
+            }
+          },
+          "macro_f1": 0.14035087719298248
+        },
+        "weight_optimization": {
+          "correlation_based": {
+            "technical_analysis": 0.40511425885835994,
+            "market_sentiment": 0.4526030656144674,
+            "volatility_analysis": 0.14228267552717264
+          },
+          "accuracy_based": {
+            "technical_analysis": 0.3681658117350007,
+            "market_sentiment": 0.278918747527966,
+            "volatility_analysis": 0.3529154407370333
+          },
+          "variance_based": {
+            "technical_analysis": 0.3166064972105512,
+            "market_sentiment": 0.21214331790291807,
+            "volatility_analysis": 0.47125018488653075
+          },
+          "final_recommendation": {
+            "recommended_weights": {
+              "technical_analysis": 0.36329552260130393,
+              "market_sentiment": 0.31455504368178383,
+              "volatility_analysis": 0.32214943371691224
+            },
+            "weight_changes": {
+              "technical_analysis": {
+                "current": 0.4,
+                "recommended": 0.36329552260130393,
+                "change": -0.03670447739869609,
+                "change_percentage": -9.176119349674023
+              },
+              "market_sentiment": {
+                "current": 0.35,
+                "recommended": 0.31455504368178383,
+                "change": -0.03544495631821615,
+                "change_percentage": -10.127130376633184
+              },
+              "volatility_analysis": {
+                "current": 0.25,
+                "recommended": 0.32214943371691224,
+                "change": 0.07214943371691224,
+                "change_percentage": 28.859773486764894
+              }
+            },
+            "improvement_potential": 0.014429886743382449
+          }
+        },
+        "conflict_resolution": {
+          "conflicts_detected": 0,
+          "conflict_rate": 0.0,
+          "resolution_strategies": [],
+          "resolution_effectiveness": {},
+          "hold_bias": 0
+        },
+        "reliability_assessment": {
+          "reliability_factors": {
+            "success_rate": 1.0,
+            "consistency": 0.7922600301733447,
+            "stability": 0.7175527434315817,
+            "weight_effectiveness": 0.7342792281768759
+          },
+          "overall_reliability": 0.8110230004454506,
+          "reliability_grade": "優秀",
+          "confidence_level": 0.9874859239299033
+        }
+      },
+      "summary": {
+        "overall_score": 0.7489938463444036,
+        "strengths": [
+          "極高的預測成功率 (100.0%)",
+          "良好的模型一致性 (0.792)",
+          "高平均信心度 (86.9%)",
+          "優秀的信號穩定性 (1.000)",
+          "有效的權重配置 (0.734)"
+        ],
+        "weaknesses": [],
+        "recommendations": [
+          "集成系統表現良好，可考慮微調參數進一步優化"
+        ]
+      },
+      "timestamp": "2025-07-27T08:23:29.202875"
+    },
+    "ml_models": {
+      "success": false,
+      "error": "Model training failed"
+    }
+  }
+}

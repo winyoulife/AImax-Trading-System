@@ -1,0 +1,100 @@
+{
+  "timestamp": "2025-07-26T18:12:27.700832",
+  "version": "1.0",
+  "pairs": {
+    "BTCTWD": {
+      "pair": "BTCTWD",
+      "min_order_size": 0.0001,
+      "max_position_size": 0.01,
+      "risk_weight": 0.27999999999999997,
+      "enabled": true,
+      "api_rate_limit": 0.2,
+      "max_retries": 2,
+      "timeout": 15,
+      "precision": 0,
+      "tick_size": 1.0,
+      "min_notional": 100.0
+    },
+    "ETHTWD": {
+      "pair": "ETHTWD",
+      "min_order_size": 0.001,
+      "max_position_size": 0.1,
+      "risk_weight": 0.36,
+      "enabled": true,
+      "api_rate_limit": 0.1,
+      "max_retries": 3,
+      "timeout": 10,
+      "precision": 0,
+      "tick_size": 1.0,
+      "min_notional": 100.0
+    },
+    "LTCTWD": {
+      "pair": "LTCTWD",
+      "min_order_size": 0.01,
+      "max_position_size": 1.0,
+      "risk_weight": 0.2,
+      "enabled": true,
+      "api_rate_limit": 0.1,
+      "max_retries": 3,
+      "timeout": 10,
+      "precision": 0,
+      "tick_size": 1.0,
+      "min_notional": 50.0
+    },
+    "BCHTWD": {
+      "pair": "BCHTWD",
+      "min_order_size": 0.001,
+      "max_position_size": 0.1,
+      "risk_weight": 0.1,
+      "enabled": true,
+      "api_rate_limit": 0.05,
+      "max_retries": 5,
+      "timeout": 10,
+      "precision": 0,
+      "tick_size": 1.0,
+      "min_notional": 50.0
+    }
+  },
+  "templates": {
+    "BTC": {
+      "base_currency": "BTC",
+      "quote_currency": "TWD",
+      "default_min_order_size": 0.0001,
+      "default_max_position_size": 0.01,
+      "default_risk_weight": 0.4,
+      "market_cap_tier": "large",
+      "volatility_tier": "medium"
+    },
+    "ETH": {
+      "base_currency": "ETH",
+      "quote_currency": "TWD",
+      "default_min_order_size": 0.001,
+      "default_max_position_size": 0.1,
+      "default_risk_weight": 0.3,
+      "market_cap_tier": "large",
+      "volatility_tier": "medium"
+    },
+    "LTC": {
+      "base_currency": "LTC",
+      "quote_currency": "TWD",
+      "default_min_order_size": 0.01,
+      "default_max_position_size": 1.0,
+      "default_risk_weight": 0.2,
+      "market_cap_tier": "medium",
+      "volatility_tier": "medium"
+    },
+    "BCH": {
+      "base_currency": "BCH",
+      "quote_currency": "TWD",
+      "default_min_order_size": 0.001,
+      "default_max_position_size": 0.1,
+      "default_risk_weight": 0.1,
+      "market_cap_tier": "medium",
+      "volatility_tier": "high"
+    }
+  },
+  "settings": {
+    "auto_optimization_enabled": true,
+    "optimization_interval": 3600
+  }
+}

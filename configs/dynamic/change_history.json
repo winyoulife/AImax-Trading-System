@@ -1,0 +1,35 @@
+[
+  {
+    "timestamp": "2025-07-26T18:12:27.698829",
+    "change_type": "update",
+    "pair": "BTCTWD",
+    "field_name": "risk_weight",
+    "old_value": 0.6,
+    "new_value": 0.35,
+    "user": "test_user",
+    "reason": "測試熱更新功能",
+    "config_hash": "75508b6f"
+  },
+  {
+    "timestamp": "2025-07-26T18:12:27.699829",
+    "change_type": "update",
+    "pair": "BTCTWD",
+    "field_name": "api_rate_limit",
+    "old_value": 0.1,
+    "new_value": 0.08,
+    "user": "test_user",
+    "reason": "測試熱更新功能",
+    "config_hash": "75508b6f"
+  },
+  {
+    "timestamp": "2025-07-26T18:12:27.700832",
+    "change_type": "update",
+    "pair": "BTCTWD",
+    "field_name": "template",
+    "old_value": null,
+    "new_value": "conservative",
+    "user": "system",
+    "reason": "應用模板: conservative",
+    "config_hash": "9c65e844"
+  }
+]

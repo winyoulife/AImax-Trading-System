@@ -1,0 +1,12 @@
+{
+  "trading_interval": 60,
+  "max_daily_trades": 50,
+  "enable_auto_trading": true,
+  "enable_risk_management": true,
+  "enable_position_management": true,
+  "emergency_stop_conditions": {
+    "max_daily_loss": 0.10,
+    "max_consecutive_losses": 10,
+    "system_error_threshold": 5
+  }
+}

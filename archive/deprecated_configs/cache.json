@@ -1,0 +1,9 @@
+{
+  "max_memory_cache_size": 100,
+  "max_memory_size_mb": 500,
+  "cache_ttl_seconds": 3600,
+  "cleanup_interval_seconds": 300,
+  "max_workers": 4,
+  "enable_persistent_cache": true,
+  "db_path": "AImax/data/cache/data_cache.db"
+}
