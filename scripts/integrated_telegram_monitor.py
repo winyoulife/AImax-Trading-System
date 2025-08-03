@@ -16,8 +16,8 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from src.notifications.telegram_bot import TelegramBot
 from src.data.data_fetcher import DataFetcher
-from src.core.macd_calculator import MACDCalculator
-from src.core.trading_signals import TradingSignals
+from src.core.improved_max_macd_calculator import ImprovedMaxMACDCalculator
+from src.core.improved_trading_signals import SignalDetectionEngine
 from config.telegram_config import telegram_config
 
 class IntegratedTelegramMonitor:
@@ -32,8 +32,8 @@ class IntegratedTelegramMonitor:
         
         # 初始化交易組件
         self.data_fetcher = DataFetcher()
-        self.macd_calculator = MACDCalculator()
-        self.trading_signals = TradingSignals()
+        self.macd_calculator = ImprovedMaxMACDCalculator()
+        self.signal_engine = SignalDetectionEngine()
         
         # 監控狀態
         self.running = False
@@ -42,6 +42,32 @@ class IntegratedTelegramMonitor:
         
         # 設置日誌
         self.logger = logging.getLogger(__name__)
+    
+    def _calculate_macd_data(self, df):
+        """計算MACD數據的輔助方法"""
+        import numpy as np
+        
+        prices = df['close'].tolist()
+        timestamps = df['timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S').tolist()
+        
+        macd_line, signal_line, hist = self.macd_calculator.calculate_macd(prices, timestamps)
+        
+        # 創建包含MACD數據的DataFrame
+        macd_df = df.copy()
+        macd_df['datetime'] = df['timestamp']
+        
+        # 填充MACD數據（前面的數據用NaN填充）
+        macd_len = len(macd_line)
+        total_len = len(df)
+        
+        macd_df['macd'] = [np.nan] * (total_len - macd_len) + macd_line
+        macd_df['macd_signal'] = [np.nan] * (total_len - macd_len) + signal_line
+        macd_df['macd_hist'] = [np.nan] * (total_len - macd_len) + hist
+        
+        # 移除NaN行
+        macd_df = macd_df.dropna().reset_index(drop=True)
+        
+        return macd_df
     
     async def check_trading_signals(self):
         """檢查交易信號"""
@@ -55,15 +81,15 @@ class IntegratedTelegramMonitor:
                 return
             
             # 計算MACD和信號
-            macd_df = self.macd_calculator.calculate_macd(df)
-            signals_df = self.trading_signals.generate_signals(macd_df)
+            macd_df = self._calculate_macd_data(df)
+            signals_df = self.signal_engine.detect_signals(macd_df)
             
             # 檢查最新信號
             latest = signals_df.iloc[-1]
             
-            if latest['signal'] != 0:
+            if latest['signal_type'] in ['buy', 'sell']:
                 # 檢查是否是新信號（避免重複發送）
-                current_time = latest['timestamp']
+                current_time = latest['datetime']
                 
                 if (self.last_signal_time is None or 
                     current_time > self.last_signal_time):
@@ -80,20 +106,20 @@ class IntegratedTelegramMonitor:
     async def send_signal_notification(self, signal_data):
         """發送信號通知"""
         try:
-            signal_type = "買進" if signal_data['signal'] == 1 else "賣出"
-            emoji = "🟢" if signal_data['signal'] == 1 else "🔴"
+            signal_type = "買進" if signal_data['signal_type'] == 'buy' else "賣出"
+            emoji = "🟢" if signal_data['signal_type'] == 'buy' else "🔴"
             
             message = f"""
 {emoji} <b>MACD交易信號</b> {emoji}
 
 🎯 <b>動作</b>: {signal_type}
-💰 <b>價格</b>: ${signal_data['close']:,.2f}
-⏰ <b>時間</b>: {signal_data['timestamp'].strftime("%Y-%m-%d %H:%M:%S")}
+💰 <b>價格</b>: ${signal_data['close']:,.0f}
+⏰ <b>時間</b>: {signal_data['datetime'].strftime("%Y-%m-%d %H:%M:%S")}
 
 📊 <b>技術指標</b>:
-• MACD: {signal_data['macd']:.4f}
-• 信號線: {signal_data['signal_line']:.4f}
-• 柱狀圖: {signal_data['hist']:.4f}
+• MACD: {signal_data['macd']:.1f}
+• 信號線: {signal_data['macd_signal']:.1f}
+• 柱狀圖: {signal_data['macd_hist']:.1f}
 
 💡 <i>AImax 1小時MACD策略</i>
 
@@ -189,13 +215,13 @@ class IntegratedTelegramMonitor:
             daily_change_pct = (daily_change / start_price) * 100 if start_price != 0 else 0
             
             # 計算MACD信號
-            macd_df = self.macd_calculator.calculate_macd(df)
-            signals_df = self.trading_signals.generate_signals(macd_df)
+            macd_df = self._calculate_macd_data(df)
+            signals_df = self.signal_engine.detect_signals(macd_df)
             
             # 統計今日信號
-            today_signals = signals_df[signals_df['signal'] != 0]
-            buy_signals = len(today_signals[today_signals['signal'] == 1])
-            sell_signals = len(today_signals[today_signals['signal'] == -1])
+            today_signals = signals_df[signals_df['signal_type'].isin(['buy', 'sell'])]
+            buy_signals = len(today_signals[today_signals['signal_type'] == 'buy'])
+            sell_signals = len(today_signals[today_signals['signal_type'] == 'sell'])
             
             message = f"""
 📊 <b>每日市場總結</b>
@@ -203,10 +229,10 @@ class IntegratedTelegramMonitor:
 📅 <b>日期</b>: {current_time.strftime("%Y-%m-%d")}
 
 💰 <b>價格統計</b>:
-• 當前價格: ${current_price:,.2f}
-• 今日最高: ${today_high:,.2f}
-• 今日最低: ${today_low:,.2f}
-• 日內變化: ${daily_change:+,.2f} ({daily_change_pct:+.2f}%)
+• 當前價格: ${current_price:,.0f}
+• 今日最高: ${today_high:,.0f}
+• 今日最低: ${today_low:,.0f}
+• 日內變化: ${daily_change:+,.0f} ({daily_change_pct:+.2f}%)
 
 📡 <b>信號統計</b>:
 • 買進信號: {buy_signals} 個

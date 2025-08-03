@@ -48,6 +48,10 @@ class LiveMACDMonitorGUI:
         self.hourly_data = None
         self.hourly_statistics = None
         self.last_update_time = None
+        
+        # Telegram機器人
+        self.telegram_bot = None
+        self.bot_thread = None
         self.monitoring_active = False
         self.update_timer = None
         self.last_signal_sequence = 0  # 記錄最後一個信號序號，避免重複通知
@@ -138,6 +142,10 @@ class LiveMACDMonitorGUI:
                                 command=self.setup_telegram, style='Custom.TButton')
         telegram_btn.pack(side='left', padx=5)
         
+        test_telegram_btn = ttk.Button(left_buttons, text="🧪 測試指令", 
+                                     command=self.test_telegram_commands, style='Custom.TButton')
+        test_telegram_btn.pack(side='left', padx=5)
+        
         # 右側狀態信息
         right_status = tk.Frame(control_frame, bg='#f0f0f0')
         right_status.pack(side='right')
@@ -152,13 +160,26 @@ class LiveMACDMonitorGUI:
         monitor_frame = tk.Frame(self.root, bg='#f0f0f0')
         monitor_frame.pack(fill='x', padx=10, pady=5)
         
+        # 左側：即時監控狀態
         monitor_info_frame = tk.LabelFrame(monitor_frame, text="即時監控狀態", 
                                          bg='#f0f0f0', fg='#800080', font=('Arial', 10, 'bold'))
-        monitor_info_frame.pack(fill='x', padx=5, pady=2)
+        monitor_info_frame.pack(side='left', fill='both', expand=True, padx=(5, 2), pady=2)
         
         self.monitor_status_text = tk.Text(monitor_info_frame, height=3, bg='#fff8dc', fg='#800080',
                                          font=('Consolas', 9), wrap='word')
-        self.monitor_status_text.pack(fill='x', padx=5, pady=3)
+        self.monitor_status_text.pack(fill='both', expand=True, padx=5, pady=3)
+        
+        # 右側：Telegram消息狀態
+        telegram_info_frame = tk.LabelFrame(monitor_frame, text="📱 Telegram消息", 
+                                          bg='#f0f0f0', fg='#0066cc', font=('Arial', 10, 'bold'))
+        telegram_info_frame.pack(side='right', fill='both', expand=True, padx=(2, 5), pady=2)
+        
+        self.telegram_status_text = tk.Text(telegram_info_frame, height=3, bg='#f0f8ff', fg='#0066cc',
+                                          font=('Consolas', 9), wrap='word')
+        self.telegram_status_text.pack(fill='both', expand=True, padx=5, pady=3)
+        
+        # 初始化Telegram狀態顯示
+        self.telegram_status_text.insert(1.0, "📱 Telegram機器人未啟動\n點擊 '📱 設置Telegram' 按鈕啟動雙向機器人")
         
         # 主要內容區域
         main_frame = tk.Frame(self.root, bg='#f0f0f0')
@@ -634,6 +655,26 @@ class LiveMACDMonitorGUI:
         self.monitor_status_text.delete(1.0, tk.END)
         self.monitor_status_text.insert(1.0, status_message)
     
+    def update_telegram_status(self, message):
+        """更新Telegram狀態顯示"""
+        timestamp = datetime.now().strftime('%H:%M:%S')
+        status_message = f"[{timestamp}] {message}"
+        
+        # 保留最近3條消息
+        current_text = self.telegram_status_text.get(1.0, tk.END).strip()
+        lines = current_text.split('\n') if current_text else []
+        
+        # 添加新消息到開頭
+        lines.insert(0, status_message)
+        
+        # 只保留最近3條
+        if len(lines) > 3:
+            lines = lines[:3]
+        
+        # 更新顯示
+        self.telegram_status_text.delete(1.0, tk.END)
+        self.telegram_status_text.insert(1.0, '\n'.join(lines))
+    
     def save_data(self):
         """導出數據到CSV文件"""
         if self.hourly_data is None:
@@ -684,6 +725,145 @@ class LiveMACDMonitorGUI:
         if self.monitoring_active:
             self.stop_monitoring()
         self.root.destroy()
+    
+    def setup_telegram(self):
+        """設置Telegram通知和雙向機器人"""
+        try:
+            # 使用你的Telegram配置
+            bot_token = "7323086952:AAE5fkQp8n98TOYnPpj2KPyrCI6hX5R2n2I"
+            chat_id = "8164385222"
+            
+            # 初始化Telegram服務
+            initialize_telegram_service(bot_token, chat_id)
+            
+            # 啟動雙向機器人
+            self.start_telegram_bot(bot_token, chat_id)
+            
+            # 發送測試消息
+            test_service = TelegramService(bot_token, chat_id)
+            success = test_service.send_system_status(
+                "AImax雙向機器人已啟動", 
+                "✅ Telegram雙向機器人已成功啟動！\n\n"
+                "📱 你現在可以在手機上發送指令：\n\n"
+                "🇨🇳 中文指令：\n"
+                "• 狀態 - 查看系統狀態\n"
+                "• 價格 - 獲取BTC價格\n"
+                "• 指標 - 查看MACD指標\n"
+                "• 信號 - 查看交易信號\n"
+                "• 獲利 - 查看獲利統計\n"
+                "• 幫助 - 顯示幫助\n\n"
+                "🇺🇸 英文指令：\n"
+                "• /help, /status, /price, /macd, /signals, /profit\n\n"
+                "🤖 機器人正在監聽你的指令..."
+            )
+            
+            if success:
+                messagebox.showinfo("設置成功", 
+                    "🎉 Telegram雙向機器人已成功啟動！\n\n"
+                    "📱 你應該已經收到啟動消息\n"
+                    "🤖 現在可以在手機上發送指令測試\n\n"
+                    "試試發送：狀態 或 /help")
+                self.update_status("🤖 Telegram雙向機器人已啟動")
+            else:
+                messagebox.showwarning("設置警告", 
+                    "⚠️ 機器人啟動完成，但測試消息發送失敗\n"
+                    "請檢查網絡連接")
+                    
+        except Exception as e:
+            messagebox.showerror("設置錯誤", f"❌ 啟動Telegram機器人時發生錯誤: {str(e)}")
+    
+    def start_telegram_bot(self, bot_token, chat_id):
+        """在後台線程中啟動Telegram雙向機器人"""
+        try:
+            # 導入輪詢版機器人，避免409錯誤
+            from src.notifications.polling_telegram_bot import PollingTelegramBot
+            
+            # 創建機器人實例，並設置GUI回調
+            self.telegram_bot = PollingTelegramBot(bot_token, chat_id)
+            self.telegram_bot.set_gui_callback(self.on_telegram_message)
+            
+            # 更新GUI狀態
+            self.update_telegram_status("🤖 啟動輪詢機器人...")
+            
+            # 啟動機器人
+            self.telegram_bot.start()
+            
+            print("✅ Telegram輪詢機器人已啟動")
+            print("📱 現在可以在手機上發送指令測試")
+            print("💡 使用輪詢模式，避免409錯誤")
+            
+        except Exception as e:
+            print(f"❌ 啟動機器人時發生錯誤: {e}")
+            self.update_telegram_status(f"❌ 啟動失敗: {str(e)}")
+            raise e
+    
+    def on_telegram_message(self, message_type, content):
+        """處理Telegram消息的回調函數"""
+        try:
+            if message_type == "received":
+                # 收到用戶消息
+                self.root.after(0, lambda: self.update_telegram_status(f"📱 收到: {content}"))
+            elif message_type == "sent":
+                # 發送回覆消息
+                self.root.after(0, lambda: self.update_telegram_status(f"🤖 回覆: {content[:30]}..."))
+            elif message_type == "started":
+                # 機器人啟動
+                self.root.after(0, lambda: self.update_telegram_status("✅ 機器人已啟動，等待指令"))
+            elif message_type == "error":
+                # 錯誤信息
+                self.root.after(0, lambda: self.update_telegram_status(f"❌ 錯誤: {content}"))
+        except Exception as e:
+            print(f"GUI回調錯誤: {e}")
+    
+    def test_telegram_commands(self):
+        """測試Telegram指令功能"""
+        try:
+            # 創建一個簡單的測試窗口
+            test_window = tk.Toplevel(self.root)
+            test_window.title("Telegram指令測試")
+            test_window.geometry("600x400")
+            test_window.resizable(False, False)
+            test_window.transient(self.root)
+            test_window.grab_set()
+            
+            # 居中顯示
+            test_window.geometry("+%d+%d" % (self.root.winfo_rootx() + 100, self.root.winfo_rooty() + 100))
+            
+            # 標題
+            title_label = tk.Label(test_window, text="📱 Telegram指令測試", 
+                                  font=('Arial', 14, 'bold'), fg='#000080')
+            title_label.pack(pady=10)
+            
+            # 說明
+            info_text = """
+以下是你可以在手機Telegram中測試的指令：
+
+中文指令：
+• 狀態 - 查看系統運行狀態
+• 價格 - 獲取當前BTC價格
+• 指標 - 顯示MACD技術指標
+• 信號 - 查看最新交易信號
+• 獲利 - 顯示獲利統計
+• 幫助 - 顯示所有可用指令
+
+英文指令：
+• /status, /price, /macd, /signals, /profit, /help
+
+現在你可以在手機上向機器人發送這些指令進行測試！
+            """.strip()
+            
+            info_label = tk.Label(test_window, text=info_text, justify='left', 
+                                 font=('Arial', 10), fg='#333333')
+            info_label.pack(pady=20, padx=20)
+            
+            # 關閉按鈕
+            close_btn = tk.Button(test_window, text="關閉", 
+                                command=test_window.destroy, 
+                                bg='#87CEEB', font=('Arial', 10))
+            close_btn.pack(pady=20)
+            
+        except Exception as e:
+            messagebox.showerror("錯誤", f"打開測試窗口時發生錯誤: {str(e)}")
     
     def run(self):
         """運行GUI"""
@@ -736,11 +916,13 @@ class TelegramSetupDialog:
         tk.Label(input_frame, text="Bot Token:", font=('Arial', 10, 'bold')).grid(row=0, column=0, sticky='w', pady=5)
         self.token_entry = tk.Entry(input_frame, width=50, font=('Consolas', 9))
         self.token_entry.grid(row=0, column=1, pady=5, padx=(10, 0))
+        self.token_entry.insert(0, "7323086952:AAE5fkQp8n98TOYnPpj2KPyrCI6hX5R2n2I")  # 預填你的Bot Token
         
         # Chat ID
         tk.Label(input_frame, text="Chat ID:", font=('Arial', 10, 'bold')).grid(row=1, column=0, sticky='w', pady=5)
         self.chat_id_entry = tk.Entry(input_frame, width=50, font=('Consolas', 9))
         self.chat_id_entry.grid(row=1, column=1, pady=5, padx=(10, 0))
+        self.chat_id_entry.insert(0, "8164385222")  # 預填你的Chat ID
         
         # 按鈕框架
         button_frame = tk.Frame(self.dialog)

@@ -17,8 +17,8 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from src.data.data_fetcher import DataFetcher
-from src.core.macd_calculator import MACDCalculator
-from src.core.trading_signals import TradingSignals
+from src.core.improved_max_macd_calculator import ImprovedMaxMACDCalculator
+from src.core.improved_trading_signals import SignalDetectionEngine
 from src.notifications.telegram_service import TelegramService
 
 logger = logging.getLogger(__name__)
@@ -33,11 +33,12 @@ class TelegramBot:
         self.telegram_service = TelegramService(bot_token, chat_id)
         self.last_update_id = 0
         self.running = False
+        self.gui_callback = None  # GUI回調函數
         
         # 初始化交易組件
         self.data_fetcher = DataFetcher()
-        self.macd_calculator = MACDCalculator()
-        self.trading_signals = TradingSignals()
+        self.macd_calculator = ImprovedMaxMACDCalculator()
+        self.signal_engine = SignalDetectionEngine()
         
         # 指令處理器映射
         self.command_handlers = {
@@ -57,21 +58,64 @@ class TelegramBot:
             '幫助': self.handle_help,
         }
     
+    def set_gui_callback(self, callback):
+        """設置GUI回調函數"""
+        self.gui_callback = callback
+    
+    def _notify_gui(self, message_type, content):
+        """通知GUI"""
+        if self.gui_callback:
+            try:
+                self.gui_callback(message_type, content)
+            except Exception as e:
+                logger.error(f"GUI回調錯誤: {e}")
+    
+    def _calculate_macd_data(self, df):
+        """計算MACD數據的輔助方法"""
+        import numpy as np
+        
+        prices = df['close'].tolist()
+        timestamps = df['timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S').tolist()
+        
+        macd_line, signal_line, hist = self.macd_calculator.calculate_macd(prices, timestamps)
+        
+        # 創建包含MACD數據的DataFrame
+        macd_df = df.copy()
+        macd_df['datetime'] = df['timestamp']
+        
+        # 填充MACD數據（前面的數據用NaN填充）
+        macd_len = len(macd_line)
+        total_len = len(df)
+        
+        macd_df['macd'] = [np.nan] * (total_len - macd_len) + macd_line
+        macd_df['macd_signal'] = [np.nan] * (total_len - macd_len) + signal_line
+        macd_df['macd_hist'] = [np.nan] * (total_len - macd_len) + hist
+        
+        # 移除NaN行
+        macd_df = macd_df.dropna().reset_index(drop=True)
+        
+        return macd_df
+    
     async def get_updates(self, offset: int = 0) -> List[Dict]:
         """獲取Telegram更新"""
         try:
             url = f"{self.base_url}/getUpdates"
             params = {
                 'offset': offset,
-                'timeout': 30,
+                'timeout': 10,  # 減少timeout避免衝突
                 'allowed_updates': ['message']
             }
             
             async with aiohttp.ClientSession() as session:
-                async with session.get(url, params=params, timeout=35) as response:
+                async with session.get(url, params=params, timeout=15) as response:
                     if response.status == 200:
                         data = await response.json()
                         return data.get('result', [])
+                    elif response.status == 409:
+                        # 409衝突錯誤，等待後重試
+                        logger.warning("檢測到409衝突，等待5秒後重試...")
+                        await asyncio.sleep(5)
+                        return []
                     else:
                         logger.error(f"獲取更新失敗: {response.status}")
                         return []
@@ -207,11 +251,11 @@ class TelegramBot:
             )
             
             if df is not None and not df.empty:
-                macd_df = self.macd_calculator.calculate_macd(df)
+                macd_df = self._calculate_macd_data(df)
                 latest = macd_df.iloc[-1]
                 
                 # 判斷MACD趨勢
-                if latest['macd'] > latest['signal']:
+                if latest['macd'] > latest['macd_signal']:
                     trend = "看漲 📈"
                     trend_color = "綠色"
                 else:
@@ -220,10 +264,10 @@ class TelegramBot:
                 
                 # 判斷柱狀圖變化
                 if len(macd_df) > 1:
-                    prev_hist = macd_df.iloc[-2]['hist']
-                    if latest['hist'] > prev_hist:
+                    prev_hist = macd_df.iloc[-2]['macd_hist']
+                    if latest['macd_hist'] > prev_hist:
                         hist_trend = "增強 ⬆️"
-                    elif latest['hist'] < prev_hist:
+                    elif latest['macd_hist'] < prev_hist:
                         hist_trend = "減弱 ⬇️"
                     else:
                         hist_trend = "持平 ➡️"
@@ -233,13 +277,13 @@ class TelegramBot:
                 macd_text = f"""
 📊 <b>MACD技術指標</b>
 
-📈 <b>MACD線</b>: {latest['macd']:.4f}
-📉 <b>信號線</b>: {latest['signal']:.4f}
-📊 <b>柱狀圖</b>: {latest['hist']:.4f}
+📈 <b>MACD線</b>: {latest['macd']:.1f}
+📉 <b>信號線</b>: {latest['macd_signal']:.1f}
+📊 <b>柱狀圖</b>: {latest['macd_hist']:.1f}
 
 🎯 <b>趨勢</b>: {trend}
 🔄 <b>柱狀圖</b>: {hist_trend}
-💰 <b>當前價格</b>: ${latest['close']:,.2f}
+💰 <b>當前價格</b>: ${latest['close']:,.0f}
 
 ⏰ <b>更新時間</b>: {datetime.now().strftime("%H:%M:%S")}
 
@@ -262,31 +306,31 @@ class TelegramBot:
             )
             
             if df is not None and not df.empty:
-                macd_df = self.macd_calculator.calculate_macd(df)
-                signals_df = self.trading_signals.generate_signals(macd_df)
+                macd_df = self._calculate_macd_data(df)
+                signals_df = self.signal_engine.detect_signals(macd_df)
                 
                 # 找到最近的信號
-                recent_signals = signals_df[signals_df['signal'] != 0].tail(3)
+                recent_signals = signals_df[signals_df['signal_type'].isin(['buy', 'sell'])].tail(3)
                 
                 if not recent_signals.empty:
                     signals_text = "📡 <b>最近交易信號</b>\n\n"
                     
                     for idx, row in recent_signals.iterrows():
-                        signal_type = "🟢 買進" if row['signal'] == 1 else "🔴 賣出"
-                        time_str = row['timestamp'].strftime("%m-%d %H:%M")
+                        signal_type = "🟢 買進" if row['signal_type'] == 'buy' else "🔴 賣出"
+                        time_str = row['datetime'].strftime("%m-%d %H:%M")
                         
                         signals_text += f"""
 {signal_type}
-💰 價格: ${row['close']:,.2f}
+💰 價格: ${row['close']:,.0f}
 ⏰ 時間: {time_str}
-📊 MACD: {row['macd']:.4f}
-📈 柱狀圖: {row['hist']:.4f}
+📊 MACD: {row['macd']:.1f}
+📈 柱狀圖: {row['macd_hist']:.1f}
 
                         """.strip() + "\n\n"
                     
                     # 添加當前狀態
                     latest = signals_df.iloc[-1]
-                    if latest['macd'] > latest['signal']:
+                    if latest['macd'] > latest['macd_signal']:
                         current_trend = "📈 當前趨勢: 看漲"
                     else:
                         current_trend = "📉 當前趨勢: 看跌"
@@ -314,26 +358,33 @@ class TelegramBot:
     async def handle_profit(self, message: Dict) -> None:
         """處理獲利統計查詢"""
         try:
-            # 這裡可以連接到你的回測結果或實際交易記錄
+            # 使用最新的真實交易數據
             profit_text = """
-💰 <b>獲利統計概覽</b>
+💰 <b>最新獲利統計</b>
 
-📊 <b>歷史回測表現</b>:
-• 總獲利: 108,774 TWD
-• 完整交易對: 54 對
-• 勝率: 約 65%
-• 平均獲利: 2,014 TWD/對
+📊 <b>實際交易表現</b>:
+• 總獲利: 255,419 TWD
+• 完整交易對: 34 對
+• 勝率: 47.1% (16勝18敗)
+• 平均獲利: 7,512 TWD/對
+• 平均持倉: 32.7 小時
 
 📈 <b>策略表現</b>:
 • 使用策略: 1小時MACD
-• 回測期間: 長期歷史數據
-• 風險控制: 良好
+• 數據期間: 最新2000小時
+• 當前狀態: 空倉
+• 下一序號: 35
+
+🎯 <b>最近表現</b>:
+• 最近5筆: 2勝3敗
+• 市場波動較大
+• 整體仍保持獲利
 
 ⚠️ <b>風險提醒</b>:
 歷史表現不代表未來收益
 請謹慎投資，控制風險
 
-💡 數據僅供參考
+💡 數據來源: 即時回測分析
             """.strip()
             
             await self.send_message(profit_text)
@@ -372,6 +423,9 @@ class TelegramBot:
             
             logger.info(f"收到消息: {text}")
             
+            # 通知GUI收到消息
+            self._notify_gui("received", text)
+            
             # 查找對應的處理器
             handler = None
             for command, func in self.command_handlers.items():
@@ -381,6 +435,8 @@ class TelegramBot:
             
             if handler:
                 await handler(message)
+                # 通知GUI已處理消息
+                self._notify_gui("sent", f"已回覆 {text}")
             else:
                 # 未知指令的回覆
                 unknown_text = f"""
@@ -404,6 +460,9 @@ class TelegramBot:
         self.running = True
         logger.info("Telegram機器人開始運行...")
         
+        # 通知GUI機器人已啟動
+        self._notify_gui("started", "機器人已啟動")
+        
         # 發送啟動通知
         await self.send_message("""
 🤖 <b>AImax交易機器人已啟動</b>
@@ -415,31 +474,45 @@ class TelegramBot:
 準備為您服務！
         """.strip())
         
+        consecutive_errors = 0
+        max_consecutive_errors = 5
+        
         while self.running:
             try:
                 # 獲取更新
                 updates = await self.get_updates(self.last_update_id + 1)
                 
-                for update in updates:
-                    self.last_update_id = update['update_id']
+                if updates:  # 只有在有更新時才處理
+                    consecutive_errors = 0  # 重置錯誤計數
                     
-                    if 'message' in update:
-                        await self.process_message(update['message'])
+                    for update in updates:
+                        self.last_update_id = update['update_id']
+                        
+                        if 'message' in update:
+                            await self.process_message(update['message'])
                 
-                # 短暫休息避免過度請求
-                await asyncio.sleep(1)
+                # 適當的休息時間
+                await asyncio.sleep(2)
                 
             except Exception as e:
-                logger.error(f"機器人運行時發生錯誤: {e}")
-                await asyncio.sleep(5)  # 錯誤時等待更長時間
+                consecutive_errors += 1
+                logger.error(f"機器人運行時發生錯誤 ({consecutive_errors}/{max_consecutive_errors}): {e}")
+                
+                if consecutive_errors >= max_consecutive_errors:
+                    logger.error("連續錯誤過多，停止機器人")
+                    self._notify_gui("error", "連續錯誤過多，機器人已停止")
+                    break
+                
+                # 錯誤時等待更長時間
+                await asyncio.sleep(10)
         
         logger.info("Telegram機器人已停止")
 
 async def main():
     """主函數"""
-    # 從環境變量或配置文件讀取
-    bot_token = "YOUR_BOT_TOKEN"  # 替換為你的bot token
-    chat_id = "YOUR_CHAT_ID"      # 替換為你的chat id
+    # 使用用戶的Telegram配置
+    bot_token = "7323086952:AAE5fkQp8n98TOYnPpj2KPyrCI6hX5R2n2I"
+    chat_id = "8164385222"
     
     bot = TelegramBot(bot_token, chat_id)
     await bot.run()

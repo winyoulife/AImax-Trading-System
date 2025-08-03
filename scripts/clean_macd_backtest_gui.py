@@ -32,9 +32,9 @@ import pandas as pd
 from src.data.live_macd_service import LiveMACDService
 from src.core.improved_trading_signals import detect_improved_trading_signals
 
-# 導入Telegram通知模組
-from src.notifications.telegram_service import initialize_telegram_service, get_telegram_service
-from config.telegram_config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, NOTIFICATION_SETTINGS
+# Telegram通知功能（如需要可以啟用）
+# from src.notifications.telegram_service import initialize_telegram_service, get_telegram_service
+# from config.telegram_config import telegram_config
 
 class CleanMACDBacktestGUI:
     """乾淨版1小時MACD回測GUI"""
