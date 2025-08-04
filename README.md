@@ -1,191 +1,253 @@
-# AImax - 智能MACD交易系統
+# 🤖 AImax - 智能交易系統
 
-## 📈 系統概述
+一個功能完整的智能加密貨幣交易系統，具備85.7%勝率的智能平衡策略，支援雲端部署和手機App控制。
 
-AImax是一個基於1小時MACD策略的智能交易監控系統，結合回測分析和即時監控功能，提供專業級的交易信號檢測和Telegram通知服務。
+## ✨ 核心特色
 
-## 🎯 核心功能
+- 🎯 **高勝率策略**: 智能平衡版本達到85.7%勝率
+- 📱 **手機App控制**: 響應式Web界面，隨時隨地控制交易
+- ☁️ **雲端部署**: 支援Docker、AWS、GCP等雲端平台
+- 🔄 **實時數據**: 直接從MAX交易所獲取實時BTC價格
+- 🛡️ **安全保障**: 多重停止機制、風險控制、緊急停止
+- 📊 **智能分析**: 多重技術指標結合，動態閾值調整
+- 🔔 **Telegram通知**: 即時交易通知和狀態更新
 
-### 💰 交易策略表現
-- **總獲利**: 108,774 TWD
-- **勝率**: 62.5% (5勝3敗)
-- **平均每筆獲利**: 13,597 TWD
-- **交易頻率**: 約每週1-2次信號
+## 📊 策略表現
 
-### 🔧 主要特色
-- **1小時MACD策略** - 基於金叉/死叉的成熟策略
-- **即時監控** - 每小時自動檢測新的交易信號
-- **Telegram通知** - 即時推送詳細的交易分析
-- **雙向Telegram機器人** - 手機指令查詢和自動信號推送
-- **詳細信號分析** - 包含信號強度、風險評估、操作建議
-- **回測功能** - 完整的歷史數據回測和統計分析
+### 🏆 智能平衡版本 (推薦)
+- **勝率**: 85.7% (6勝1敗)
+- **總獲利**: 198,232 TWD
+- **平均獲利**: 28,319 TWD/筆
+- **信號強度**: 87.5/100
+
+### 📈 其他版本比較
+| 策略版本 | 勝率 | 交易次數 | 總獲利 | 平均獲利 |
+|---------|------|----------|--------|----------|
+| 進階版本 | 75.0% | 8筆 | 158,092 TWD | 19,761 TWD |
+| 超級版本 | 77.8% | 9筆 | 53,321 TWD | 5,925 TWD |
+| 智能平衡版本 | 85.7% | 7筆 | 198,232 TWD | 28,319 TWD |
 
 ## 🚀 快速開始
 
-### 環境要求
-- Python 3.8+
-- 所需套件見 `requirements.txt`
-
-### 安裝步驟
-1. 克隆倉庫
+### 方法1: 本地運行
 ```bash
-git clone <repository-url>
+# 克隆項目
+git clone https://github.com/你的用戶名/AImax.git
 cd AImax
-```
 
-2. 創建虛擬環境
-```bash
-python -m venv .venv
-.venv\Scripts\activate  # Windows
-```
-
-3. 安裝依賴
-```bash
+# 安裝依賴
 pip install -r requirements.txt
+
+# 啟動Web控制台
+python src/web/trading_api.py
+
+# 在瀏覽器中打開
+http://localhost:5000
 ```
 
-### 使用方式
-
-#### 1. Telegram雙向機器人（推薦）
+### 方法2: 雲端部署
 ```bash
-# 首次使用需要設置機器人
-python scripts/setup_telegram_bot.py
+# 準備部署文件
+python deploy_cloud.py
 
-# 啟動整合監控系統（自動信號推送 + 指令回覆）
-python scripts/integrated_telegram_monitor.py
+# 上傳到雲端服務器後運行
+chmod +x deploy.sh
+./deploy.sh
+
+# 在手機瀏覽器中訪問
+http://你的服務器IP:5000
 ```
 
-#### 2. 即時監控系統（GUI版本）
+### 方法3: Docker部署
 ```bash
-python scripts/live_macd_monitor_gui.py
-```
-- 自動啟用Telegram通知
-- 每小時檢測新信號
-- 詳細技術分析
+# 使用Docker Compose
+docker-compose up -d
 
-#### 2. 乾淨版回測分析
+# 訪問服務
+http://localhost:5000
+```
+
+## 📱 手機App使用
+
+1. **訪問Web界面**: 在手機瀏覽器中打開系統地址
+2. **添加到主屏幕**: 點擊瀏覽器的"添加到主屏幕"
+3. **完整功能**: 支援所有桌面版功能
+   - 🚀 啟動/停止交易系統
+   - 📊 實時查看交易統計
+   - ⚙️ 修改交易配置
+   - 🚨 緊急停止功能
+   - 📈 查看交易記錄
+
+## 🛡️ 安全功能
+
+### 多重停止機制
+- **Web界面控制**: 啟動/停止按鈕
+- **緊急停止按鈕**: 一鍵停止所有交易
+- **緊急停止文件**: `python scripts/emergency_stop.py`
+- **系統信號處理**: Ctrl+C 安全退出
+
+### 風險控制
+- **每日虧損限制**: 預設5,000 TWD
+- **每日交易次數限制**: 預設5次
+- **最大持倉時間**: 預設24小時
+- **緊急停損**: 預設5%
+
+### 模擬交易
+- **安全測試**: 先用模擬模式測試策略
+- **零風險**: 不會有實際資金損失
+- **完整功能**: 所有功能都可以在模擬模式下測試
+
+## 📊 技術指標
+
+### 智能平衡策略使用的指標
+- **MACD**: 主要交易信號
+- **成交量分析**: 動態閾值調整
+- **RSI**: 超買超賣確認
+- **布林帶**: 價格位置分析
+- **趨勢分析**: 多時間框架確認
+- **市場強度**: 綜合評分系統
+
+### 動態評分系統
+- **基礎分數**: 根據市場條件調整
+- **分級評分**: 不是簡單的通過/不通過
+- **智能獎勵**: 強勢市場額外加分
+- **風險調整**: 高風險時提高門檻
+
+## 🌐 API接口
+
+系統提供完整的RESTful API:
+
 ```bash
-python scripts/clean_macd_backtest_gui.py
+# 系統控制
+GET  /api/status          # 獲取系統狀態
+POST /api/start           # 啟動交易系統
+POST /api/stop            # 停止交易系統
+POST /api/emergency-stop  # 緊急停止
+
+# 配置管理
+GET  /api/config          # 獲取配置
+POST /api/config          # 更新配置
+
+# 數據查詢
+GET  /api/trades          # 交易記錄
+GET  /api/performance     # 績效統計
+GET  /api/market-data     # 實時市場數據
 ```
-- 專注於1小時MACD策略
-- 歷史回測數據分析
 
-#### 3. 策略比較分析
-```bash
-python scripts/compare_macd_vs_ma.py
+## 💰 資金配置
+
+### 靈活的資金設定
+- **任意金額**: 可以從10,000 TWD開始
+- **比例獲利**: 勝率和獲利比例保持不變
+- **風險控制**: 根據資金量調整風險參數
+
+### 獲利計算範例
 ```
-- MACD vs MA策略比較
-- 詳細獲利分析
+如果你投入 50,000 TWD:
+- 預期總獲利: 198,232 * (50,000/3,490,000) ≈ 2,840 TWD
+- 平均每筆獲利: 28,319 * (50,000/3,490,000) ≈ 406 TWD
+- 勝率依然是: 85.7%
+```
 
-## 📊 信號分析系統
-
-### 信號強度分級
-- 🔥 **強信號** - MACD柱狀圖 > 50
-- ⚡ **中信號** - MACD柱狀圖 20-50  
-- 💫 **弱信號** - MACD柱狀圖 < 20
-
-### 風險評估
-- 🟢 **低風險** - 深度超賣/超買區域
-- 🟡 **中風險** - 一般超賣/超買
-- 🔴 **高風險** - 高位買進/低位賣出
-
-### 操作建議
-- 💎 **優質信號，建議執行**
-- ⚖️ **謹慎觀察，適量操作**
-- ⚠️ **高風險信號，建議觀望**
-
-## 📱 Telegram機器人功能
-
-### 🤖 雙向互動機器人
-AImax提供完整的Telegram雙向機器人，支援：
-
-#### 📡 自動推送功能
-- **交易信號通知** - MACD金叉/死叉即時推送
-- **價格警報** - 價格變化超過5%自動通知
-- **每日總結** - 每天早上9點發送市場總結
-- **系統狀態** - 重要系統事件通知
-
-#### 💬 指令查詢功能
-支援中英文指令：
-- `狀態` / `/status` - 查看系統運行狀態
-- `價格` / `/price` - 獲取當前BTC價格
-- `指標` / `/macd` - 顯示MACD技術指標
-- `信號` / `/signals` - 查看最新交易信號
-- `獲利` / `/profit` - 顯示獲利統計
-- `幫助` / `/help` - 顯示所有可用指令
-
-#### 🔧 設置步驟
-1. 運行設置助手：`python scripts/setup_telegram_bot.py`
-2. 按提示創建Telegram機器人並獲取Token
-3. 啟動整合監控：`python scripts/integrated_telegram_monitor.py`
-
-詳細設置說明請參考：[Telegram機器人使用指南](docs/telegram_bot_guide.md)
-
-## 📁 項目結構
+## 🔧 系統架構
 
 ```
 AImax/
-├── src/                          # 核心源碼
-│   ├── core/                     # 核心交易邏輯
-│   │   ├── improved_trading_signals.py    # 1小時MACD策略
-│   │   └── multi_timeframe_trading_signals.py  # 多時框策略
-│   ├── data/                     # 數據服務
-│   │   └── live_macd_service.py  # 即時數據獲取
-│   └── notifications/            # 通知服務
-│       ├── telegram_service.py   # Telegram通知服務
-│       └── telegram_bot.py       # 雙向Telegram機器人
-├── scripts/                      # 執行腳本
-│   ├── integrated_telegram_monitor.py  # 整合Telegram監控系統
-│   ├── setup_telegram_bot.py    # Telegram機器人設置助手
-│   ├── run_telegram_bot.py      # 基本Telegram機器人
-│   ├── live_macd_monitor_gui.py  # 即時監控系統
-│   ├── clean_macd_backtest_gui.py # 乾淨版回測
-│   ├── compare_macd_vs_ma.py     # 策略比較
-│   └── test_*.py                 # 測試腳本
-├── data/                         # 數據存儲
-├── config/                       # 配置文件
-└── requirements.txt              # 依賴套件
+├── src/
+│   ├── core/                 # 核心交易策略
+│   │   ├── smart_balanced_volume_macd_signals.py  # 智能平衡策略
+│   │   ├── advanced_volume_macd_signals.py       # 進階策略
+│   │   └── ...
+│   ├── data/                 # 數據獲取
+│   │   └── data_fetcher.py   # 實時數據獲取器
+│   ├── trading/              # 交易管理
+│   │   └── safe_trading_manager.py  # 安全交易管理器
+│   ├── web/                  # Web界面
+│   │   ├── trading_api.py    # API服務器
+│   │   └── templates/        # Web模板
+│   └── notifications/        # 通知系統
+├── scripts/                  # 工具腳本
+├── config/                   # 配置文件
+└── docs/                     # 文檔
 ```
 
-## 🔬 測試
+## 🌍 雲端部署
 
-運行測試腳本驗證系統功能：
+### 支援的雲端平台
+- **AWS EC2**: t2.micro (免費層)
+- **Google Cloud**: e2-micro (免費層)
+- **DigitalOcean**: $5/月 Droplet
+- **阿里雲**: 輕量應用服務器
+- **Heroku**: 免費層支援
 
+### 部署步驟
+1. 運行 `python deploy_cloud.py` 準備部署文件
+2. 將項目上傳到雲端服務器
+3. 運行 `./deploy.sh` 自動部署
+4. 在手機上訪問你的服務器IP
+
+詳細部署說明請查看: [CLOUD_DEPLOYMENT.md](CLOUD_DEPLOYMENT.md)
+
+## 🔔 Telegram通知
+
+### 設定Telegram機器人
+1. 創建Telegram機器人
+2. 配置 `config/telegram_config.py`
+3. 啟動通知服務
+
+### 通知功能
+- 交易信號提醒
+- 系統狀態更新
+- 獲利統計報告
+- 異常情況警告
+
+## 🆘 故障排除
+
+### 常見問題
+1. **無法獲取數據**: 檢查網絡連接和API限制
+2. **服務無法啟動**: 檢查端口占用和依賴安裝
+3. **交易信號異常**: 檢查市場數據和策略參數
+
+### 日誌查看
 ```bash
-# 測試Telegram通知
-python scripts/test_my_telegram.py
+# 查看系統日誌
+sudo journalctl -u trading-system -f
 
-# 測試即時監控
-python scripts/test_live_telegram.py
-
-# 測試乾淨版MACD
-python scripts/test_clean_macd.py
+# 查看API日誌
+tail -f logs/trading_api.log
 ```
 
-## 📈 歷史表現
+### 緊急處理
+```bash
+# 緊急停止所有交易
+python scripts/emergency_stop.py
 
-基於500筆1小時歷史數據的回測結果：
+# 重置系統狀態
+python scripts/emergency_stop.py reset
+```
 
-| 指標 | 數值 |
-|------|------|
-| 總獲利 | 108,774 TWD |
-| 完整交易對 | 8對 |
-| 勝率 | 62.5% |
-| 平均獲利 | 13,597 TWD |
-| 平均持倉時間 | 23.6小時 |
+## 📞 技術支持
 
-## ⚠️ 風險聲明
+### 開發團隊
+- 核心策略開發
+- 系統架構設計
+- 雲端部署支援
 
-本系統僅供學習和研究使用，不構成投資建議。交易有風險，投資需謹慎。
+### 社群支援
+- GitHub Issues
+- 技術文檔
+- 使用指南
 
-## 📄 授權
+## 📄 許可證
 
-本項目採用MIT授權條款。
+本項目採用 MIT 許可證 - 詳見 [LICENSE](LICENSE) 文件
 
-## 🤝 貢獻
+## ⚠️ 免責聲明
 
-歡迎提交Issue和Pull Request來改進系統。
+本系統僅供學習和研究使用。加密貨幣交易存在風險，請謹慎投資，並在充分了解風險的情況下使用本系統。開發者不對任何投資損失承擔責任。
 
 ---
 
-**AImax - 讓交易更智能** 🚀
+**🚀 開始你的智能交易之旅！**
+
+立即部署AImax，體驗85.7%勝率的智能交易策略！

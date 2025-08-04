@@ -32,30 +32,44 @@ env/
 .idea/
 *.swp
 *.swo
+*~
 
 # OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# Logs
+# Trading System Specific
+trading_status.json
+EMERGENCY_STOP
 *.log
 logs/
 
-# Data files
+# Data files (keep structure but not actual data)
 data/*.csv
 data/*.json
-data/*.xlsx
+!data/.gitkeep
 
 # Config files with sensitive info
-config/secrets.json
-config/api_keys.json
-config/telegram_secrets.txt
-telegram_secrets.txt
+config/api_keys.py
+config/private_config.json
 
 # Temporary files
 *.tmp
 *.temp
+temp/
 
 # Backup files
 *.bak
 *.backup
+
+# Docker
+.dockerignore
+
+# Deployment specific
+deploy.sh
+*.service
