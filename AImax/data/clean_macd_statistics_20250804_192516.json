@@ -1,0 +1,214 @@
+{
+  "position": 0,
+  "position_status": "空倉",
+  "buy_count": 9,
+  "sell_count": 9,
+  "complete_pairs": 9,
+  "open_positions": 0,
+  "next_trade_sequence": 10,
+  "total_profit": 101971.29999999935,
+  "average_profit": 11330.144444444371,
+  "average_hold_time": 27.22222222222222,
+  "trade_pairs": [
+    {
+      "buy_sequence": 1,
+      "sell_sequence": 1,
+      "buy_time": "2025-07-16 00:00:00",
+      "sell_time": "2025-07-17 06:00:00",
+      "buy_price": 3450954.7,
+      "sell_price": 3488458.7,
+      "profit": 37504.0
+    },
+    {
+      "buy_sequence": 2,
+      "sell_sequence": 2,
+      "buy_time": "2025-07-19 09:00:00",
+      "sell_time": "2025-07-21 05:00:00",
+      "buy_price": 3487706.1,
+      "sell_price": 3481865.0,
+      "profit": -5841.100000000093
+    },
+    {
+      "buy_sequence": 3,
+      "sell_sequence": 3,
+      "buy_time": "2025-07-21 11:00:00",
+      "sell_time": "2025-07-21 20:00:00",
+      "buy_price": 3495000.0,
+      "sell_price": 3486087.4,
+      "profit": -8912.600000000093
+    },
+    {
+      "buy_sequence": 4,
+      "sell_sequence": 4,
+      "buy_time": "2025-07-22 14:00:00",
+      "sell_time": "2025-07-23 10:00:00",
+      "buy_price": 3476999.9,
+      "sell_price": 3505000.0,
+      "profit": 28000.100000000093
+    },
+    {
+      "buy_sequence": 5,
+      "sell_sequence": 5,
+      "buy_time": "2025-07-24 06:00:00",
+      "sell_time": "2025-07-25 06:00:00",
+      "buy_price": 3486075.5,
+      "sell_price": 3489033.9,
+      "profit": 2958.399999999907
+    },
+    {
+      "buy_sequence": 6,
+      "sell_sequence": 6,
+      "buy_time": "2025-07-25 20:00:00",
+      "sell_time": "2025-07-27 05:00:00",
+      "buy_price": 3434409.6,
+      "sell_price": 3485342.4,
+      "profit": 50932.799999999814
+    },
+    {
+      "buy_sequence": 7,
+      "sell_sequence": 7,
+      "buy_time": "2025-07-30 11:00:00",
+      "sell_time": "2025-07-31 01:00:00",
+      "buy_price": 3517744.9,
+      "sell_price": 3514299.8,
+      "profit": -3445.100000000093
+    },
+    {
+      "buy_sequence": 8,
+      "sell_sequence": 8,
+      "buy_time": "2025-07-31 07:00:00",
+      "sell_time": "2025-07-31 22:00:00",
+      "buy_price": 3521738.7,
+      "sell_price": 3529315.9,
+      "profit": 7577.199999999721
+    },
+    {
+      "buy_sequence": 9,
+      "sell_sequence": 9,
+      "buy_time": "2025-08-01 20:00:00",
+      "sell_time": "2025-08-04 04:00:00",
+      "buy_price": 3487154.3,
+      "sell_price": 3480351.9,
+      "profit": -6802.399999999907
+    }
+  ],
+  "trade_history": [
+    {
+      "type": "buy",
+      "sequence": 1,
+      "timestamp": "2025-07-16 00:00:00",
+      "price": 3450954.7
+    },
+    {
+      "type": "sell",
+      "sequence": 1,
+      "timestamp": "2025-07-17 06:00:00",
+      "price": 3488458.7,
+      "paired_with": 1
+    },
+    {
+      "type": "buy",
+      "sequence": 2,
+      "timestamp": "2025-07-19 09:00:00",
+      "price": 3487706.1
+    },
+    {
+      "type": "sell",
+      "sequence": 2,
+      "timestamp": "2025-07-21 05:00:00",
+      "price": 3481865.0,
+      "paired_with": 2
+    },
+    {
+      "type": "buy",
+      "sequence": 3,
+      "timestamp": "2025-07-21 11:00:00",
+      "price": 3495000.0
+    },
+    {
+      "type": "sell",
+      "sequence": 3,
+      "timestamp": "2025-07-21 20:00:00",
+      "price": 3486087.4,
+      "paired_with": 3
+    },
+    {
+      "type": "buy",
+      "sequence": 4,
+      "timestamp": "2025-07-22 14:00:00",
+      "price": 3476999.9
+    },
+    {
+      "type": "sell",
+      "sequence": 4,
+      "timestamp": "2025-07-23 10:00:00",
+      "price": 3505000.0,
+      "paired_with": 4
+    },
+    {
+      "type": "buy",
+      "sequence": 5,
+      "timestamp": "2025-07-24 06:00:00",
+      "price": 3486075.5
+    },
+    {
+      "type": "sell",
+      "sequence": 5,
+      "timestamp": "2025-07-25 06:00:00",
+      "price": 3489033.9,
+      "paired_with": 5
+    },
+    {
+      "type": "buy",
+      "sequence": 6,
+      "timestamp": "2025-07-25 20:00:00",
+      "price": 3434409.6
+    },
+    {
+      "type": "sell",
+      "sequence": 6,
+      "timestamp": "2025-07-27 05:00:00",
+      "price": 3485342.4,
+      "paired_with": 6
+    },
+    {
+      "type": "buy",
+      "sequence": 7,
+      "timestamp": "2025-07-30 11:00:00",
+      "price": 3517744.9
+    },
+    {
+      "type": "sell",
+      "sequence": 7,
+      "timestamp": "2025-07-31 01:00:00",
+      "price": 3514299.8,
+      "paired_with": 7
+    },
+    {
+      "type": "buy",
+      "sequence": 8,
+      "timestamp": "2025-07-31 07:00:00",
+      "price": 3521738.7
+    },
+    {
+      "type": "sell",
+      "sequence": 8,
+      "timestamp": "2025-07-31 22:00:00",
+      "price": 3529315.9,
+      "paired_with": 8
+    },
+    {
+      "type": "buy",
+      "sequence": 9,
+      "timestamp": "2025-08-01 20:00:00",
+      "price": 3487154.3
+    },
+    {
+      "type": "sell",
+      "sequence": 9,
+      "timestamp": "2025-08-04 04:00:00",
+      "price": 3480351.9,
+      "paired_with": 9
+    }
+  ]
+}
