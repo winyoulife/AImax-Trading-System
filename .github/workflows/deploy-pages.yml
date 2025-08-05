@@ -1,11 +1,10 @@
-name: 部署Web控制面板到GitHub Pages
+name: 部署AImax簡潔版儀表板到GitHub Pages
 
 on:
   push:
     branches: [ main ]
     paths:
-      - 'static/**'
-      - 'templates/**'
+      - 'static/clean-dashboard.html'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
@@ -28,15 +27,95 @@ jobs:
       - name: 🔧 設置Pages
         uses: actions/configure-pages@v4
         
-      - name: 📦 準備私有靜態文件
+      - name: 📦 準備簡潔版儀表板部署文件
         run: |
-          echo "📦 準備AImax私有Web控制面板..."
+          echo "📦 準備AImax v3.0簡潔版儀表板..."
           
           # 創建部署目錄
           mkdir -p _site
           
-          # 複製靜態文件
-          cp -r static/* _site/
+          # 複製簡潔版儀表板作為主頁
+          cp static/clean-dashboard.html _site/index.html
+          
+          # 創建重定向頁面
+          cat > _site/dashboard.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <meta http-equiv="refresh" content="0; url=./index.html">
+              <title>重定向到 AImax 儀表板</title>
+          </head>
+          <body>
+              <p>正在重定向到 <a href="./index.html">AImax 儀表板</a>...</p>
+          </body>
+          </html>
+          EOF
+          
+          # 創建說明頁面
+          cat > _site/README.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="zh-TW">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>AImax v3.0 簡潔版交易儀表板</title>
+              <style>
+                  body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+                  .header { background: #6c5ce7; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+                  .card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+                  .btn { display: inline-block; background: #00b894; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0; }
+                  .btn:hover { background: #00a085; }
+                  .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 6px; margin: 20px 0; }
+              </style>
+          </head>
+          <body>
+              <div class="header">
+                  <h1>🤖 AImax v3.0 簡潔版交易儀表板</h1>
+                  <p>智能交易系統 - 85%勝率目標</p>
+              </div>
+              
+              <div class="card">
+                  <h2>🚀 快速開始</h2>
+                  <a href="./index.html" class="btn">🔐 進入儀表板</a>
+                  <p><strong>登入資訊：</strong></p>
+                  <ul>
+                      <li>帳號：<code>admin</code></li>
+                      <li>密碼：<code>aimax2025</code></li>
+                  </ul>
+              </div>
+              
+              <div class="card">
+                  <h2>✨ 主要功能</h2>
+                  <ul>
+                      <li>💰 即時 MAX API BTC/TWD 價格顯示</li>
+                      <li>📊 85%勝率交易策略監控</li>
+                      <li>🔒 安全登入系統</li>
+                      <li>📱 響應式設計，支援移動設備</li>
+                      <li>🔄 每30秒自動價格更新</li>
+                      <li>🚨 緊急停止功能</li>
+                  </ul>
+              </div>
+              
+              <div class="warning">
+                  <h3>⚠️ 重要提醒</h3>
+                  <ul>
+                      <li>此為私有交易系統，僅限授權用戶使用</li>
+                      <li>價格數據直接來自 MAX Exchange 官方 API</li>
+                      <li>85%勝率交易策略已啟用並受到保護</li>
+                      <li>請勿在公共網路環境下使用</li>
+                  </ul>
+              </div>
+              
+              <div class="card">
+                  <h2>🔗 相關連結</h2>
+                  <ul>
+                      <li><a href="https://github.com/winyoulife/AImax-Trading-System">GitHub 專案</a></li>
+                      <li><a href="https://max.maicoin.com/documents/api">MAX API 文檔</a></li>
+                  </ul>
+              </div>
+          </body>
+          </html>
+          EOF
           
           # 確保robots.txt存在並禁止索引
           echo "# AImax 私有交易系統 - 禁止所有搜索引擎索引" > _site/robots.txt
@@ -47,39 +126,9 @@ jobs:
           # 創建.nojekyll文件
           touch _site/.nojekyll
           
-          # 創建安全配置文件
-          echo "# 強制HTTPS和安全標頭" > _site/.htaccess
-          echo "Header always set X-Content-Type-Options nosniff" >> _site/.htaccess
-          echo "Header always set X-Frame-Options DENY" >> _site/.htaccess
-          echo "Header always set X-XSS-Protection \"1; mode=block\"" >> _site/.htaccess
-          echo "Options -Indexes" >> _site/.htaccess
-          
-          # 注入環境變數到配置文件
-          if [ -f "_site/js/config.js" ]; then
-            echo "正在注入GitHub配置..."
-            # 替換GitHub配置
-            sed -i "s|your-username|winyoulife|g" _site/js/config.js
-            echo "GitHub配置注入完成"
-          fi
-          
-          # 創建運行時配置
-          echo "// 運行時配置 - 部署時自動生成" > _site/js/runtime-config.js
-          echo "window.RUNTIME_CONFIG = {" >> _site/js/runtime-config.js
-          echo "  deployTime: '$(date -u +"%Y-%m-%dT%H:%M:%SZ")'," >> _site/js/runtime-config.js
-          echo "  version: '2.0.0'," >> _site/js/runtime-config.js
-          echo "  environment: 'production'," >> _site/js/runtime-config.js
-          echo "  isPrivate: true" >> _site/js/runtime-config.js
-          echo "};" >> _site/js/runtime-config.js
-          
-          # 移除任何可能的敏感文件
-          find _site -name "*.md" -delete
-          find _site -name "*.log" -delete
-          find _site -name "*.tmp" -delete
-          
-          echo "✅ 私有靜態文件準備完成"
+          echo "✅ 簡潔版儀表板部署文件準備完成"
           echo "📁 部署文件列表:"
           ls -la _site/
-          echo "🔒 安全檢查完成"
           
       - name: 📤 上傳Pages構建產物
         uses: actions/upload-pages-artifact@v3
@@ -99,7 +148,8 @@ jobs:
         
       - name: ✅ 部署完成通知
         run: |
-          echo "🎉 AImax Web控制面板部署完成！"
+          echo "🎉 AImax v3.0 簡潔版儀表板部署完成！"
           echo "🌐 訪問地址: ${{ steps.deployment.outputs.page_url }}"
-          echo "🔐 登入帳號: lovejk1314"
-          echo "🔑 登入密碼: Ichen5978"
+          echo "🔐 登入帳號: admin"
+          echo "🔑 登入密碼: aimax2025"
+          echo "💰 MAX API: 已整合，支援即時價格"
