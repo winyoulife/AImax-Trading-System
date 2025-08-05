@@ -110,23 +110,27 @@ jobs:
         print(f'📅 今日交易: {daily_trades}')
         "
         
-    - name: 📤 提交交易數據
+    - name: 📤 保存交易數據
       run: |
-        echo "📤 提交模擬交易數據到倉庫..."
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
+        echo "📤 保存模擬交易數據..."
         
-        # 添加交易數據文件
-        git add data/simulation/ || true
-        
-        # 檢查是否有變更
-        if git diff --staged --quiet; then
-          echo "📝 無新的交易數據需要提交"
+        # 檢查數據文件是否存在
+        if [ -d "data/simulation" ]; then
+          echo "✅ 交易數據已生成"
+          ls -la data/simulation/
         else
-          git commit -m "🤖 自動更新模擬交易數據 - $(date '+%Y-%m-%d %H:%M:%S')"
-          git push
-          echo "✅ 交易數據已提交到倉庫"
+          echo "📝 無交易數據生成"
         fi
+        
+    - name: 📦 上傳交易數據
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: trading-data-${{ github.run_number }}
+        path: |
+          data/simulation/
+          logs/
+        retention-days: 30
         
     - name: 📊 生成交易報告
       run: |
@@ -191,9 +195,5 @@ jobs:
         mkdir -p logs
         echo "$(date): GitHub Actions執行失敗" >> logs/error.log
         
-        # 嘗試提交錯誤日誌
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add logs/ || true
-        git commit -m "🚨 記錄系統錯誤 - $(date '+%Y-%m-%d %H:%M:%S')" || true
-        git push || true
+        # 記錄錯誤到artifacts
+        echo "錯誤將通過artifacts保存"
