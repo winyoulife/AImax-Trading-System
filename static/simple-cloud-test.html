@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AImax 雲端測試版</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .price { font-size: 2em; color: #00b894; text-align: center; margin: 20px 0; }
+        .status { padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .loading { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>🤖 AImax 雲端測試版</h1>
+    
+    <div class="card">
+        <h2>💰 BTC/TWD 價格測試</h2>
+        <div class="price" id="price">載入中...</div>
+        <div id="status" class="status loading">正在測試 API 連接...</div>
+        <div id="details"></div>
+    </div>
+    
+    <script>
+        async function testAPI() {
+            const priceEl = document.getElementById('price');
+            const statusEl = document.getElementById('status');
+            const detailsEl = document.getElementById('details');
+            
+            // 測試方法列表
+            const methods = [
+                {
+                    name: '直接連接 MAX API',
+                    test: async () => {
+                        const response = await fetch('https://max-api.maicoin.com/api/v2/tickers/btctwd', {
+                            method: 'GET',
+                            mode: 'cors'
+                        });
+                        const data = await response.json();
+                        return { price: parseFloat(data.last), source: '直接連接' };
+                    }
+                },
+                {
+                    name: 'CORS 代理 (allorigins.win)',
+                    test: async () => {
+                        const corsUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://max-api.maicoin.com/api/v2/tickers/btctwd');
+                        const response = await fetch(corsUrl);
+                        const data = await response.json();
+                        return { price: parseFloat(data.last), source: 'CORS 代理' };
+                    }
+                },
+                {
+                    name: 'CORS 代理 (corsproxy.io)',
+                    test: async () => {
+                        const corsUrl = 'https://corsproxy.io/?' + encodeURIComponent('https://max-api.maicoin.com/api/v2/tickers/btctwd');
+                        const response = await fetch(corsUrl);
+                        const data = await response.json();
+                        return { price: parseFloat(data.last), source: 'CORS 代理 2' };
+                    }
+                },
+                {
+                    name: '備用價格',
+                    test: async () => {
+                        return { price: 3450000, source: '備用數據' };
+                    }
+                }
+            ];
+            
+            let details = '<h3>測試結果:</h3>';
+            
+            for (const method of methods) {
+                try {
+                    details += `<p>🔄 測試 ${method.name}...</p>`;
+                    const result = await method.test();
+                    
+                    if (result.price && result.price > 0) {
+                        priceEl.textContent = `NT$${result.price.toLocaleString()}`;
+                        statusEl.textContent = `✅ 成功連接 (${result.source})`;
+                        statusEl.className = 'status success';
+                        details += `<p>✅ ${method.name}: NT$${result.price.toLocaleString()}</p>`;
+                        break;
+                    }
+                } catch (error) {
+                    details += `<p>❌ ${method.name}: ${error.message}</p>`;
+                    console.error(`${method.name} 失敗:`, error);
+                }
+            }
+            
+            detailsEl.innerHTML = details;
+            
+            if (statusEl.className.includes('loading')) {
+                statusEl.textContent = '❌ 所有連接方式都失敗';
+                statusEl.className = 'status error';
+                priceEl.textContent = '無法獲取價格';
+            }
+        }
+        
+        // 頁面載入後執行測試
+        document.addEventListener('DOMContentLoaded', testAPI);
+        
+        // 每30秒重新測試
+        setInterval(testAPI, 30000);
+    </script>
+</body>
+</html>

@@ -469,10 +469,9 @@
         window.CleanDashboard = {
             // 配置
             config: {
-                maxApiUrl: 'https://max-api.maicoin.com/api/v2/tickers/btctwd', // MAX API 直接連接
+                maxApiUrl: 'https://max-api.maicoin.com/api/v2/tickers/btctwd', // MAX API v2 正確端點
                 maxApiUrlProxy: 'http://localhost:5000/api/btc-price', // 本地代理（如果可用）
                 corsProxyUrl: 'https://api.allorigins.win/raw?url=', // CORS 代理
-                corsProxyUrl2: 'https://cors-anywhere.herokuapp.com/', // 備用 CORS 代理
                 updateInterval: 30000, // 30秒
                 loginAttempts: 0,
                 maxLoginAttempts: 5,
@@ -631,6 +630,7 @@
                         const data = await response.json();
                         console.log('📊 CORS 代理響應數據:', data);
                         
+                        // MAX API v2 格式：直接有 last 字段
                         let price = parseFloat(data.last);
                         if (isNaN(price) || price <= 0) {
                             throw new Error('CORS 代理返回無效價格');
@@ -663,6 +663,7 @@
                         const data = await response.json();
                         console.log('📊 MAX API直接響應數據:', data);
                         
+                        // MAX API v2 格式：直接有 last 字段
                         let price = parseFloat(data.last);
                         if (isNaN(price) || price <= 0) {
                             throw new Error('MAX API 返回無效價格');
