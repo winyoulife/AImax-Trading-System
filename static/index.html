@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AImax 智能交易控制面板</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+</head>
+<body>
+    <!-- 登入界面 -->
+    <div id="loginContainer" class="login-container">
+        <div class="login-card">
+            <div class="logo">
+                <h1>🤖 AImax</h1>
+                <p>智能交易控制面板</p>
+            </div>
+            
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">帳號</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">密碼</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="login-btn">🔐 安全登入</button>
+                
+                <div id="loginError" class="error-message" style="display: none;"></div>
+                <div id="lockoutMessage" class="lockout-message" style="display: none;"></div>
+            </form>
+            
+            <div class="security-notice">
+                <h3>⚠️ 安全提醒</h3>
+                <p>
+                    • 此為私有交易系統，僅限授權用戶使用<br>
+                    • 請勿在公共網路環境下登入<br>
+                    • 使用完畢請記得登出
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主控制面板 -->
+    <div id="dashboardContainer" class="dashboard-container" style="display: none;">
+        <!-- 頂部導航 -->
+        <header class="header">
+            <div class="header-left">
+                <h1>🤖 AImax 智能交易系統</h1>
+                <span class="version">v2.0 - 雲端模擬版</span>
+            </div>
+            <div class="header-right">
+                <span id="currentTime" class="current-time"></span>
+                <button id="logoutBtn" class="logout-btn">🚪 登出</button>
+            </div>
+        </header>
+
+        <!-- 系統狀態卡片 -->
+        <div class="status-grid">
+            <div class="status-card system-status">
+                <div class="card-header">
+                    <h3>🔄 系統狀態</h3>
+                    <span id="systemIndicator" class="status-indicator offline"></span>
+                </div>
+                <div class="card-content">
+                    <div id="systemStatus" class="status-value">載入中...</div>
+                    <div id="lastUpdate" class="last-update">更新時間: --</div>
+                </div>
+            </div>
+
+            <div class="status-card price-card">
+                <div class="card-header">
+                    <h3>💰 BTC 價格</h3>
+                    <span class="trend-indicator" id="priceIndicator">📊</span>
+                </div>
+                <div class="card-content">
+                    <div id="btcPrice" class="status-value price">$--</div>
+                    <div id="priceChange" class="price-change">變化: --</div>
+                </div>
+            </div>
+
+            <div class="status-card pnl-card">
+                <div class="card-header">
+                    <h3>📊 模擬損益</h3>
+                    <span class="pnl-indicator" id="pnlIndicator">💹</span>
+                </div>
+                <div class="card-content">
+                    <div id="totalPnl" class="status-value pnl">$0</div>
+                    <div id="pnlPercentage" class="pnl-percentage">收益率: 0%</div>
+                </div>
+            </div>
+
+            <div class="status-card trades-card">
+                <div class="card-header">
+                    <h3>📈 交易統計</h3>
+                    <span class="trades-indicator">🎯</span>
+                </div>
+                <div class="card-content">
+                    <div id="totalTrades" class="status-value">0</div>
+                    <div id="winRate" class="win-rate">勝率: 85%+</div>
+                </div>
+            </div>
+
+            <div class="status-card strategy-card">
+                <div class="card-header">
+                    <h3>🎯 當前策略</h3>
+                    <span class="strategy-indicator">🤖</span>
+                </div>
+                <div class="card-content">
+                    <div id="currentStrategy" class="status-value strategy">終極優化MACD</div>
+                    <div id="strategyStatus" class="strategy-status">85%勝率目標</div>
+                </div>
+            </div>
+
+            <div class="status-card position-card">
+                <div class="card-header">
+                    <h3>💼 當前持倉</h3>
+                    <span class="position-indicator">📊</span>
+                </div>
+                <div class="card-content">
+                    <div id="currentPosition" class="status-value position">無持倉</div>
+                    <div id="positionValue" class="position-value">價值: $0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 控制面板 -->
+        <div class="control-panel">
+            <h2>🎮 GitHub Actions 控制</h2>
+            <div class="control-buttons">
+                <button id="triggerWorkflow" class="control-btn trigger-btn">
+                    🚀 手動觸發交易
+                </button>
+                <button id="viewActions" class="control-btn view-btn">
+                    📊 查看執行日誌
+                </button>
+                <button id="downloadData" class="control-btn download-btn">
+                    💾 下載交易數據
+                </button>
+                <button id="emergencyStop" class="control-btn emergency-btn">
+                    🚨 緊急停止
+                </button>
+            </div>
+        </div>
+
+        <!-- 交易歷史 -->
+        <div class="trading-history">
+            <h2>📈 最近交易記錄</h2>
+            <div class="history-container">
+                <table id="tradesTable" class="trades-table">
+                    <thead>
+                        <tr>
+                            <th>時間</th>
+                            <th>動作</th>
+                            <th>價格</th>
+                            <th>數量</th>
+                            <th>信號強度</th>
+                            <th>狀態</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tradesTableBody">
+                        <tr>
+                            <td colspan="6" class="no-data">載入交易數據中...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 系統日誌 -->
+        <div class="system-logs">
+            <h2>📋 系統日誌</h2>
+            <div class="log-container">
+                <div id="systemLog" class="log-content">
+                    <div class="log-entry info">[系統] AImax 智能交易系統已就緒</div>
+                    <div class="log-entry info">[系統] 等待GitHub Actions執行...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 載入中覆蓋層 -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>載入中...</p>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/auth.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/github-api.js"></script>
+</body>
+</html>

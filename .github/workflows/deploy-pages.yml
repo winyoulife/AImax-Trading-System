@@ -1,0 +1,77 @@
+name: 部署Web控制面板到GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'static/**'
+      - 'templates/**'
+      - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔄 檢出代碼
+        uses: actions/checkout@v4
+        
+      - name: 🔧 設置Pages
+        uses: actions/configure-pages@v4
+        
+      - name: 📦 準備靜態文件
+        run: |
+          echo "📦 準備AImax Web控制面板..."
+          
+          # 創建部署目錄
+          mkdir -p _site
+          
+          # 複製靜態文件
+          cp -r static/* _site/
+          
+          # 創建CNAME文件（如果需要自定義域名）
+          # echo "your-domain.com" > _site/CNAME
+          
+          # 創建.nojekyll文件
+          touch _site/.nojekyll
+          
+          # 創建robots.txt
+          cat > _site/robots.txt << EOF
+          User-agent: *
+          Disallow: /
+          EOF
+          
+          echo "✅ 靜態文件準備完成"
+          ls -la _site/
+          
+      - name: 📤 上傳Pages構建產物
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: 🚀 部署到GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        
+      - name: ✅ 部署完成通知
+        run: |
+          echo "🎉 AImax Web控制面板部署完成！"
+          echo "🌐 訪問地址: ${{ steps.deployment.outputs.page_url }}"
+          echo "🔐 登入帳號: lovejk1314"
+          echo "🔑 登入密碼: Ichen5978"

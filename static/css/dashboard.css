@@ -1,0 +1,584 @@
+/* AImax 智能交易控制面板樣式 */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #667eea;
+    --secondary-color: #764ba2;
+    --success-color: #2ed573;
+    --danger-color: #ff4757;
+    --warning-color: #ffa502;
+    --info-color: #3742fa;
+    --dark-color: #2c3e50;
+    --light-color: #ecf0f1;
+    --border-color: #e1e5e9;
+    --shadow: 0 5px 15px rgba(0,0,0,0.08);
+    --gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fa;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* 登入界面 */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient);
+    padding: 20px;
+}
+
+.login-card {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    backdrop-filter: blur(10px);
+}
+
+.logo {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.logo h1 {
+    color: #333;
+    font-size: 2.5em;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.logo p {
+    color: #666;
+    font-size: 1.1em;
+}
+
+.login-form .form-group {
+    margin-bottom: 25px;
+}
+
+.login-form label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: 600;
+}
+
+.login-form input {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.login-form input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.login-btn {
+    width: 100%;
+    padding: 15px;
+    background: var(--gradient);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+}
+
+.login-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.error-message {
+    background: var(--danger-color);
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.lockout-message {
+    background: var(--warning-color);
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.security-notice {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border-left: 4px solid var(--warning-color);
+}
+
+.security-notice h3 {
+    color: #e55039;
+    margin-bottom: 10px;
+}
+
+.security-notice p {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* 主控制面板 */
+.dashboard-container {
+    min-height: 100vh;
+    background: #f5f7fa;
+}
+
+.header {
+    background: var(--gradient);
+    color: white;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow);
+}
+
+.header-left h1 {
+    font-size: 1.8em;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.version {
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.current-time {
+    font-size: 1.1em;
+    font-weight: 500;
+}
+
+.logout-btn {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-size: 14px;
+}
+
+.logout-btn:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+/* 狀態網格 */
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    padding: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.status-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.status-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+
+.card-header {
+    padding: 20px 25px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.card-header h3 {
+    color: #333;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.card-content {
+    padding: 15px 25px 25px;
+}
+
+.status-value {
+    font-size: 2em;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--dark-color);
+}
+
+.status-value.price {
+    color: var(--info-color);
+}
+
+.status-value.pnl.positive {
+    color: var(--success-color);
+}
+
+.status-value.pnl.negative {
+    color: var(--danger-color);
+}
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-indicator.online {
+    background: var(--success-color);
+    box-shadow: 0 0 10px rgba(46, 213, 115, 0.5);
+    animation: pulse 2s infinite;
+}
+
+.status-indicator.offline {
+    background: var(--danger-color);
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.last-update, .price-change, .pnl-percentage, .win-rate, .strategy-status, .position-value {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.price-change.positive {
+    color: var(--success-color);
+}
+
+.price-change.negative {
+    color: var(--danger-color);
+}
+
+/* 控制面板 */
+.control-panel {
+    background: white;
+    margin: 0 30px 30px;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    max-width: 1340px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 30px;
+}
+
+.control-panel h2 {
+    margin-bottom: 25px;
+    color: #333;
+    font-size: 1.5em;
+}
+
+.control-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.control-btn {
+    padding: 15px 25px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.trigger-btn {
+    background: var(--success-color);
+    color: white;
+}
+
+.trigger-btn:hover {
+    background: #26d467;
+    transform: translateY(-2px);
+}
+
+.view-btn {
+    background: var(--info-color);
+    color: white;
+}
+
+.view-btn:hover {
+    background: #2f3542;
+    transform: translateY(-2px);
+}
+
+.download-btn {
+    background: var(--warning-color);
+    color: white;
+}
+
+.download-btn:hover {
+    background: #ff9500;
+    transform: translateY(-2px);
+}
+
+.emergency-btn {
+    background: var(--danger-color);
+    color: white;
+}
+
+.emergency-btn:hover {
+    background: #ff3838;
+    transform: translateY(-2px);
+}
+
+/* 交易歷史 */
+.trading-history {
+    background: white;
+    margin: 0 30px 30px;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    max-width: 1340px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 30px;
+}
+
+.trading-history h2 {
+    margin-bottom: 25px;
+    color: #333;
+    font-size: 1.5em;
+}
+
+.history-container {
+    overflow-x: auto;
+}
+
+.trades-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.trades-table th {
+    background: #f8f9fa;
+    padding: 15px 10px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.trades-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.trades-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.trade-buy {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+.trade-sell {
+    color: var(--danger-color);
+    font-weight: 600;
+}
+
+.no-data {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 30px;
+}
+
+/* 系統日誌 */
+.system-logs {
+    background: white;
+    margin: 0 30px 30px;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    max-width: 1340px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.system-logs h2 {
+    margin-bottom: 25px;
+    color: #333;
+    font-size: 1.5em;
+}
+
+.log-container {
+    background: #2c3e50;
+    border-radius: 10px;
+    padding: 20px;
+    height: 300px;
+    overflow-y: auto;
+}
+
+.log-content {
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.log-entry {
+    margin-bottom: 8px;
+    padding: 5px 0;
+}
+
+.log-entry.info {
+    color: #3498db;
+}
+
+.log-entry.success {
+    color: #2ecc71;
+}
+
+.log-entry.warning {
+    color: #f39c12;
+}
+
+.log-entry.error {
+    color: #e74c3c;
+}
+
+.log-entry .timestamp {
+    color: #95a5a6;
+    margin-right: 10px;
+}
+
+/* 載入覆蓋層 */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    text-align: center;
+    color: white;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .status-grid {
+        grid-template-columns: 1fr;
+        padding: 20px;
+    }
+    
+    .control-panel, .trading-history, .system-logs {
+        margin: 0 20px 20px;
+        padding: 20px;
+    }
+    
+    .control-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .login-card {
+        padding: 30px 20px;
+    }
+    
+    .trades-table {
+        font-size: 12px;
+    }
+    
+    .trades-table th,
+    .trades-table td {
+        padding: 8px 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .status-value {
+        font-size: 1.5em;
+    }
+    
+    .card-header h3 {
+        font-size: 1em;
+    }
+    
+    .control-btn {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+}
