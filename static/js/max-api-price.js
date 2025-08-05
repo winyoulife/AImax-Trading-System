@@ -86,9 +86,9 @@ class MAXAPIPrice {
             
             if (response.ok) {
                 const data = await response.json();
-                // MAX API返回格式: { "at": timestamp, "ticker": { "last": "price" } }
-                if (data.ticker && data.ticker.last) {
-                    const price = parseFloat(data.ticker.last);
+                // MAX API返回格式: { "at": timestamp, "last": "price", "buy": "price", "sell": "price" }
+                if (data.last) {
+                    const price = parseFloat(data.last);
                     console.log('✅ 直接從MAX API獲取價格:', price);
                     return price;
                 }
@@ -123,8 +123,8 @@ class MAXAPIPrice {
                     
                     if (response.ok) {
                         const data = await response.json();
-                        if (data.ticker && data.ticker.last) {
-                            const price = parseFloat(data.ticker.last);
+                        if (data.last) {
+                            const price = parseFloat(data.last);
                             console.log('✅ 通過代理從MAX API獲取價格:', price);
                             return price;
                         }
