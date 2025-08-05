@@ -82,41 +82,49 @@ class GitHubAPI {
     
     async getSimulationData() {
         try {
-            // 嘗試獲取多個模擬數據文件
-            const files = [
-                'data/simulation/execution_status.json',
-                'data/simulation/portfolio_state.json',
-                'data/simulation/status.json'
-            ];
+            // 獲取執行狀態文件
+            const statusData = await this.getRawFile('data/simulation/execution_status.json');
             
-            const results = {};
+            // 獲取交易記錄
+            const trades = await this.getTradingHistory();
             
-            for (const file of files) {
-                const data = await this.getRawFile(file);
-                if (data) {
-                    Object.assign(results, data);
+            // 獲取當前BTC價格（從Binance API）
+            let currentPrice = 95000; // 默認價格
+            try {
+                const priceResponse = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+                if (priceResponse.ok) {
+                    const priceData = await priceResponse.json();
+                    currentPrice = parseFloat(priceData.price);
                 }
+            } catch (e) {
+                console.warn('無法獲取實時BTC價格，使用默認價格');
             }
             
-            // 如果沒有數據，返回默認結構
-            if (Object.keys(results).length === 0) {
+            // 如果有狀態數據，使用它
+            if (statusData) {
                 return {
-                    current_btc_price: 95000,
-                    portfolio: {
-                        initial_balance: 10000,
-                        current_balance: 10000,
-                        total_value: 10000,
-                        total_return: 0,
-                        return_percentage: 0,
-                        total_trades: 0,
-                        positions: {}
-                    },
-                    system_status: 'waiting',
+                    ...statusData,
+                    current_btc_price: currentPrice,
+                    trades: trades,
+                    total_trades: trades.length,
                     last_update: new Date().toISOString()
                 };
             }
             
-            return results;
+            // 如果沒有狀態數據，構建基本結構
+            return {
+                current_btc_price: currentPrice,
+                system_status: trades.length > 0 ? 'running' : 'stopped',
+                trading_mode: 'simulation',
+                strategy: 'ultimate_optimized_85%_winrate',
+                executed_trades_this_cycle: 0,
+                last_execution: trades.length > 0 ? trades[trades.length - 1].timestamp : null,
+                github_actions: true,
+                next_execution: '10 minutes',
+                trades: trades,
+                total_trades: trades.length,
+                last_update: new Date().toISOString()
+            };
         } catch (error) {
             console.error('獲取模擬數據失敗:', error);
             return null;
