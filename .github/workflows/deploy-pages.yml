@@ -5,6 +5,8 @@ on:
     branches: [ main ]
     paths:
       - 'static/clean-dashboard.html'
+      - 'static/simple-max-dashboard.html'
+      - 'static/test-max-api.html'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
