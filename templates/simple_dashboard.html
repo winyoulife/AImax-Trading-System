@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AImax 監控面板</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.8em;
+            font-weight: 700;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .status-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-left: 5px solid #667eea;
+        }
+        
+        .status-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .status-value {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .status-value.positive {
+            color: #2ed573;
+        }
+        
+        .status-value.negative {
+            color: #ff4757;
+        }
+        
+        .status-value.neutral {
+            color: #667eea;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-indicator.online {
+            background: #2ed573;
+            box-shadow: 0 0 10px rgba(46, 213, 115, 0.5);
+        }
+        
+        .status-indicator.offline {
+            background: #ff4757;
+        }
+        
+        .trades-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        
+        .trades-section h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .trades-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .trades-table th,
+        .trades-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .trades-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .trade-buy {
+            color: #2ed573;
+            font-weight: 600;
+        }
+        
+        .trade-sell {
+            color: #ff4757;
+            font-weight: 600;
+        }
+        
+        .last-update {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .trades-table {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 AImax 智能交易監控</h1>
+        <div class="header-actions">
+            <span id="current-time"></span>
+            <a href="/logout" class="logout-btn">🚪 登出</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- 系統狀態 -->
+        <div class="status-grid">
+            <div class="status-card">
+                <h3>🔄 系統狀態</h3>
+                <div class="status-value neutral" id="system-status">
+                    <span class="status-indicator offline" id="status-indicator"></span>
+                    載入中...
+                </div>
+                <div class="last-update" id="last-update">更新時間: --</div>
+            </div>
+            
+            <div class="status-card">
+                <h3>💰 BTC 當前價格</h3>
+                <div class="status-value neutral" id="btc-price">$--</div>
+            </div>
+            
+            <div class="status-card">
+                <h3>📈 交易次數</h3>
+                <div class="status-value neutral" id="total-trades">0</div>
+            </div>
+            
+            <div class="status-card">
+                <h3>🎯 交易策略</h3>
+                <div class="status-value neutral">85%勝率MACD</div>
+            </div>
+        </div>
+        
+        <!-- 最近交易 -->
+        <div class="trades-section">
+            <h2>📈 最近交易記錄</h2>
+            <table class="trades-table">
+                <thead>
+                    <tr>
+                        <th>時間</th>
+                        <th>動作</th>
+                        <th>價格</th>
+                        <th>數量</th>
+                        <th>信心度</th>
+                    </tr>
+                </thead>
+                <tbody id="trades-table-body">
+                    <tr>
+                        <td colspan="5" class="loading">載入交易數據中...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        // 更新當前時間
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = 
+                now.toLocaleString('zh-TW');
+        }
+        
+        // 更新系統狀態
+        async function updateStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                
+                if (data.error) {
+                    console.error('獲取狀態失敗:', data.error);
+                    return;
+                }
+                
+                const status = data.status;
+                const trades = data.recent_trades;
+                
+                // 更新系統狀態
+                const indicator = document.getElementById('status-indicator');
+                const statusText = document.getElementById('system-status');
+                
+                if (status.system_status === 'running') {
+                    indicator.className = 'status-indicator online';
+                    statusText.innerHTML = '<span class="status-indicator online"></span>運行中';
+                    statusText.className = 'status-value positive';
+                } else {
+                    indicator.className = 'status-indicator offline';
+                    statusText.innerHTML = '<span class="status-indicator offline"></span>已停止';
+                    statusText.className = 'status-value negative';
+                }
+                
+                // 更新BTC價格
+                const price = status.current_btc_price || 0;
+                document.getElementById('btc-price').textContent = 
+                    price > 0 ? `$${price.toLocaleString()}` : '$--';
+                
+                // 更新交易次數
+                document.getElementById('total-trades').textContent = trades.length;
+                
+                // 更新最後更新時間
+                document.getElementById('last-update').textContent = 
+                    `更新時間: ${new Date().toLocaleString('zh-TW')}`;
+                
+                // 更新交易表格
+                updateTradesTable(trades);
+                
+            } catch (error) {
+                console.error('更新狀態失敗:', error);
+            }
+        }
+        
+        // 更新交易表格
+        function updateTradesTable(trades) {
+            const tbody = document.getElementById('trades-table-body');
+            
+            if (!trades || trades.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="loading">暫無交易記錄</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            
+            trades.reverse().forEach(trade => {
+                const row = document.createElement('tr');
+                
+                const timestamp = new Date(trade.timestamp).toLocaleString('zh-TW');
+                const action = trade.action.toUpperCase();
+                const price = trade.price ? `$${trade.price.toLocaleString()}` : '--';
+                const quantity = trade.quantity ? trade.quantity.toFixed(6) : '--';
+                const confidence = trade.confidence ? `${(trade.confidence * 100).toFixed(0)}%` : '--';
+                
+                const actionClass = action === 'BUY' ? 'trade-buy' : 'trade-sell';
+                
+                row.innerHTML = `
+                    <td>${timestamp}</td>
+                    <td class="${actionClass}">${action}</td>
+                    <td>${price}</td>
+                    <td>${quantity}</td>
+                    <td>${confidence}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        // 初始化
+        updateTime();
+        updateStatus();
+        
+        // 定期更新
+        setInterval(updateTime, 1000);
+        setInterval(updateStatus, 10000); // 每10秒更新一次
+    </script>
+</body>
+</html>

@@ -559,7 +559,8 @@
         window.CleanDashboard = {
             // 配置
             config: {
-                maxApiUrl: 'https://max-api.maicoin.com/api/v2/tickers/btctwd',
+                maxApiUrl: 'http://localhost:5000/api/btc-price', // 使用本地代理
+                maxApiUrlDirect: 'https://max-api.maicoin.com/api/v2/tickers/btctwd', // 備用直接連接
                 updateInterval: 30000, // 30秒
                 loginAttempts: 0,
                 maxLoginAttempts: 5,
@@ -755,27 +756,26 @@
                 console.log('📡 正在從MAX API獲取BTC/TWD價格...');
                 
                 try {
-                    const response = await fetch(this.config.maxApiUrl, {
+                    // 首先嘗試本地代理
+                    let response = await fetch(this.config.maxApiUrl, {
                         method: 'GET',
                         headers: {
                             'Accept': 'application/json'
-                        },
-                        mode: 'cors'
+                        }
                     });
                     
                     if (!response.ok) {
-                        throw new Error(`MAX API 響應錯誤: ${response.status}`);
+                        throw new Error(`代理服務器響應錯誤: ${response.status}`);
                     }
                     
                     const data = await response.json();
-                    console.log('📊 MAX API響應數據:', data);
+                    console.log('📊 代理服務器響應數據:', data);
                     
-                    // 驗證數據格式
-                    if (!data.ticker || !data.ticker.last || isNaN(parseFloat(data.ticker.last))) {
-                        throw new Error('MAX API 返回無效的價格數據');
+                    if (!data.success) {
+                        throw new Error(data.error || '代理服務器返回錯誤');
                     }
                     
-                    const newPrice = parseFloat(data.ticker.last);
+                    const newPrice = data.price;
                     const oldPrice = this.state.currentPrice;
                     
                     // 更新價格顯示
@@ -786,12 +786,51 @@
                     // 更新狀態指示器
                     document.getElementById('priceIndicator').className = 'status-indicator online';
                     
-                    console.log(`💰 MAX API價格已更新: NT$${newPrice.toLocaleString()}`);
+                    console.log(`💰 MAX API價格已更新: ${data.formatted_price}`);
                     
                 } catch (error) {
-                    console.error('❌ MAX API請求失敗:', error);
-                    this.displayPriceError(error.message);
-                    document.getElementById('priceIndicator').className = 'status-indicator offline';
+                    console.error('❌ 代理請求失敗，嘗試直接連接:', error);
+                    
+                    // 備用方案：嘗試直接連接 MAX API
+                    try {
+                        const directResponse = await fetch(this.config.maxApiUrlDirect, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json'
+                            },
+                            mode: 'cors'
+                        });
+                        
+                        if (!directResponse.ok) {
+                            throw new Error(`MAX API 響應錯誤: ${directResponse.status}`);
+                        }
+                        
+                        const directData = await directResponse.json();
+                        console.log('📊 MAX API直接響應數據:', directData);
+                        
+                        // 驗證數據格式
+                        if (!directData.ticker || !directData.ticker.last || isNaN(parseFloat(directData.ticker.last))) {
+                            throw new Error('MAX API 返回無效的價格數據');
+                        }
+                        
+                        const newPrice = parseFloat(directData.ticker.last);
+                        const oldPrice = this.state.currentPrice;
+                        
+                        // 更新價格顯示
+                        this.displayPrice(newPrice, oldPrice);
+                        this.state.currentPrice = newPrice;
+                        this.state.lastUpdate = new Date();
+                        
+                        // 更新狀態指示器
+                        document.getElementById('priceIndicator').className = 'status-indicator online';
+                        
+                        console.log(`💰 MAX API直接連接價格已更新: NT$${newPrice.toLocaleString()}`);
+                        
+                    } catch (directError) {
+                        console.error('❌ 直接連接也失敗:', directError);
+                        this.displayPriceError('無法連接 MAX API (代理和直連都失敗)');
+                        document.getElementById('priceIndicator').className = 'status-indicator offline';
+                    }
                 }
             },
             
