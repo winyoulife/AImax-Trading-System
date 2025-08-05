@@ -366,6 +366,16 @@ body {
     transform: translateY(-2px);
 }
 
+.refresh-btn {
+    background: #f39c12;
+    color: white;
+}
+
+.refresh-btn:hover {
+    background: #e67e22;
+    transform: translateY(-2px);
+}
+
 .emergency-btn {
     background: var(--danger-color);
     color: white;
