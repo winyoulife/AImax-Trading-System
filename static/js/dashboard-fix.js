@@ -1,6 +1,6 @@
-// AImax 儀表板數據更新修正
+// AImax 儀表板數據更新修正 - 支援MAX API價格優先
 
-// 修正BTC價格顯示問題
+// 修正BTC價格顯示問題 - 讓MAX API價格有優先權
 function fixBTCPriceDisplay() {
     // 覆蓋原有的updateTradingData方法
     if (window.dashboardManager) {
@@ -10,8 +10,18 @@ function fixBTCPriceDisplay() {
                 const simulationData = await this.githubAPI.getSimulationData();
                 
                 if (simulationData) {
-                    // 更新BTC價格 - 修正版本
-                    if (simulationData.current_btc_price) {
+                    // BTC價格更新邏輯 - MAX API優先
+                    if (window.maxAPIPrice && typeof window.maxAPIPrice.getCurrentPrice === 'function') {
+                        // 如果MAX API價格管理器存在且正常工作，不要覆蓋價格
+                        console.log('🔄 Dashboard-fix: MAX API價格管理器正在運行，保持MAX API價格顯示');
+                        
+                        // 但是可以更新價格變化指示器
+                        const priceChange = document.getElementById('priceChange');
+                        if (priceChange && !priceChange.textContent.includes('MAX API')) {
+                            // 只有在不是MAX API更新時才修改
+                        }
+                    } else if (simulationData.current_btc_price) {
+                        // 只有在沒有MAX API管理器時才使用模擬數據
                         const btcPrice = document.getElementById('btcPrice');
                         const priceChange = document.getElementById('priceChange');
                         
@@ -21,7 +31,7 @@ function fixBTCPriceDisplay() {
                         
                         // 顯示價格變化
                         if (priceChange) {
-                            priceChange.textContent = '變化: 即時更新';
+                            priceChange.textContent = '變化: 模擬數據';
                         }
                     }
                     
@@ -85,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 等待原始dashboard載入
     setTimeout(() => {
         fixBTCPriceDisplay();
-        console.log('✅ BTC價格顯示已修正');
+        console.log('✅ BTC價格顯示已修正 - MAX API優先模式');
     }, 1000);
 });
 
@@ -93,3 +103,12 @@ document.addEventListener('DOMContentLoaded', () => {
 if (window.dashboardManager) {
     fixBTCPriceDisplay();
 }
+
+// 確保MAX API價格管理器有足夠的時間初始化
+setTimeout(() => {
+    if (window.maxAPIPrice) {
+        console.log('🚀 MAX API價格管理器已檢測到，將優先使用MAX API價格');
+    } else {
+        console.log('⚠️ 未檢測到MAX API價格管理器，將使用模擬數據');
+    }
+}, 2000);
