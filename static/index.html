@@ -3,9 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AImax 智能交易控制面板</title>
+    <title>AImax 私有交易系統</title>
+    
+    <!-- 安全標頭 -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    
+    <!-- 禁止搜索引擎索引 -->
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+    <meta name="googlebot" content="noindex, nofollow">
+    <meta name="bingbot" content="noindex, nofollow">
+    
+    <!-- 樣式和圖標 -->
     <link rel="stylesheet" href="css/dashboard.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔒</text></svg>">
+    
+    <!-- 內容安全策略 -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' api.github.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' api.github.com; font-src 'self'">
 </head>
 <body>
     <!-- 登入界面 -->
@@ -191,8 +207,32 @@
     </div>
 
     <!-- JavaScript -->
+    <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/dashboard.js"></script>
     <script src="js/github-api.js"></script>
+    
+    <!-- 私有系統標識 -->
+    <script>
+        // 防止在開發者工具中洩露信息
+        console.clear();
+        console.log('%c🔒 AImax 私有交易系統', 'color: #ff4757; font-size: 16px; font-weight: bold;');
+        console.log('%c⚠️  此為私有系統，未經授權禁止訪問', 'color: #ffa502; font-size: 12px;');
+        
+        // 禁用右鍵菜單（可選）
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+        
+        // 禁用F12和其他開發者工具快捷鍵（可選）
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+                (e.ctrlKey && e.key === 'U')) {
+                e.preventDefault();
+            }
+        });
+    </script>
 </body>
 </html>

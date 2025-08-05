@@ -28,9 +28,9 @@ jobs:
       - name: 🔧 設置Pages
         uses: actions/configure-pages@v4
         
-      - name: 📦 準備靜態文件
+      - name: 📦 準備私有靜態文件
         run: |
-          echo "📦 準備AImax Web控制面板..."
+          echo "📦 準備AImax私有Web控制面板..."
           
           # 創建部署目錄
           mkdir -p _site
@@ -38,20 +38,56 @@ jobs:
           # 複製靜態文件
           cp -r static/* _site/
           
-          # 創建CNAME文件（如果需要自定義域名）
-          # echo "your-domain.com" > _site/CNAME
+          # 確保robots.txt存在並禁止索引
+          cat > _site/robots.txt << EOF
+          # AImax 私有交易系統 - 禁止所有搜索引擎索引
+          User-agent: *
+          Disallow: /
+          Crawl-delay: 86400
+          EOF
           
           # 創建.nojekyll文件
           touch _site/.nojekyll
           
-          # 創建robots.txt
-          cat > _site/robots.txt << EOF
-          User-agent: *
-          Disallow: /
+          # 創建安全配置文件
+          cat > _site/.htaccess << EOF
+          # 強制HTTPS和安全標頭
+          Header always set X-Content-Type-Options nosniff
+          Header always set X-Frame-Options DENY
+          Header always set X-XSS-Protection "1; mode=block"
+          Options -Indexes
           EOF
           
-          echo "✅ 靜態文件準備完成"
+          # 注入環境變數到配置文件
+          if [ -f "_site/js/config.js" ]; then
+            sed -i 's/{{GITHUB_TOKEN}}/${{ secrets.GITHUB_TOKEN }}/g' _site/js/config.js
+            sed -i 's/your-username/${{ secrets.REPO_OWNER }}/g' _site/js/config.js
+          fi
+          
+          if [ -f "_site/js/auth.js" ]; then
+            sed -i 's/{{AUTH_HASH}}/${{ secrets.AUTH_HASH }}/g' _site/js/auth.js
+          fi
+          
+          # 創建運行時配置
+          cat > _site/js/runtime-config.js << EOF
+          // 運行時配置 - 部署時自動生成
+          window.RUNTIME_CONFIG = {
+            deployTime: '$(date -u +"%Y-%m-%dT%H:%M:%SZ")',
+            version: '2.0.0',
+            environment: 'production',
+            isPrivate: true
+          };
+          EOF
+          
+          # 移除任何可能的敏感文件
+          find _site -name "*.md" -delete
+          find _site -name "*.log" -delete
+          find _site -name "*.tmp" -delete
+          
+          echo "✅ 私有靜態文件準備完成"
+          echo "📁 部署文件列表:"
           ls -la _site/
+          echo "🔒 安全檢查完成"
           
       - name: 📤 上傳Pages構建產物
         uses: actions/upload-pages-artifact@v3

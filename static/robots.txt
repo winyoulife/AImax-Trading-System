@@ -1,0 +1,27 @@
+# AImax 私有交易系統 - 禁止所有搜索引擎索引
+User-agent: *
+Disallow: /
+
+# 明確禁止常見搜索引擎
+User-agent: Googlebot
+Disallow: /
+
+User-agent: Bingbot
+Disallow: /
+
+User-agent: Slurp
+Disallow: /
+
+User-agent: DuckDuckBot
+Disallow: /
+
+User-agent: Baiduspider
+Disallow: /
+
+# 禁止爬蟲和機器人
+User-agent: *
+Crawl-delay: 86400
+Disallow: /
+
+# 沒有sitemap
+# Sitemap: (故意留空)
