@@ -1,0 +1,7 @@
+{
+  "username": "lovejk1314",
+  "password_hash": "898535a8764bb8b3ccfebd1c2ac92163adafb69300370881a7beaa2dda7af4ae",
+  "session_timeout": 3600,
+  "max_login_attempts": 5,
+  "lockout_duration": 300
+}
