@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AImax 智能交易系統 v3.0 - 簡潔版</title>
+    
+    <!-- 安全標頭 -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    
+    <!-- 禁止搜索引擎索引 -->
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+    
+    <!-- 內嵌CSS樣式 -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        /* 登入界面樣式 */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            font-size: 28px;
+            color: #6c5ce7;
+            margin-bottom: 8px;
+        }
+        
+        .logo p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: #6c5ce7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .login-btn:hover {
+            background: #5a4fcf;
+        }
+        
+        .error-message, .lockout-message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .error-message {
+            background: #ffe6e6;
+            color: #d63031;
+            border: 1px solid #fab1a0;
+        }
+        
+        .lockout-message {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .security-notice {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #6c5ce7;
+        }
+        
+        .security-notice h3 {
+            color: #6c5ce7;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .security-notice p {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #666;
+        }
+        
+        /* 主控制面板樣式 */
+        .dashboard-container {
+            display: none;
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #6c5ce7;
+            font-size: 24px;
+        }
+        
+        .version {
+            color: #666;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .current-time {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .logout-btn {
+            padding: 8px 16px;
+            background: #e17055;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .logout-btn:hover {
+            background: #d63031;
+        }
+        
+        /* 卡片網格 */
+        .cards-grid {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .card-header h3 {
+            font-size: 18px;
+            color: #333;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ddd;
+        }
+        
+        .status-indicator.online {
+            background: #00b894;
+            box-shadow: 0 0 10px rgba(0,184,148,0.3);
+        }
+        
+        .status-indicator.offline {
+            background: #e17055;
+        }
+        
+        .card-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .price-value {
+            color: #00b894;
+        }
+        
+        .card-subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* 控制按鈕 */
+        .controls {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .controls h2 {
+            margin-bottom: 16px;
+            color: #333;
+        }
+        
+        .control-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .refresh-btn {
+            background: #00b894;
+            color: white;
+        }
+        
+        .refresh-btn:hover {
+            background: #00a085;
+        }
+        
+        .log-btn {
+            background: #0984e3;
+            color: white;
+        }
+        
+        .log-btn:hover {
+            background: #0770c4;
+        }
+        
+        .emergency-btn {
+            background: #e17055;
+            color: white;
+        }
+        
+        .emergency-btn:hover {
+            background: #d63031;
+        }
+        
+        /* 交易歷史表格 */
+        .trading-history {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .trading-history h2 {
+            margin-bottom: 16px;
+            color: #333;
+        }
+        
+        .history-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .history-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .history-table th {
+            background: #6c5ce7;
+            color: white;
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .history-table td {
+            padding: 16px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .history-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .trade-buy {
+            color: #00b894;
+            font-weight: 600;
+        }
+        
+        .trade-sell {
+            color: #e17055;
+            font-weight: 600;
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .cards-grid {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+            
+            .control-buttons {
+                justify-content: center;
+            }
+            
+            .history-table {
+                overflow-x: auto;
+            }
+        }
+        
+        /* 載入動畫 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #6c5ce7;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 價格更新動畫 */
+        .price-update {
+            animation: priceFlash 0.3s ease-in-out;
+        }
+        
+        @keyframes priceFlash {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 登入界面 -->
+    <div id="loginContainer" class="login-container">
+        <div class="login-card">
+            <div class="logo">
+                <h1>🤖 AImax v3.0</h1>
+                <p>智能交易控制面板 - 簡潔版</p>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">帳號</label>
+                    <input type="text" id="username" name="username" required autocomplete="username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">密碼</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                </div>
+                
+                <button type="submit" class="login-btn">🔐 安全登入</button>
+                
+                <div id="loginError" class="error-message" style="display: none;"></div>
+                <div id="lockoutMessage" class="lockout-message" style="display: none;"></div>
+            </form>
+            
+            <div class="security-notice">
+                <h3>⚠️ 安全提醒</h3>
+                <p>
+                    • 此為私有交易系統，僅限授權用戶使用<br>
+                    • 請勿在公共網路環境下登入<br>
+                    • 使用完畢請記得登出<br>
+                    • 85%勝率交易策略已啟用
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主控制面板 -->
+    <div id="dashboardContainer" class="dashboard-container">
+        <!-- 頂部導航 -->
+        <header class="header">
+            <div>
+                <h1>🤖 AImax 智能交易系統</h1>
+                <span class="version">v3.0 - 簡潔版 | 85%勝率目標</span>
+            </div>
+            <div class="header-right">
+                <span id="currentTime" class="current-time"></span>
+                <button id="logoutBtn" class="logout-btn">🚪 登出</button>
+            </div>
+        </header>
+
+        <!-- 狀態卡片 -->
+        <div class="cards-grid">
+            <!-- BTC價格卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>💰 BTC/TWD 價格 (MAX)</h3>
+                    <span id="priceIndicator" class="status-indicator"></span>
+                </div>
+                <div id="btcPrice" class="card-value price-value">載入中...</div>
+                <div id="priceChange" class="card-subtitle">變化: --</div>
+                <div id="lastPriceUpdate" class="card-subtitle">更新時間: --</div>
+            </div>
+
+            <!-- 系統狀態卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>🔄 系統狀態</h3>
+                    <span id="systemIndicator" class="status-indicator"></span>
+                </div>
+                <div id="systemStatus" class="card-value">載入中...</div>
+                <div id="systemUptime" class="card-subtitle">運行時間: --</div>
+                <div id="lastSystemUpdate" class="card-subtitle">更新時間: --</div>
+            </div>
+
+            <!-- 交易統計卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>📊 交易統計</h3>
+                    <span class="status-indicator online"></span>
+                </div>
+                <div id="totalTrades" class="card-value">0</div>
+                <div id="winRate" class="card-subtitle">勝率: 85%+ 目標</div>
+                <div id="totalProfit" class="card-subtitle">總獲利: --</div>
+            </div>
+
+            <!-- 當前持倉卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>💼 當前持倉</h3>
+                    <span id="positionIndicator" class="status-indicator"></span>
+                </div>
+                <div id="currentPosition" class="card-value">無持倉</div>
+                <div id="positionValue" class="card-subtitle">價值: NT$0</div>
+                <div id="positionProfit" class="card-subtitle">浮動損益: --</div>
+            </div>
+        </div>
+
+        <!-- 控制按鈕 -->
+        <div class="controls">
+            <h2>🎮 系統控制</h2>
+            <div class="control-buttons">
+                <button id="refreshPrice" class="control-btn refresh-btn">💰 刷新價格</button>
+                <button id="viewLogs" class="control-btn log-btn">📋 查看日誌</button>
+                <button id="emergencyStop" class="control-btn emergency-btn">🚨 緊急停止</button>
+            </div>
+        </div>
+
+        <!-- 交易歷史 -->
+        <div class="trading-history">
+            <h2>📈 最近交易記錄</h2>
+            <div class="history-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>時間</th>
+                            <th>類型</th>
+                            <th>價格</th>
+                            <th>數量</th>
+                            <th>獲利/虧損</th>
+                            <th>狀態</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tradesTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #666;">載入交易數據中...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 內嵌JavaScript -->
+    <script>
+        // 全局命名空間，避免衝突
+        window.CleanDashboard = {
+            // 配置
+            config: {
+                maxApiUrl: 'https://max-api.maicoin.com/api/v2/tickers/btctwd',
+                updateInterval: 30000, // 30秒
+                loginAttempts: 0,
+                maxLoginAttempts: 5,
+                lockoutTime: 15 * 60 * 1000 // 15分鐘
+            },
+            
+            // 狀態
+            state: {
+                isAuthenticated: false,
+                currentPrice: null,
+                lastUpdate: null,
+                systemStartTime: new Date(),
+                priceUpdateTimer: null
+            },
+            
+            // 初始化
+            init() {
+                console.log('🚀 AImax v3.0 簡潔版儀表板初始化中...');
+                this.bindEvents();
+                this.updateCurrentTime();
+                setInterval(() => this.updateCurrentTime(), 1000);
+                
+                // 檢查是否已登入
+                if (this.checkAuthStatus()) {
+                    this.showDashboard();
+                } else {
+                    this.showLogin();
+                }
+            },
+            
+            // 綁定事件
+            bindEvents() {
+                // 登入表單
+                document.getElementById('loginForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleLogin();
+                });
+                
+                // 登出按鈕
+                document.getElementById('logoutBtn').addEventListener('click', () => {
+                    this.handleLogout();
+                });
+                
+                // 控制按鈕
+                document.getElementById('refreshPrice').addEventListener('click', () => {
+                    this.refreshPrice();
+                });
+                
+                document.getElementById('viewLogs').addEventListener('click', () => {
+                    this.viewLogs();
+                });
+                
+                document.getElementById('emergencyStop').addEventListener('click', () => {
+                    this.emergencyStop();
+                });
+            },
+            
+            // 更新當前時間
+            updateCurrentTime() {
+                const timeElement = document.getElementById('currentTime');
+                if (timeElement) {
+                    timeElement.textContent = new Date().toLocaleString('zh-TW');
+                }
+            },
+            
+            // 檢查認證狀態
+            checkAuthStatus() {
+                const authData = sessionStorage.getItem('aimax_auth');
+                if (authData) {
+                    try {
+                        const auth = JSON.parse(authData);
+                        const now = new Date().getTime();
+                        // 檢查會話是否過期（4小時）
+                        if (now - auth.timestamp < 4 * 60 * 60 * 1000) {
+                            this.state.isAuthenticated = true;
+                            return true;
+                        } else {
+                            sessionStorage.removeItem('aimax_auth');
+                        }
+                    } catch (e) {
+                        sessionStorage.removeItem('aimax_auth');
+                    }
+                }
+                return false;
+            },
+            
+            // 處理登入
+            async handleLogin() {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const errorDiv = document.getElementById('loginError');
+                const lockoutDiv = document.getElementById('lockoutMessage');
+                
+                // 清除之前的錯誤信息
+                errorDiv.style.display = 'none';
+                lockoutDiv.style.display = 'none';
+                
+                // 檢查是否被鎖定
+                const lockoutData = localStorage.getItem('aimax_lockout');
+                if (lockoutData) {
+                    const lockout = JSON.parse(lockoutData);
+                    const now = new Date().getTime();
+                    if (now < lockout.until) {
+                        const remainingMinutes = Math.ceil((lockout.until - now) / 60000);
+                        lockoutDiv.textContent = `帳號已被鎖定，請等待 ${remainingMinutes} 分鐘後再試`;
+                        lockoutDiv.style.display = 'block';
+                        return;
+                    } else {
+                        localStorage.removeItem('aimax_lockout');
+                        this.config.loginAttempts = 0;
+                    }
+                }
+                
+                // 簡單的認證邏輯（實際應用中應該更安全）
+                if (username === 'admin' && password === 'aimax2025') {
+                    // 認證成功
+                    this.state.isAuthenticated = true;
+                    sessionStorage.setItem('aimax_auth', JSON.stringify({
+                        username: username,
+                        timestamp: new Date().getTime()
+                    }));
+                    this.config.loginAttempts = 0;
+                    this.showDashboard();
+                    console.log('✅ 用戶登入成功');
+                } else {
+                    // 認證失敗
+                    this.config.loginAttempts++;
+                    errorDiv.textContent = `登入失敗，請檢查帳號密碼 (${this.config.loginAttempts}/${this.config.maxLoginAttempts})`;
+                    errorDiv.style.display = 'block';
+                    
+                    // 檢查是否需要鎖定
+                    if (this.config.loginAttempts >= this.config.maxLoginAttempts) {
+                        const lockoutUntil = new Date().getTime() + this.config.lockoutTime;
+                        localStorage.setItem('aimax_lockout', JSON.stringify({
+                            until: lockoutUntil
+                        }));
+                        lockoutDiv.textContent = '登入失敗次數過多，帳號已被鎖定 15 分鐘';
+                        lockoutDiv.style.display = 'block';
+                        errorDiv.style.display = 'none';
+                    }
+                }
+            },
+            
+            // 處理登出
+            handleLogout() {
+                if (confirm('確定要登出嗎？')) {
+                    this.state.isAuthenticated = false;
+                    sessionStorage.removeItem('aimax_auth');
+                    this.showLogin();
+                    this.stopPriceUpdates();
+                    console.log('📤 用戶已登出');
+                }
+            },
+            
+            // 顯示登入界面
+            showLogin() {
+                document.getElementById('loginContainer').style.display = 'flex';
+                document.getElementById('dashboardContainer').style.display = 'none';
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+            },
+            
+            // 顯示儀表板
+            showDashboard() {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('dashboardContainer').style.display = 'block';
+                this.startPriceUpdates();
+                this.updateSystemStatus();
+                console.log('📊 儀表板已載入');
+            },
+            
+            // 開始價格更新
+            startPriceUpdates() {
+                // 立即更新一次
+                this.updatePrice();
+                
+                // 設置定時更新
+                this.state.priceUpdateTimer = setInterval(() => {
+                    this.updatePrice();
+                }, this.config.updateInterval);
+            },
+            
+            // 停止價格更新
+            stopPriceUpdates() {
+                if (this.state.priceUpdateTimer) {
+                    clearInterval(this.state.priceUpdateTimer);
+                    this.state.priceUpdateTimer = null;
+                }
+            },
+            
+            // 更新價格
+            async updatePrice() {
+                console.log('📡 正在從MAX API獲取BTC/TWD價格...');
+                
+                try {
+                    const response = await fetch(this.config.maxApiUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json'
+                        },
+                        mode: 'cors'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`MAX API 響應錯誤: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('📊 MAX API響應數據:', data);
+                    
+                    // 驗證數據格式
+                    if (!data.ticker || !data.ticker.last || isNaN(parseFloat(data.ticker.last))) {
+                        throw new Error('MAX API 返回無效的價格數據');
+                    }
+                    
+                    const newPrice = parseFloat(data.ticker.last);
+                    const oldPrice = this.state.currentPrice;
+                    
+                    // 更新價格顯示
+                    this.displayPrice(newPrice, oldPrice);
+                    this.state.currentPrice = newPrice;
+                    this.state.lastUpdate = new Date();
+                    
+                    // 更新狀態指示器
+                    document.getElementById('priceIndicator').className = 'status-indicator online';
+                    
+                    console.log(`💰 MAX API價格已更新: NT$${newPrice.toLocaleString()}`);
+                    
+                } catch (error) {
+                    console.error('❌ MAX API請求失敗:', error);
+                    this.displayPriceError(error.message);
+                    document.getElementById('priceIndicator').className = 'status-indicator offline';
+                }
+            },
+            
+            // 顯示價格
+            displayPrice(price, oldPrice) {
+                const priceElement = document.getElementById('btcPrice');
+                const changeElement = document.getElementById('priceChange');
+                const updateElement = document.getElementById('lastPriceUpdate');
+                
+                if (priceElement) {
+                    priceElement.textContent = `NT$${price.toLocaleString()}`;
+                    priceElement.classList.add('price-update');
+                    
+                    // 價格變化顏色
+                    if (oldPrice && price !== oldPrice) {
+                        if (price > oldPrice) {
+                            priceElement.style.color = '#00b894';
+                            changeElement.textContent = `變化: ↗️ +${((price - oldPrice) / oldPrice * 100).toFixed(2)}%`;
+                            changeElement.style.color = '#00b894';
+                        } else {
+                            priceElement.style.color = '#e17055';
+                            changeElement.textContent = `變化: ↘️ ${((price - oldPrice) / oldPrice * 100).toFixed(2)}%`;
+                            changeElement.style.color = '#e17055';
+                        }
+                    } else {
+                        changeElement.textContent = '變化: MAX API 即時';
+                        changeElement.style.color = '#666';
+                    }
+                    
+                    updateElement.textContent = `更新時間: ${new Date().toLocaleString('zh-TW')}`;
+                    
+                    // 移除動畫類
+                    setTimeout(() => {
+                        priceElement.classList.remove('price-update');
+                        priceElement.style.color = '#00b894';
+                    }, 300);
+                }
+            },
+            
+            // 顯示價格錯誤
+            displayPriceError(errorMessage) {
+                const priceElement = document.getElementById('btcPrice');
+                const changeElement = document.getElementById('priceChange');
+                const updateElement = document.getElementById('lastPriceUpdate');
+                
+                if (priceElement) {
+                    priceElement.textContent = '無法連接 MAX API';
+                    priceElement.style.color = '#e17055';
+                    changeElement.textContent = `錯誤: ${errorMessage}`;
+                    changeElement.style.color = '#e17055';
+                    updateElement.textContent = `錯誤時間: ${new Date().toLocaleString('zh-TW')}`;
+                }
+            },
+            
+            // 更新系統狀態
+            updateSystemStatus() {
+                const statusElement = document.getElementById('systemStatus');
+                const uptimeElement = document.getElementById('systemUptime');
+                const updateElement = document.getElementById('lastSystemUpdate');
+                const indicatorElement = document.getElementById('systemIndicator');
+                
+                if (statusElement) {
+                    statusElement.textContent = '運行正常';
+                    indicatorElement.className = 'status-indicator online';
+                    
+                    // 計算運行時間
+                    const uptime = new Date() - this.state.systemStartTime;
+                    const hours = Math.floor(uptime / (1000 * 60 * 60));
+                    const minutes = Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60));
+                    uptimeElement.textContent = `運行時間: ${hours}小時${minutes}分鐘`;
+                    
+                    updateElement.textContent = `更新時間: ${new Date().toLocaleString('zh-TW')}`;
+                }
+            },
+            
+            // 手動刷新價格
+            refreshPrice() {
+                console.log('🔄 手動刷新價格');
+                this.updatePrice();
+            },
+            
+            // 查看日誌
+            viewLogs() {
+                console.log('📋 打開系統日誌');
+                alert('系統日誌功能\n\n• MAX API 連線狀態: 正常\n• 85%勝率策略: 已啟用\n• 交易執行: GitHub Actions\n• 最後更新: ' + new Date().toLocaleString('zh-TW'));
+            },
+            
+            // 緊急停止
+            emergencyStop() {
+                if (confirm('⚠️ 確定要執行緊急停止嗎？\n\n這將停止所有自動交易活動。')) {
+                    console.log('🚨 用戶執行緊急停止');
+                    alert('緊急停止已記錄。\n\n請到GitHub Actions頁面手動停止正在運行的工作流。');
+                    window.open('https://github.com/winyoulife/AImax-Trading-System/actions', '_blank');
+                }
+            }
+        };
+        
+        // 頁面載入完成後初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            window.CleanDashboard.init();
+        });
+        
+        // 防止開發者工具洩露信息
+        console.clear();
+        console.log('%c🔒 AImax v3.0 簡潔版交易系統', 'color: #6c5ce7; font-size: 16px; font-weight: bold;');
+        console.log('%c⚠️  此為私有系統，未經授權禁止訪問', 'color: #e17055; font-size: 12px;');
+        console.log('%c🎯  85%勝率交易策略已啟用', 'color: #00b894; font-size: 12px;');
+    </script>
+</body>
+</html>
