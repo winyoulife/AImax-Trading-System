@@ -34,19 +34,22 @@ jobs:
           # 創建部署目錄
           mkdir -p _site
           
-          # 複製簡潔版儀表板作為主頁
-          cp static/clean-dashboard.html _site/index.html
+          # 複製MAX API直連版儀表板作為主頁
+          cp static/simple-max-dashboard.html _site/index.html
+          
+          # 複製原版儀表板作為備用
+          cp static/clean-dashboard.html _site/dashboard.html
           
           # 創建重定向頁面
-          cat > _site/dashboard.html << 'EOF'
+          cat > _site/login.html << 'EOF'
           <!DOCTYPE html>
           <html>
           <head>
-              <meta http-equiv="refresh" content="0; url=./index.html">
-              <title>重定向到 AImax 儀表板</title>
+              <meta http-equiv="refresh" content="0; url=./dashboard.html">
+              <title>重定向到 AImax 登入頁面</title>
           </head>
           <body>
-              <p>正在重定向到 <a href="./index.html">AImax 儀表板</a>...</p>
+              <p>正在重定向到 <a href="./dashboard.html">AImax 登入頁面</a>...</p>
           </body>
           </html>
           EOF
@@ -76,8 +79,9 @@ jobs:
               
               <div class="card">
                   <h2>🚀 快速開始</h2>
-                  <a href="./index.html" class="btn">🔐 進入儀表板</a>
-                  <p><strong>登入資訊：</strong></p>
+                  <a href="./index.html" class="btn">💰 查看即時價格</a>
+                  <a href="./dashboard.html" class="btn">🔐 進入完整儀表板</a>
+                  <p><strong>完整儀表板登入資訊：</strong></p>
                   <ul>
                       <li>帳號：<code>admin</code></li>
                       <li>密碼：<code>aimax2025</code></li>
@@ -87,12 +91,12 @@ jobs:
               <div class="card">
                   <h2>✨ 主要功能</h2>
                   <ul>
-                      <li>💰 即時 MAX API BTC/TWD 價格顯示</li>
-                      <li>📊 85%勝率交易策略監控</li>
-                      <li>🔒 安全登入系統</li>
+                      <li>💰 MAX API 直連即時 BTC/TWD 價格</li>
+                      <li>📊 買賣價差和24小時成交量</li>
+                      <li>📈 價格變化趨勢顯示</li>
                       <li>📱 響應式設計，支援移動設備</li>
-                      <li>🔄 每30秒自動價格更新</li>
-                      <li>🚨 緊急停止功能</li>
+                      <li>🔄 每30秒自動更新 + 手動刷新</li>
+                      <li>🔒 完整儀表板含登入系統</li>
                   </ul>
               </div>
               
@@ -148,8 +152,8 @@ jobs:
         
       - name: ✅ 部署完成通知
         run: |
-          echo "🎉 AImax v3.0 簡潔版儀表板部署完成！"
-          echo "🌐 訪問地址: ${{ steps.deployment.outputs.page_url }}"
-          echo "🔐 登入帳號: admin"
-          echo "🔑 登入密碼: aimax2025"
-          echo "💰 MAX API: 已整合，支援即時價格"
+          echo "🎉 AImax MAX API 直連版儀表板部署完成！"
+          echo "🌐 主頁 (即時價格): ${{ steps.deployment.outputs.page_url }}"
+          echo "🔐 完整儀表板: ${{ steps.deployment.outputs.page_url }}dashboard.html"
+          echo "📊 登入帳號: admin / 密碼: aimax2025"
+          echo "💰 MAX API: 直接連接，無需代理"
