@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAX API v2 測試</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-result { padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .loading { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .price { font-size: 2em; color: #00b894; text-align: center; margin: 20px 0; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🧪 MAX API v2 測試頁面</h1>
+    <p>測試不同方式連接 MAX API v2 獲取 BTC/TWD 價格</p>
+    
+    <div id="results"></div>
+    
+    <script>
+        async function runTests() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="test-result loading">🔄 開始測試...</div>';
+            
+            const tests = [
+                {
+                    name: '直接連接 MAX API v2',
+                    url: 'https://max-api.maicoin.com/api/v2/tickers/btctwd',
+                    method: 'direct'
+                },
+                {
+                    name: 'CORS 代理 (allorigins.win)',
+                    url: 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://max-api.maicoin.com/api/v2/tickers/btctwd'),
+                    method: 'cors'
+                },
+                {
+                    name: 'CORS 代理 (corsproxy.io)',
+                    url: 'https://corsproxy.io/?' + encodeURIComponent('https://max-api.maicoin.com/api/v2/tickers/btctwd'),
+                    method: 'cors2'
+                }
+            ];
+            
+            let html = '';
+            let successPrice = null;
+            
+            for (const test of tests) {
+                html += `<h3>🧪 ${test.name}</h3>`;
+                
+                try {
+                    const startTime = Date.now();
+                    const response = await fetch(test.url, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json'
+                        },
+                        mode: 'cors'
+                    });
+                    
+                    const endTime = Date.now();
+                    const responseTime = endTime - startTime;
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log(`${test.name} 響應:`, data);
+                        
+                        // 解析價格
+                        let price = null;
+                        if (data.last) {
+                            price = parseFloat(data.last);
+                        }
+                        
+                        if (price && price > 0) {
+                            if (!successPrice) successPrice = price;
+                            
+                            html += `<div class="test-result success">
+                                ✅ <strong>成功</strong><br>
+                                💰 價格: NT$${price.toLocaleString()}<br>
+                                ⏱️ 響應時間: ${responseTime}ms<br>
+                                📊 數據: <pre>${JSON.stringify(data, null, 2)}</pre>
+                            </div>`;
+                        } else {
+                            html += `<div class="test-result error">
+                                ❌ <strong>價格解析失敗</strong><br>
+                                📊 原始數據: <pre>${JSON.stringify(data, null, 2)}</pre>
+                            </div>`;
+                        }
+                    } else {
+                        html += `<div class="test-result error">
+                            ❌ <strong>HTTP 錯誤</strong><br>
+                            狀態碼: ${response.status}<br>
+                            狀態文字: ${response.statusText}
+                        </div>`;
+                    }
+                } catch (error) {
+                    html += `<div class="test-result error">
+                        ❌ <strong>連接錯誤</strong><br>
+                        錯誤信息: ${error.message}
+                    </div>`;
+                    console.error(`${test.name} 錯誤:`, error);
+                }
+            }
+            
+            // 顯示最終結果
+            if (successPrice) {
+                html = `<div class="price">💰 BTC/TWD: NT$${successPrice.toLocaleString()}</div>` + html;
+                html += `<div class="test-result success">
+                    🎉 <strong>測試完成</strong><br>
+                    至少有一種方法可以成功獲取價格數據！
+                </div>`;
+            } else {
+                html += `<div class="test-result error">
+                    😞 <strong>所有測試都失敗</strong><br>
+                    請檢查網路連接或 API 狀態
+                </div>`;
+            }
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        // 頁面載入後執行測試
+        document.addEventListener('DOMContentLoaded', runTests);
+        
+        // 添加重新測試按鈕
+        document.addEventListener('DOMContentLoaded', function() {
+            const button = document.createElement('button');
+            button.textContent = '🔄 重新測試';
+            button.style.cssText = 'padding: 10px 20px; background: #6c5ce7; color: white; border: none; border-radius: 6px; cursor: pointer; margin: 20px 0;';
+            button.onclick = runTests;
+            document.body.insertBefore(button, document.getElementById('results'));
+        });
+    </script>
+</body>
+</html>
