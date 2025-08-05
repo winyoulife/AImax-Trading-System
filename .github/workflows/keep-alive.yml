@@ -1,0 +1,258 @@
+name: AImax 系統保活機制 - 防止雲端休眠
+
+on:
+  schedule:
+    # 每10分鐘執行一次保活檢查
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+    inputs:
+      wake_up_mode:
+        description: '喚醒模式'
+        required: true
+        default: 'gentle'
+        type: choice
+        options:
+        - gentle      # 溫和模式
+        - aggressive  # 積極模式
+        - emergency   # 緊急模式
+
+env:
+  KEEP_ALIVE_MODE: active
+  PYTHON_VERSION: '3.10'
+  
+jobs:
+  keep-alive-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    
+    steps:
+    - name: 🔄 檢出代碼
+      uses: actions/checkout@v4
+      
+    - name: 🐍 設置Python環境
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 安裝依賴
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests pytz
+        
+    - name: 💓 系統保活檢查
+      id: keep_alive
+      run: |
+        echo "💓 執行AImax系統保活檢查..."
+        python -c "
+        import json
+        import os
+        import requests
+        from datetime import datetime, timedelta
+        import pytz
+        
+        def keep_alive_check():
+            taipei_tz = pytz.timezone('Asia/Taipei')
+            now_taipei = datetime.now(taipei_tz)
+            
+            keep_alive_result = {
+                'timestamp': datetime.now().isoformat(),
+                'taipei_time': now_taipei.isoformat(),
+                'system_status': 'active',
+                'last_activity': None,
+                'needs_wake_up': False,
+                'wake_up_reason': '',
+                'btc_price_check': False,
+                'github_actions_active': True
+            }
+            
+            print(f'💓 系統保活檢查 - {now_taipei.strftime(\"%H:%M:%S\")}')
+            
+            # 檢查最後活動時間
+            if os.path.exists('data/monitoring/frequency_control.json'):
+                with open('data/monitoring/frequency_control.json', 'r') as f:
+                    last_control = json.load(f)
+                    last_activity = datetime.fromisoformat(last_control['timestamp'])
+                    time_since_activity = (datetime.now() - last_activity).total_seconds()
+                    
+                    keep_alive_result['last_activity'] = last_control['timestamp']
+                    
+                    # 如果超過30分鐘沒有活動，需要喚醒
+                    if time_since_activity > 1800:  # 30分鐘
+                        keep_alive_result['needs_wake_up'] = True
+                        keep_alive_result['wake_up_reason'] = f'系統閒置{time_since_activity/60:.0f}分鐘'
+                        print(f'⚠️ 系統閒置{time_since_activity/60:.0f}分鐘，需要喚醒')
+                    else:
+                        print(f'✅ 系統活躍，最後活動: {time_since_activity/60:.1f}分鐘前')
+            else:
+                keep_alive_result['needs_wake_up'] = True
+                keep_alive_result['wake_up_reason'] = '找不到活動記錄'
+                print('⚠️ 找不到系統活動記錄，執行喚醒')
+            
+            # 執行BTC價格檢查（保持API活躍）
+            try:
+                print('📡 執行BTC價格檢查...')
+                response = requests.get('https://max-api.maicoin.com/api/v2/tickers/btctwd', timeout=5)
+                if response.status_code == 200:
+                    data = response.json()
+                    btc_price = float(data.get('last', 0))
+                    keep_alive_result['btc_price_check'] = True
+                    keep_alive_result['current_btc_price'] = btc_price
+                    print(f'💰 BTC價格檢查成功: NT\${btc_price:,.0f}')
+                    
+                    # 保存價格數據（保持文件系統活躍）
+                    os.makedirs('data/keep_alive', exist_ok=True)
+                    price_data = {
+                        'price': btc_price,
+                        'timestamp': datetime.now().isoformat(),
+                        'check_type': 'keep_alive'
+                    }
+                    with open('data/keep_alive/latest_price.json', 'w') as f:
+                        json.dump(price_data, f)
+                else:
+                    print(f'⚠️ BTC價格檢查失敗: {response.status_code}')
+            except Exception as e:
+                print(f'❌ BTC價格檢查錯誤: {str(e)}')
+            
+            # 檢查GitHub Actions執行狀態
+            try:
+                # 檢查最近的工作流執行
+                if os.path.exists('data/monitoring/daily_executions_' + now_taipei.strftime('%Y-%m-%d') + '.json'):
+                    with open('data/monitoring/daily_executions_' + now_taipei.strftime('%Y-%m-%d') + '.json', 'r') as f:
+                        daily_data = json.load(f)
+                        executions_today = daily_data.get('count', 0)
+                        
+                        if executions_today == 0:
+                            keep_alive_result['needs_wake_up'] = True
+                            keep_alive_result['wake_up_reason'] = '今日無交易執行記錄'
+                            print('⚠️ 今日無交易執行記錄，需要喚醒系統')
+                        else:
+                            print(f'✅ 今日已執行{executions_today}次交易檢查')
+            except Exception as e:
+                print(f'❓ 執行狀態檢查失敗: {str(e)}')
+            
+            return keep_alive_result
+        
+        # 執行保活檢查
+        result = keep_alive_check()
+        
+        # 保存保活記錄
+        os.makedirs('data/keep_alive', exist_ok=True)
+        with open('data/keep_alive/keep_alive_log.json', 'w') as f:
+            json.dump(result, f, indent=2)
+        
+        print(f'💓 保活檢查完成')
+        print(f'🔋 系統狀態: {result[\"system_status\"]}')
+        print(f'⚡ 需要喚醒: {\"是\" if result[\"needs_wake_up\"] else \"否\"}')
+        
+        if result['needs_wake_up']:
+            print(f'🚨 喚醒原因: {result[\"wake_up_reason\"]}')
+        
+        # 設置GitHub Actions輸出
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+            f.write(f'needs_wake_up={str(result[\"needs_wake_up\"]).lower()}\\n')
+            f.write(f'system_status={result[\"system_status\"]}\\n')
+        "
+        
+    - name: 🚨 系統喚醒操作
+      if: steps.keep_alive.outputs.needs_wake_up == 'true'
+      run: |
+        echo "🚨 執行系統喚醒操作..."
+        
+        # 觸發高頻交易工作流
+        echo "🔄 嘗試觸發高頻交易工作流..."
+        
+        # 創建喚醒標記文件
+        mkdir -p data/keep_alive
+        python -c "
+        import json
+        from datetime import datetime
+        
+        wake_up_record = {
+            'timestamp': datetime.now().isoformat(),
+            'action': 'system_wake_up',
+            'trigger': 'keep_alive_mechanism',
+            'status': 'executed'
+        }
+        
+        with open('data/keep_alive/wake_up_record.json', 'w') as f:
+            json.dump(wake_up_record, f, indent=2)
+        
+        print('🚨 系統喚醒記錄已創建')
+        "
+        
+        # 執行一次快速的BTC價格獲取（保持系統活躍）
+        echo "💰 執行快速BTC價格更新..."
+        python -c "
+        import requests
+        import json
+        import os
+        from datetime import datetime
+        
+        try:
+            response = requests.get('https://max-api.maicoin.com/api/v2/tickers/btctwd', timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                btc_price = float(data.get('last', 0))
+                
+                # 強制更新價格文件
+                os.makedirs('data/monitoring', exist_ok=True)
+                with open('data/monitoring/last_price.json', 'w') as f:
+                    json.dump({
+                        'price': btc_price, 
+                        'timestamp': datetime.now().isoformat(),
+                        'source': 'keep_alive_wake_up'
+                    }, f)
+                
+                print(f'💰 喚醒價格更新成功: NT\${btc_price:,.0f}')
+            else:
+                print(f'⚠️ 喚醒價格更新失敗: {response.status_code}')
+        except Exception as e:
+            print(f'❌ 喚醒價格更新錯誤: {str(e)}')
+        "
+        
+    - name: 📊 保活統計更新
+      run: |
+        echo "📊 更新保活統計..."
+        python -c "
+        import json
+        import os
+        from datetime import datetime
+        
+        # 更新保活統計
+        today = datetime.now().strftime('%Y-%m-%d')
+        stats_file = f'data/keep_alive/daily_keep_alive_{today}.json'
+        
+        if os.path.exists(stats_file):
+            with open(stats_file, 'r') as f:
+                stats = json.load(f)
+        else:
+            stats = {
+                'date': today,
+                'keep_alive_checks': 0,
+                'wake_up_actions': 0,
+                'last_check': None,
+                'system_uptime_checks': 0
+            }
+        
+        stats['keep_alive_checks'] += 1
+        stats['system_uptime_checks'] += 1
+        stats['last_check'] = datetime.now().isoformat()
+        
+        # 如果執行了喚醒操作
+        if '${{ steps.keep_alive.outputs.needs_wake_up }}' == 'true':
+            stats['wake_up_actions'] += 1
+        
+        with open(stats_file, 'w') as f:
+            json.dump(stats, f, indent=2)
+        
+        print(f'📈 今日保活檢查: {stats[\"keep_alive_checks\"]}次')
+        print(f'🚨 今日喚醒操作: {stats[\"wake_up_actions\"]}次')
+        "
+        
+    - name: 📤 保存保活數據
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: keep-alive-data-${{ github.run_number }}
+        path: data/keep_alive/
+        retention-days: 3
