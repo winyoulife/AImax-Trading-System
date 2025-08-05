@@ -37,6 +37,9 @@ jobs:
           # 複製MAX API直連版儀表板作為主頁
           cp static/simple-max-dashboard.html _site/index.html
           
+          # 複製測試頁面
+          cp static/test-max-api.html _site/test-max-api.html
+          
           # 複製原版儀表板作為備用
           cp static/clean-dashboard.html _site/dashboard.html
           
