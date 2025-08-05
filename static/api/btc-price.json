@@ -1,0 +1,39 @@
+{
+  "success": true,
+  "data": {
+    "price": 3434782.6,
+    "formatted_price": "NT$3,434,783",
+    "buy_price": 3434697.3,
+    "sell_price": 3434697.4,
+    "volume": 33.4103,
+    "timestamp": "2025-08-05T12:38:00.972246+00:00",
+    "source": "MAX API v2"
+  },
+  "meta": {
+    "fetch_time": "2025-08-05T12:38:00.972246+00:00",
+    "data_age_seconds": 0,
+    "api_response_time_ms": 594,
+    "next_update_eta": "2025-08-05T12:40:00+00:00",
+    "version": "1.0"
+  },
+  "status": {
+    "code": 200,
+    "message": "success",
+    "last_error": null,
+    "consecutive_failures": 0
+  },
+  "raw_data": {
+    "at": 1754397480,
+    "buy": "3434697.3",
+    "buy_vol": "0.000197",
+    "sell": "3434697.4",
+    "sell_vol": "0.25030326",
+    "open": "3439381.7",
+    "low": "3416249.8",
+    "high": "3472485.8",
+    "last": "3434782.6",
+    "vol": "33.4103",
+    "vol_in_btc": "33.4103",
+    "vol_in_quote": "114216582.037776074087"
+  }
+}

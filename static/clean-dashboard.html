@@ -463,6 +463,9 @@
         </div>
     </div>
     
+    <!-- GitHub API 適配器 -->
+    <script src="js/github-api-adapter.js"></script>
+    
     <!-- JavaScript 邏輯 -->
     <script>
         // 全局命名空間，避免衝突
@@ -587,123 +590,64 @@
             
             // 更新價格
             async updatePrice() {
-                console.log('📡 正在從MAX API獲取BTC/TWD價格...');
+                console.log('📡 正在獲取BTC/TWD價格...');
                 
-                // 檢測環境：本地還是雲端
-                const isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost';
-                
-                // 方法1: 本地代理（僅本地環境）
-                if (isLocal) {
-                    try {
-                        console.log('🏠 本地環境：嘗試代理服務器...');
-                        const response = await fetch(this.config.maxApiUrlProxy, {
-                            method: 'GET',
-                            headers: { 'Accept': 'application/json' }
-                        });
+                try {
+                    // 使用智能 API 適配器
+                    const data = await window.smartAPIAdapter.getCurrentPrice();
+                    
+                    if (data && data.last) {
+                        const newPrice = parseFloat(data.last);
+                        const oldPrice = this.state.currentPrice;
                         
-                        if (response.ok) {
-                            const data = await response.json();
-                            if (data.success) {
-                                this.displayPrice(data.price, this.state.currentPrice);
-                                this.state.currentPrice = data.price;
-                                this.state.lastUpdate = new Date();
-                                document.getElementById('priceIndicator').className = 'status-indicator online';
-                                console.log(`💰 通過代理獲取價格: ${data.formatted_price}`);
-                                return;
+                        // 更新價格顯示
+                        this.displayPrice(newPrice, oldPrice);
+                        this.state.currentPrice = newPrice;
+                        this.state.lastUpdate = new Date();
+                        
+                        // 更新狀態指示器
+                        document.getElementById('priceIndicator').className = 'status-indicator online';
+                        
+                        // 顯示數據來源信息
+                        const changeElement = document.getElementById('priceChange');
+                        if (changeElement && data._meta) {
+                            const dataAge = data._meta.data_age_seconds || 0;
+                            const method = data._meta.fetch_method || 'unknown';
+                            
+                            if (dataAge > 300) { // 5分鐘以上
+                                changeElement.textContent = `數據來源: ${data.source} (${Math.floor(dataAge/60)}分鐘前)`;
+                                changeElement.style.color = '#e17055';
+                            } else if (dataAge > 60) { // 1分鐘以上
+                                changeElement.textContent = `數據來源: ${data.source} (${dataAge}秒前)`;
+                                changeElement.style.color = '#f39c12';
+                            } else {
+                                // 顯示價格變化
+                                if (oldPrice && newPrice !== oldPrice) {
+                                    if (newPrice > oldPrice) {
+                                        changeElement.textContent = `變化: ↗️ +${((newPrice - oldPrice) / oldPrice * 100).toFixed(2)}%`;
+                                        changeElement.style.color = '#00b894';
+                                    } else {
+                                        changeElement.textContent = `變化: ↘️ ${((newPrice - oldPrice) / oldPrice * 100).toFixed(2)}%`;
+                                        changeElement.style.color = '#e17055';
+                                    }
+                                } else {
+                                    changeElement.textContent = `數據來源: ${data.source}`;
+                                    changeElement.style.color = '#666';
+                                }
                             }
                         }
-                    } catch (proxyError) {
-                        console.log('⚠️ 代理不可用，嘗試其他方法...');
-                    }
-                }
-                
-                // 方法2: CORS 代理 (allorigins.win)
-                try {
-                    console.log('🌐 嘗試 CORS 代理 (allorigins.win)...');
-                    const corsUrl = this.config.corsProxyUrl + encodeURIComponent(this.config.maxApiUrl);
-                    const response = await fetch(corsUrl, {
-                        method: 'GET',
-                        headers: { 'Accept': 'application/json' }
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        console.log('📊 CORS 代理響應數據:', data);
                         
-                        // MAX API v2 實際格式：直接有 last 字段（不在 ticker 中）
-                        let price = parseFloat(data.last);
-                        if (isNaN(price) || price <= 0) {
-                            throw new Error('CORS 代理返回無效價格');
-                        }
+                        console.log(`💰 價格已更新: ${data._meta?.formatted_price || `NT$${newPrice.toLocaleString()}`}`);
+                        console.log(`📊 數據來源: ${data.source} (${data._meta?.fetch_method || 'unknown'})`);
                         
-                        this.displayPrice(price, this.state.currentPrice);
-                        this.state.currentPrice = price;
-                        this.state.lastUpdate = new Date();
-                        document.getElementById('priceIndicator').className = 'status-indicator online';
-                        console.log(`💰 CORS 代理價格已更新: NT$${price.toLocaleString()}`);
                         return;
                     }
-                } catch (corsError) {
-                    console.log('⚠️ CORS 代理失敗，嘗試直接連接...', corsError);
-                }
-                
-                // 方法3: 直接連接 MAX API
-                try {
-                    console.log('🔄 嘗試直接連接 MAX API...');
-                    const response = await fetch(this.config.maxApiUrl, {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'application/json',
-                            'User-Agent': 'AImax-Trading-System/3.0'
-                        },
-                        mode: 'cors'
-                    });
                     
-                    if (response.ok) {
-                        const data = await response.json();
-                        console.log('📊 MAX API直接響應數據:', data);
-                        
-                        // MAX API v2 實際格式：直接有 last 字段（不在 ticker 中）
-                        let price = parseFloat(data.last);
-                        if (isNaN(price) || price <= 0) {
-                            throw new Error('MAX API 返回無效價格');
-                        }
-                        
-                        this.displayPrice(price, this.state.currentPrice);
-                        this.state.currentPrice = price;
-                        this.state.lastUpdate = new Date();
-                        document.getElementById('priceIndicator').className = 'status-indicator online';
-                        console.log(`💰 MAX API直接連接價格已更新: NT$${price.toLocaleString()}`);
-                        return;
-                    }
-                } catch (directError) {
-                    console.log('⚠️ 直接連接失敗，嘗試備用方案...', directError);
-                }
-                
-                // 方法4: 使用靜態價格作為最後備用方案
-                try {
-                    console.log('🔄 使用備用價格數據...');
-                    // 使用一個合理的 BTC 價格作為備用
-                    const fallbackPrice = 3450000; // 約 345 萬台幣
+                    throw new Error('獲取的數據格式無效');
                     
-                    this.displayPrice(fallbackPrice, this.state.currentPrice);
-                    this.state.currentPrice = fallbackPrice;
-                    this.state.lastUpdate = new Date();
-                    document.getElementById('priceIndicator').className = 'status-indicator offline';
-                    
-                    // 顯示備用價格警告
-                    const changeElement = document.getElementById('priceChange');
-                    if (changeElement) {
-                        changeElement.textContent = '⚠️ 使用備用價格數據';
-                        changeElement.style.color = '#e17055';
-                    }
-                    
-                    console.log('💰 使用備用價格數據');
-                    return;
-                    
-                } catch (fallbackError) {
-                    console.error('❌ 所有方法都失敗:', fallbackError);
-                    this.displayPriceError('無法連接 MAX API (所有方法都失敗)');
+                } catch (error) {
+                    console.error('❌ 價格更新失敗:', error);
+                    this.displayPriceError(`無法獲取價格數據: ${error.message}`);
                     document.getElementById('priceIndicator').className = 'status-indicator offline';
                 }
             },

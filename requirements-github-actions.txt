@@ -1,0 +1,2 @@
+# GitHub Actions Python 依賴
+requests>=2.31.0

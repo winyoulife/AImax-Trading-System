@@ -1,0 +1,203 @@
+name: 獲取 MAX API 數據並部署
+
+on:
+  schedule:
+    # 每5分鐘執行一次
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    # 允許手動觸發
+  push:
+    branches: [ main ]
+    paths:
+      - 'scripts/fetch_max_data.py'
+      - '.github/workflows/fetch-max-api.yml'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "max-api-fetch"
+  cancel-in-progress: true
+
+jobs:
+  fetch-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔄 檢出代碼
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: 🐍 設置 Python 環境
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          
+      - name: 📦 安裝 Python 依賴
+        run: |
+          echo "📦 安裝 Python 依賴..."
+          pip install -r requirements-github-actions.txt
+          
+      - name: 📡 獲取 MAX API 數據
+        run: |
+          echo "📡 開始獲取 MAX API 數據..."
+          python scripts/fetch_max_data.py
+          
+          # 檢查文件是否生成
+          if [ -f "static/api/btc-price.json" ]; then
+            echo "✅ 數據文件生成成功"
+            echo "📊 文件大小: $(du -h static/api/btc-price.json | cut -f1)"
+            echo "🔍 數據預覽:"
+            head -20 static/api/btc-price.json
+          else
+            echo "❌ 數據文件生成失敗"
+            exit 1
+          fi
+          
+      - name: 📝 更新時間戳文件
+        run: |
+          echo "📝 更新部署時間戳..."
+          mkdir -p static/api
+          echo "{\"last_deployment\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\", \"commit_sha\": \"${{ github.sha }}\", \"run_id\": \"${{ github.run_id }}\"}" > static/api/deployment-info.json
+          
+      - name: 🔧 設置 Git 配置
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+      - name: 💾 提交數據更新
+        run: |
+          echo "💾 檢查是否有數據更新..."
+          
+          # 檢查是否有變更
+          if git diff --quiet static/api/; then
+            echo "📊 數據沒有變化，跳過提交"
+          else
+            echo "📊 檢測到數據變化，準備提交..."
+            git add static/api/
+            
+            # 從 JSON 文件中提取價格信息用於提交信息
+            PRICE=$(python -c "import json; data=json.load(open('static/api/btc-price.json')); print(data['data']['formatted_price'])")
+            TIMESTAMP=$(python -c "import json; data=json.load(open('static/api/btc-price.json')); print(data['data']['timestamp'][:19])")
+            
+            git commit -m "📊 更新 BTC/TWD 價格數據: ${PRICE}
+            
+            🕐 更新時間: ${TIMESTAMP}
+            🤖 自動更新 via GitHub Actions
+            📈 數據來源: MAX API v2
+            🔄 運行 ID: ${{ github.run_id }}"
+            
+            echo "✅ 數據更新已提交"
+          fi
+          
+      - name: 🚀 推送更新
+        run: |
+          echo "🚀 推送數據更新到倉庫..."
+          git push origin main || echo "⚠️ 沒有新的提交需要推送"
+          
+      - name: 📤 準備 Pages 部署
+        run: |
+          echo "📤 準備 GitHub Pages 部署文件..."
+          
+          # 創建部署目錄
+          mkdir -p _site
+          
+          # 複製靜態文件
+          cp -r static/* _site/
+          
+          # 創建 API 索引頁面
+          cat > _site/api/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="zh-TW">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>AImax API 端點</title>
+              <style>
+                  body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+                  .endpoint { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0; }
+                  .url { font-family: monospace; background: #e9ecef; padding: 5px; border-radius: 4px; }
+                  pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+              </style>
+          </head>
+          <body>
+              <h1>🤖 AImax API 端點</h1>
+              
+              <div class="endpoint">
+                  <h3>💰 BTC/TWD 即時價格</h3>
+                  <p><strong>端點：</strong> <span class="url">GET /api/btc-price.json</span></p>
+                  <p><strong>描述：</strong> 獲取 MAX Exchange BTC/TWD 即時價格數據</p>
+                  <p><strong>更新頻率：</strong> 每 5 分鐘</p>
+                  <p><strong>數據來源：</strong> MAX API v2</p>
+                  <a href="btc-price.json" target="_blank">📊 查看當前數據</a>
+              </div>
+              
+              <div class="endpoint">
+                  <h3>📋 部署信息</h3>
+                  <p><strong>端點：</strong> <span class="url">GET /api/deployment-info.json</span></p>
+                  <p><strong>描述：</strong> 獲取最後部署時間和版本信息</p>
+                  <a href="deployment-info.json" target="_blank">🔍 查看部署信息</a>
+              </div>
+              
+              <h2>📖 使用示例</h2>
+              <pre><code>// JavaScript 示例
+fetch('https://winyoulife.github.io/AImax-Trading-System/api/btc-price.json')
+  .then(response => response.json())
+  .then(data => {
+    console.log('BTC/TWD 價格:', data.data.formatted_price);
+    console.log('更新時間:', data.data.timestamp);
+  });</code></pre>
+          </body>
+          </html>
+          EOF
+          
+          # 創建 robots.txt
+          echo "User-agent: *" > _site/robots.txt
+          echo "Disallow: /" >> _site/robots.txt
+          
+          # 創建 .nojekyll
+          touch _site/.nojekyll
+          
+          echo "✅ Pages 部署文件準備完成"
+          echo "📁 部署文件列表:"
+          find _site -type f | head -20
+          
+      - name: 🔧 設置 Pages
+        uses: actions/configure-pages@v4
+        
+      - name: 📤 上傳 Pages 構建產物
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+          
+      - name: 🚀 部署到 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        
+      - name: ✅ 部署完成通知
+        run: |
+          echo "🎉 MAX API 數據獲取和部署完成！"
+          echo "🌐 API 端點: ${{ steps.deployment.outputs.page_url }}api/btc-price.json"
+          echo "📊 API 文檔: ${{ steps.deployment.outputs.page_url }}api/"
+          
+          # 驗證部署
+          if [ -f "static/api/btc-price.json" ]; then
+            PRICE=$(python -c "import json; data=json.load(open('static/api/btc-price.json')); print(data['data']['formatted_price'])")
+            echo "💰 當前 BTC/TWD 價格: ${PRICE}"
+          fi
+          
+      - name: 🔍 部署後驗證
+        run: |
+          echo "🔍 等待部署生效並進行驗證..."
+          sleep 30
+          
+          # 嘗試訪問部署的 API
+          API_URL="${{ steps.deployment.outputs.page_url }}api/btc-price.json"
+          echo "📡 測試 API 端點: ${API_URL}"
+          
+          # 使用 curl 測試（如果失敗不中斷工作流）
+          curl -f -s "${API_URL}" > /dev/null && echo "✅ API 端點可訪問" || echo "⚠️ API 端點暫時不可訪問（可能需要更多時間生效）"
