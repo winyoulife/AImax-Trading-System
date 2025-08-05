@@ -241,6 +241,94 @@ class GitHubAPIAdapter {
 }
 
 /**
+ * 本地代理適配器
+ * 用於本地開發環境，通過 Flask 代理服務器獲取數據
+ */
+class LocalProxyAdapter {
+    constructor() {
+        this.proxyUrl = 'http://localhost:5000/api/btc-price';
+        this.timeout = 10000; // 10秒超時
+        
+        console.log('🏠 本地代理適配器初始化');
+        console.log('📡 代理端點:', this.proxyUrl);
+    }
+    
+    /**
+     * 獲取當前 BTC/TWD 價格
+     */
+    async getCurrentPrice() {
+        try {
+            console.log('📡 通過本地代理獲取價格數據...');
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+            
+            const response = await fetch(this.proxyUrl, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                },
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+                throw new Error(`代理服務器響應錯誤: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || '代理服務器返回錯誤');
+            }
+            
+            // 轉換為兼容格式
+            const compatibleData = {
+                last: data.price.toString(),
+                buy: data.price.toString(), // 本地代理可能沒有買賣價
+                sell: data.price.toString(),
+                vol: "0",
+                timestamp: new Date().toISOString(),
+                source: 'MAX API v2 (本地代理)',
+                _meta: {
+                    formatted_price: data.formatted_price,
+                    data_age_seconds: 0,
+                    api_response_time_ms: 0,
+                    fetch_method: 'local_proxy'
+                }
+            };
+            
+            console.log('✅ 本地代理獲取成功:', compatibleData._meta.formatted_price);
+            return compatibleData;
+            
+        } catch (error) {
+            console.error('❌ 本地代理獲取失敗:', error);
+            throw error;
+        }
+    }
+    
+    /**
+     * 獲取適配器信息
+     */
+    getAdapterInfo() {
+        return {
+            name: 'Local Proxy Adapter',
+            version: '1.0.0',
+            endpoint: this.proxyUrl,
+            timeout: this.timeout
+        };
+    }
+    
+    /**
+     * 清除緩存（本地代理不需要緩存）
+     */
+    clearCache() {
+        console.log('🏠 本地代理適配器無需清除緩存');
+    }
+}
+
+/**
  * 智能 API 適配器
  * 自動選擇最佳的 API 連接方式
  */
@@ -257,15 +345,39 @@ class SmartAPIAdapter {
      * 初始化所有可用的適配器
      */
     initializeAdapters() {
-        // GitHub API 適配器（優先使用）
-        this.adapters.push({
-            name: 'GitHub Static API',
-            adapter: new GitHubAPIAdapter(),
-            priority: 1,
-            available: true
-        });
+        // 檢測環境
+        const isLocal = window.location.protocol === 'file:' || 
+                       window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1';
+        
+        if (isLocal) {
+            // 本地環境：優先使用本地代理
+            this.adapters.push({
+                name: 'Local Proxy API',
+                adapter: new LocalProxyAdapter(),
+                priority: 1,
+                available: true
+            });
+            
+            // 備用：GitHub API 適配器
+            this.adapters.push({
+                name: 'GitHub Static API',
+                adapter: new GitHubAPIAdapter(),
+                priority: 2,
+                available: true
+            });
+        } else {
+            // 雲端環境：優先使用 GitHub API
+            this.adapters.push({
+                name: 'GitHub Static API',
+                adapter: new GitHubAPIAdapter(),
+                priority: 1,
+                available: true
+            });
+        }
         
         console.log('🔧 智能 API 適配器初始化完成');
+        console.log('🌍 環境:', isLocal ? '本地' : '雲端');
         console.log('📋 可用適配器:', this.adapters.length);
     }
     
@@ -352,6 +464,7 @@ class SmartAPIAdapter {
 
 // 導出適配器類
 window.GitHubAPIAdapter = GitHubAPIAdapter;
+window.LocalProxyAdapter = LocalProxyAdapter;
 window.SmartAPIAdapter = SmartAPIAdapter;
 
 // 創建全局實例
