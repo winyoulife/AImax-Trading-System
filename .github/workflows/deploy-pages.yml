@@ -60,7 +60,7 @@ jobs:
           
           # 注入環境變數到配置文件
           if [ -f "_site/js/config.js" ]; then
-            sed -i 's/{{GITHUB_TOKEN}}/${{ secrets.GITHUB_TOKEN }}/g' _site/js/config.js
+            sed -i 's/{{GH_TOKEN}}/${{ secrets.GH_TOKEN }}/g' _site/js/config.js
             sed -i 's/your-username/${{ secrets.REPO_OWNER }}/g' _site/js/config.js
           fi
           
