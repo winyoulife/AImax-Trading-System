@@ -630,7 +630,7 @@
                         const data = await response.json();
                         console.log('📊 CORS 代理響應數據:', data);
                         
-                        // MAX API v2 格式：直接有 last 字段
+                        // MAX API v2 實際格式：直接有 last 字段（不在 ticker 中）
                         let price = parseFloat(data.last);
                         if (isNaN(price) || price <= 0) {
                             throw new Error('CORS 代理返回無效價格');
@@ -663,7 +663,7 @@
                         const data = await response.json();
                         console.log('📊 MAX API直接響應數據:', data);
                         
-                        // MAX API v2 格式：直接有 last 字段
+                        // MAX API v2 實際格式：直接有 last 字段（不在 ticker 中）
                         let price = parseFloat(data.last);
                         if (isNaN(price) || price <= 0) {
                             throw new Error('MAX API 返回無效價格');
