@@ -39,24 +39,20 @@ jobs:
           cp -r static/* _site/
           
           # 確保robots.txt存在並禁止索引
-          cat > _site/robots.txt << EOF
-          # AImax 私有交易系統 - 禁止所有搜索引擎索引
-          User-agent: *
-          Disallow: /
-          Crawl-delay: 86400
-          EOF
+          echo "# AImax 私有交易系統 - 禁止所有搜索引擎索引" > _site/robots.txt
+          echo "User-agent: *" >> _site/robots.txt
+          echo "Disallow: /" >> _site/robots.txt
+          echo "Crawl-delay: 86400" >> _site/robots.txt
           
           # 創建.nojekyll文件
           touch _site/.nojekyll
           
           # 創建安全配置文件
-          cat > _site/.htaccess << EOF
-          # 強制HTTPS和安全標頭
-          Header always set X-Content-Type-Options nosniff
-          Header always set X-Frame-Options DENY
-          Header always set X-XSS-Protection "1; mode=block"
-          Options -Indexes
-          EOF
+          echo "# 強制HTTPS和安全標頭" > _site/.htaccess
+          echo "Header always set X-Content-Type-Options nosniff" >> _site/.htaccess
+          echo "Header always set X-Frame-Options DENY" >> _site/.htaccess
+          echo "Header always set X-XSS-Protection \"1; mode=block\"" >> _site/.htaccess
+          echo "Options -Indexes" >> _site/.htaccess
           
           # 注入環境變數到配置文件
           if [ -f "_site/js/config.js" ]; then
@@ -67,15 +63,13 @@ jobs:
           fi
           
           # 創建運行時配置
-          cat > _site/js/runtime-config.js << EOF
-          // 運行時配置 - 部署時自動生成
-          window.RUNTIME_CONFIG = {
-            deployTime: '$(date -u +"%Y-%m-%dT%H:%M:%SZ")',
-            version: '2.0.0',
-            environment: 'production',
-            isPrivate: true
-          };
-          EOF
+          echo "// 運行時配置 - 部署時自動生成" > _site/js/runtime-config.js
+          echo "window.RUNTIME_CONFIG = {" >> _site/js/runtime-config.js
+          echo "  deployTime: '$(date -u +"%Y-%m-%dT%H:%M:%SZ")'," >> _site/js/runtime-config.js
+          echo "  version: '2.0.0'," >> _site/js/runtime-config.js
+          echo "  environment: 'production'," >> _site/js/runtime-config.js
+          echo "  isPrivate: true" >> _site/js/runtime-config.js
+          echo "};" >> _site/js/runtime-config.js
           
           # 移除任何可能的敏感文件
           find _site -name "*.md" -delete
