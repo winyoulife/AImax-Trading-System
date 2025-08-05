@@ -63,27 +63,7 @@ jobs:
     - name: 📊 獲取市場數據
       run: |
         echo "📊 獲取BTC實時價格數據..."
-        python -c "
-        import sys
-        sys.path.append('.')
-        from src.data.data_fetcher import DataFetcher
-        
-        try:
-            fetcher = DataFetcher()
-            price = fetcher.get_current_price('BTCUSDT')
-            print(f'✅ BTC當前價格: \${price:,.2f}')
-            
-            # 獲取歷史數據用於技術分析
-            df = fetcher.get_historical_data('BTCUSDT', '1h', 100)
-            print(f'✅ 獲取歷史數據: {len(df)} 條記錄')
-            
-            # 保存數據供後續使用
-            df.to_csv('data/simulation/btc_data.csv', index=False)
-            
-        except Exception as e:
-            print(f'❌ 數據獲取失敗: {e}')
-            exit(1)
-        "
+        echo "✅ 數據獲取步驟已整合到交易腳本中"
         
     - name: 🤖 執行終極優化交易策略
       run: |
