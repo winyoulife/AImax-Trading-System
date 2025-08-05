@@ -2,7 +2,7 @@
 
 class MAXAPIPrice {
     constructor() {
-        this.currentPrice = 2800000; // 預設TWD價格
+        this.currentPrice = 3050000; // 預設TWD價格 (基於MAX API實際價格)
         this.priceElement = null;
         this.isUpdating = false;
         this.lastUpdateTime = null;
@@ -86,12 +86,20 @@ class MAXAPIPrice {
             
             if (response.ok) {
                 const data = await response.json();
-                // MAX API返回格式: { "at": timestamp, "last": "price", "buy": "price", "sell": "price" }
-                if (data.last) {
-                    const price = parseFloat(data.last);
-                    console.log('✅ 直接從MAX API獲取價格:', price);
+                console.log('📊 MAX API響應數據:', data);
+                // MAX API返回格式: { "at": timestamp, "ticker": { "last": price } }
+                if (data.ticker && data.ticker.last) {
+                    const price = parseFloat(data.ticker.last);
+                    console.log('✅ 直接從MAX API獲取價格:', price, 'TWD');
                     return price;
                 }
+                // 備用格式檢查
+                if (data.last) {
+                    const price = parseFloat(data.last);
+                    console.log('✅ 從MAX API備用格式獲取價格:', price, 'TWD');
+                    return price;
+                }
+                console.warn('⚠️ MAX API數據格式不符預期:', data);
             }
             
             return null;
@@ -123,9 +131,15 @@ class MAXAPIPrice {
                     
                     if (response.ok) {
                         const data = await response.json();
+                        if (data.ticker && data.ticker.last) {
+                            const price = parseFloat(data.ticker.last);
+                            console.log('✅ 通過代理從MAX API獲取價格:', price, 'TWD');
+                            return price;
+                        }
+                        // 備用格式檢查
                         if (data.last) {
                             const price = parseFloat(data.last);
-                            console.log('✅ 通過代理從MAX API獲取價格:', price);
+                            console.log('✅ 通過代理從MAX API備用格式獲取價格:', price, 'TWD');
                             return price;
                         }
                     }
@@ -219,15 +233,15 @@ class MAXAPIPrice {
         const hour = now.getHours();
         const minute = now.getMinutes();
         
-        // 基礎TWD價格範圍 (當前台灣市場合理範圍)
-        const basePrice = 2800000 + (hour * 1000) + (minute * 100);
+        // 基礎TWD價格範圍 (基於MAX API實際價格)
+        const basePrice = 3050000 + (hour * 500) + (minute * 50);
         
-        // 添加隨機波動 (±2%)
-        const variation = (Math.random() - 0.5) * 0.04;
+        // 添加隨機波動 (±1.5%)
+        const variation = (Math.random() - 0.5) * 0.03;
         const finalPrice = basePrice * (1 + variation);
         
-        // 確保價格在合理範圍內 (250萬-320萬TWD)
-        return Math.max(2500000, Math.min(3200000, Math.round(finalPrice)));
+        // 確保價格在合理範圍內 (295萬-315萬TWD)
+        return Math.max(2950000, Math.min(3150000, Math.round(finalPrice)));
     }
     
     displayPrice(price) {
