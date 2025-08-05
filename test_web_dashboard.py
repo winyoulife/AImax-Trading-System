@@ -23,7 +23,7 @@ def start_web_server():
     os.chdir(static_dir)
     
     # 設置端口
-    PORT = 8080
+    PORT = 8081
     
     try:
         # 創建HTTP服務器

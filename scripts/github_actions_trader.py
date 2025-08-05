@@ -15,9 +15,9 @@ import logging
 # 添加項目路徑
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.core.ultimate_optimized_volume_macd_signals import UltimateOptimizedVolumeEnhancedMACDSignals
+from src.core.clean_ultimate_signals import UltimateOptimizedVolumeEnhancedMACDSignals
 from src.trading.simulation_manager import SimulationTradingManager
-from src.data.data_fetcher import DataFetcher
+from src.data.simple_data_fetcher import DataFetcher
 
 # 設置日誌
 logging.basicConfig(
