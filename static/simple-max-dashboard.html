@@ -270,20 +270,26 @@
             try {
                 console.log('📡 正在獲取 MAX API 數據...');
                 
-                // 直接調用 MAX API v2
-                const response = await fetch('https://max-api.maicoin.com/api/v2/tickers/btctwd', {
+                // 使用 CORS 代理調用 MAX API v2
+                const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://max-api.maicoin.com/api/v2/tickers/btctwd');
+                const response = await fetch(proxyUrl, {
                     method: 'GET',
                     headers: {
-                        'Accept': 'application/json',
-                        'User-Agent': 'AImax-Trading-System/1.0'
+                        'Accept': 'application/json'
                     }
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`MAX API 響應錯誤: ${response.status} ${response.statusText}`);
+                    throw new Error(`CORS 代理響應錯誤: ${response.status} ${response.statusText}`);
                 }
                 
-                const data = await response.json();
+                const proxyData = await response.json();
+                
+                if (proxyData.status.http_code !== 200) {
+                    throw new Error(`MAX API 響應錯誤: ${proxyData.status.http_code}`);
+                }
+                
+                const data = JSON.parse(proxyData.contents);
                 console.log('📊 MAX API 響應數據:', data);
                 
                 if (data && data.last) {
@@ -318,7 +324,7 @@
                             priceChange.style.color = '#e17055';
                         }
                     } else {
-                        priceChange.textContent = '📊 MAX API v2 即時數據';
+                        priceChange.textContent = '📊 MAX API v2 (CORS代理)';
                         priceChange.style.color = '#666';
                     }
                     
