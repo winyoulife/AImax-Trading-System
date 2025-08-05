@@ -1,0 +1,649 @@
+name: AImax 數據存儲和狀態管理系統
+
+on:
+  schedule:
+    # 每小時執行數據整理和備份
+    - cron: '0 * * * *'
+  workflow_dispatch:
+    inputs:
+      operation_type:
+        description: '操作類型'
+        required: true
+        default: 'full_backup'
+        type: choice
+        options:
+        - full_backup      # 完整備份
+        - data_cleanup     # 數據清理
+        - state_sync       # 狀態同步
+        - recovery         # 數據恢復
+      retention_days:
+        description: '數據保留天數'
+        required: false
+        default: '30'
+        type: string
+
+env:
+  DATA_MANAGEMENT_MODE: active
+  PYTHON_VERSION: '3.10'
+  MAX_DATA_SIZE_MB: 100  # 最大數據大小限制
+  
+jobs:
+  data-storage-management:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - name: 🔄 檢出代碼
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # 獲取完整歷史，用於數據恢復
+        
+    - name: 🐍 設置Python環境
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 安裝數據處理依賴
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas numpy pytz requests
+        
+    - name: 📊 創建交易狀態數據結構
+      id: create_data_structure
+      run: |
+        echo "📊 創建AImax交易狀態數據結構..."
+        python -c "
+        import json
+        import os
+        from datetime import datetime, timedelta
+        import pytz
+        
+        def create_data_structure():
+            print('📊 初始化數據存儲結構...')
+            
+            # 創建數據目錄結構
+            directories = [
+                'data/trading',           # 交易數據
+                'data/monitoring',        # 監控數據
+                'data/keep_alive',        # 保活數據
+                'data/backups',           # 備份數據
+                'data/analytics',         # 分析數據
+                'data/states',            # 狀態數據
+                'logs/trading',           # 交易日誌
+                'logs/system',            # 系統日誌
+                'logs/errors'             # 錯誤日誌
+            ]
+            
+            for directory in directories:
+                os.makedirs(directory, exist_ok=True)
+                print(f'📁 創建目錄: {directory}')
+            
+            # 定義交易狀態數據結構
+            trading_state_schema = {
+                'schema_version': '1.0',
+                'last_updated': datetime.now().isoformat(),
+                'trading_status': {
+                    'is_active': True,
+                    'current_strategy': 'ultimate_optimized_85_percent',
+                    'execution_mode': 'high_frequency',
+                    'last_execution': None,
+                    'next_scheduled': None,
+                    'total_executions_today': 0,
+                    'consecutive_failures': 0
+                },
+                'market_data': {
+                    'current_btc_price': 0.0,
+                    'last_price_update': None,
+                    'price_change_24h': 0.0,
+                    'volatility_level': 'unknown',
+                    'market_trend': 'neutral'
+                },
+                'performance_metrics': {
+                    'daily_win_rate': 0.0,
+                    'total_trades': 0,
+                    'successful_trades': 0,
+                    'failed_trades': 0,
+                    'average_confidence': 0.85,
+                    'total_profit_loss': 0.0
+                },
+                'system_health': {
+                    'github_actions_status': 'active',
+                    'api_connectivity': 'unknown',
+                    'data_integrity': 'good',
+                    'last_health_check': None,
+                    'resource_usage': {
+                        'actions_minutes_used': 0,
+                        'storage_mb_used': 0,
+                        'api_calls_today': 0
+                    }
+                },
+                'configuration': {
+                    'max_daily_executions': 1440,
+                    'high_volatility_threshold': 2.0,
+                    'medium_volatility_threshold': 0.5,
+                    'trading_hours': {
+                        'start': '09:00',
+                        'end': '13:00',
+                        'timezone': 'Asia/Taipei'
+                    }
+                }
+            }
+            
+            # 保存數據結構模板
+            with open('data/states/trading_state_schema.json', 'w') as f:
+                json.dump(trading_state_schema, f, indent=2)
+            
+            # 創建當前狀態文件（如果不存在）
+            current_state_file = 'data/states/current_trading_state.json'
+            if not os.path.exists(current_state_file):
+                with open(current_state_file, 'w') as f:
+                    json.dump(trading_state_schema, f, indent=2)
+                print('✅ 創建初始交易狀態文件')
+            
+            # 創建數據索引文件
+            data_index = {
+                'created': datetime.now().isoformat(),
+                'version': '1.0',
+                'data_files': {
+                    'trading_state': 'data/states/current_trading_state.json',
+                    'daily_stats': 'data/analytics/daily_stats_{date}.json',
+                    'execution_log': 'data/trading/execution_log_{date}.jsonl',
+                    'price_history': 'data/trading/price_history_{date}.json',
+                    'system_metrics': 'data/monitoring/system_metrics_{date}.json'
+                },
+                'backup_schedule': {
+                    'hourly': True,
+                    'daily': True,
+                    'weekly': True,
+                    'retention_days': 30
+                }
+            }
+            
+            with open('data/data_index.json', 'w') as f:
+                json.dump(data_index, f, indent=2)
+            
+            print('✅ 數據結構創建完成')
+            return True
+        
+        # 執行數據結構創建
+        success = create_data_structure()
+        
+        # 設置輸出
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+            f.write(f'data_structure_created={str(success).lower()}\\n')
+        "
+        
+    - name: 🔄 實現狀態同步和一致性檢查
+      run: |
+        echo "🔄 執行狀態同步和一致性檢查..."
+        python -c "
+        import json
+        import os
+        from datetime import datetime, timedelta
+        import pytz
+        
+        def sync_and_check_consistency():
+            print('🔄 開始狀態同步和一致性檢查...')
+            
+            taipei_tz = pytz.timezone('Asia/Taipei')
+            now = datetime.now()
+            now_taipei = now.astimezone(taipei_tz)
+            today = now_taipei.strftime('%Y-%m-%d')
+            
+            sync_result = {
+                'timestamp': now.isoformat(),
+                'sync_status': 'success',
+                'issues_found': [],
+                'actions_taken': [],
+                'data_integrity': 'good'
+            }
+            
+            # 檢查並同步交易狀態
+            try:
+                current_state_file = 'data/states/current_trading_state.json'
+                if os.path.exists(current_state_file):
+                    with open(current_state_file, 'r') as f:
+                        current_state = json.load(f)
+                    
+                    # 更新時間戳
+                    current_state['last_updated'] = now.isoformat()
+                    
+                    # 檢查數據完整性
+                    required_keys = ['trading_status', 'market_data', 'performance_metrics', 'system_health']
+                    for key in required_keys:
+                        if key not in current_state:
+                            sync_result['issues_found'].append(f'缺少必要字段: {key}')
+                            current_state[key] = {}
+                    
+                    # 同步高頻交易系統數據
+                    if os.path.exists('data/monitoring/frequency_control.json'):
+                        with open('data/monitoring/frequency_control.json', 'r') as f:
+                            freq_data = json.load(f)
+                        
+                        current_state['market_data']['current_btc_price'] = freq_data.get('btc_price', 0)
+                        current_state['market_data']['volatility_level'] = freq_data.get('volatility_level', 'unknown')
+                        current_state['market_data']['last_price_update'] = freq_data.get('timestamp')
+                        
+                        sync_result['actions_taken'].append('同步高頻交易數據')
+                    
+                    # 同步每日執行統計
+                    daily_exec_file = f'data/monitoring/daily_executions_{today}.json'
+                    if os.path.exists(daily_exec_file):
+                        with open(daily_exec_file, 'r') as f:
+                            daily_data = json.load(f)
+                        
+                        current_state['trading_status']['total_executions_today'] = daily_data.get('count', 0)
+                        current_state['trading_status']['last_execution'] = daily_data.get('last_execution')
+                        
+                        sync_result['actions_taken'].append('同步每日執行統計')
+                    
+                    # 計算系統資源使用
+                    try:
+                        # 計算存儲使用量
+                        total_size = 0
+                        for root, dirs, files in os.walk('data'):
+                            for file in files:
+                                file_path = os.path.join(root, file)
+                                if os.path.exists(file_path):
+                                    total_size += os.path.getsize(file_path)
+                        
+                        storage_mb = total_size / (1024 * 1024)
+                        current_state['system_health']['resource_usage']['storage_mb_used'] = round(storage_mb, 2)
+                        
+                        if storage_mb > float(os.environ.get('MAX_DATA_SIZE_MB', 100)):
+                            sync_result['issues_found'].append(f'存儲使用量過高: {storage_mb:.1f}MB')
+                        
+                    except Exception as e:
+                        sync_result['issues_found'].append(f'資源使用計算失敗: {str(e)}')
+                    
+                    # 保存更新後的狀態
+                    with open(current_state_file, 'w') as f:
+                        json.dump(current_state, f, indent=2)
+                    
+                    print('✅ 交易狀態同步完成')
+                    
+                else:
+                    sync_result['issues_found'].append('交易狀態文件不存在')
+                    sync_result['sync_status'] = 'warning'
+            
+            except Exception as e:
+                sync_result['issues_found'].append(f'狀態同步失敗: {str(e)}')
+                sync_result['sync_status'] = 'error'
+            
+            # 檢查數據文件完整性
+            critical_files = [
+                'data/data_index.json',
+                'data/states/trading_state_schema.json'
+            ]
+            
+            for file_path in critical_files:
+                if not os.path.exists(file_path):
+                    sync_result['issues_found'].append(f'關鍵文件缺失: {file_path}')
+                    sync_result['data_integrity'] = 'compromised'
+            
+            # 保存同步結果
+            with open('data/states/last_sync_result.json', 'w') as f:
+                json.dump(sync_result, f, indent=2)
+            
+            print(f'🔄 狀態同步完成，狀態: {sync_result[\"sync_status\"]}')
+            if sync_result['issues_found']:
+                print('⚠️ 發現問題:')
+                for issue in sync_result['issues_found']:
+                    print(f'  - {issue}')
+            
+            if sync_result['actions_taken']:
+                print('✅ 執行的操作:')
+                for action in sync_result['actions_taken']:
+                    print(f'  - {action}')
+            
+            return sync_result
+        
+        # 執行狀態同步
+        result = sync_and_check_consistency()
+        "
+        
+    - name: 💾 實現數據備份和恢復功能
+      run: |
+        echo "💾 執行數據備份和恢復功能..."
+        python -c "
+        import json
+        import os
+        import shutil
+        from datetime import datetime, timedelta
+        import pytz
+        
+        def backup_and_recovery():
+            print('💾 開始數據備份流程...')
+            
+            now = datetime.now()
+            taipei_tz = pytz.timezone('Asia/Taipei')
+            now_taipei = now.astimezone(taipei_tz)
+            
+            backup_result = {
+                'timestamp': now.isoformat(),
+                'backup_type': os.environ.get('INPUT_OPERATION_TYPE', 'full_backup'),
+                'status': 'success',
+                'files_backed_up': [],
+                'backup_size_mb': 0,
+                'retention_applied': False
+            }
+            
+            # 創建備份目錄
+            backup_dir = f'data/backups/{now_taipei.strftime(\"%Y-%m-%d_%H-%M-%S\")}'
+            os.makedirs(backup_dir, exist_ok=True)
+            
+            # 要備份的關鍵數據
+            backup_sources = [
+                ('data/states/', 'states/'),
+                ('data/trading/', 'trading/'),
+                ('data/monitoring/', 'monitoring/'),
+                ('data/analytics/', 'analytics/'),
+                ('data/data_index.json', 'data_index.json')
+            ]
+            
+            total_size = 0
+            
+            for source, dest in backup_sources:
+                source_path = source
+                dest_path = os.path.join(backup_dir, dest)
+                
+                try:
+                    if os.path.isfile(source_path):
+                        # 備份單個文件
+                        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+                        shutil.copy2(source_path, dest_path)
+                        file_size = os.path.getsize(source_path)
+                        total_size += file_size
+                        backup_result['files_backed_up'].append(source_path)
+                        
+                    elif os.path.isdir(source_path):
+                        # 備份目錄
+                        if os.path.exists(source_path):
+                            shutil.copytree(source_path, dest_path, dirs_exist_ok=True)
+                            
+                            # 計算目錄大小
+                            for root, dirs, files in os.walk(dest_path):
+                                for file in files:
+                                    file_path = os.path.join(root, file)
+                                    if os.path.exists(file_path):
+                                        total_size += os.path.getsize(file_path)
+                            
+                            backup_result['files_backed_up'].append(source_path)
+                
+                except Exception as e:
+                    print(f'⚠️ 備份失敗 {source_path}: {str(e)}')
+                    backup_result['status'] = 'partial'
+            
+            backup_result['backup_size_mb'] = round(total_size / (1024 * 1024), 2)
+            
+            # 創建備份元數據
+            backup_metadata = {
+                'created': now.isoformat(),
+                'taipei_time': now_taipei.isoformat(),
+                'backup_type': backup_result['backup_type'],
+                'total_files': len(backup_result['files_backed_up']),
+                'total_size_mb': backup_result['backup_size_mb'],
+                'retention_days': int(os.environ.get('INPUT_RETENTION_DAYS', 30)),
+                'system_info': {
+                    'github_run_id': os.environ.get('GITHUB_RUN_ID', 'unknown'),
+                    'github_run_number': os.environ.get('GITHUB_RUN_NUMBER', 'unknown')
+                }
+            }
+            
+            with open(os.path.join(backup_dir, 'backup_metadata.json'), 'w') as f:
+                json.dump(backup_metadata, f, indent=2)
+            
+            # 應用保留政策
+            retention_days = int(os.environ.get('INPUT_RETENTION_DAYS', 30))
+            cutoff_date = now - timedelta(days=retention_days)
+            
+            if os.path.exists('data/backups'):
+                for backup_folder in os.listdir('data/backups'):
+                    backup_path = os.path.join('data/backups', backup_folder)
+                    if os.path.isdir(backup_path):
+                        try:
+                            # 從文件夾名稱解析日期
+                            folder_date = datetime.strptime(backup_folder[:10], '%Y-%m-%d')
+                            if folder_date < cutoff_date:
+                                shutil.rmtree(backup_path)
+                                print(f'🗑️ 刪除過期備份: {backup_folder}')
+                                backup_result['retention_applied'] = True
+                        except ValueError:
+                            # 無法解析日期的文件夾跳過
+                            continue
+            
+            # 保存備份結果
+            with open('data/states/last_backup_result.json', 'w') as f:
+                json.dump(backup_result, f, indent=2)
+            
+            print(f'💾 備份完成: {len(backup_result[\"files_backed_up\"])}個項目')
+            print(f'📊 備份大小: {backup_result[\"backup_size_mb\"]}MB')
+            print(f'📁 備份位置: {backup_dir}')
+            
+            return backup_result
+        
+        # 執行備份
+        result = backup_and_recovery()
+        "
+        
+    - name: 📈 生成數據分析報告
+      run: |
+        echo "📈 生成數據分析和統計報告..."
+        python -c "
+        import json
+        import os
+        from datetime import datetime, timedelta
+        import pytz
+        
+        def generate_analytics_report():
+            print('📈 生成AImax數據分析報告...')
+            
+            now = datetime.now()
+            taipei_tz = pytz.timezone('Asia/Taipei')
+            now_taipei = now.astimezone(taipei_tz)
+            today = now_taipei.strftime('%Y-%m-%d')
+            
+            analytics_report = {
+                'report_date': today,
+                'generated_at': now.isoformat(),
+                'taipei_time': now_taipei.isoformat(),
+                'system_overview': {},
+                'trading_performance': {},
+                'data_health': {},
+                'recommendations': []
+            }
+            
+            # 系統概覽
+            try:
+                if os.path.exists('data/states/current_trading_state.json'):
+                    with open('data/states/current_trading_state.json', 'r') as f:
+                        current_state = json.load(f)
+                    
+                    analytics_report['system_overview'] = {
+                        'trading_active': current_state.get('trading_status', {}).get('is_active', False),
+                        'current_strategy': current_state.get('trading_status', {}).get('current_strategy', 'unknown'),
+                        'execution_mode': current_state.get('trading_status', {}).get('execution_mode', 'unknown'),
+                        'executions_today': current_state.get('trading_status', {}).get('total_executions_today', 0),
+                        'current_btc_price': current_state.get('market_data', {}).get('current_btc_price', 0),
+                        'volatility_level': current_state.get('market_data', {}).get('volatility_level', 'unknown')
+                    }
+            except Exception as e:
+                analytics_report['system_overview']['error'] = str(e)
+            
+            # 交易性能分析
+            try:
+                # 分析今日交易統計
+                daily_stats_file = f'data/trading/daily_stats_{today}.json'
+                if os.path.exists(daily_stats_file):
+                    with open(daily_stats_file, 'r') as f:
+                        daily_stats = json.load(f)
+                    
+                    analytics_report['trading_performance'] = {
+                        'total_executions': daily_stats.get('total_executions', 0),
+                        'high_volatility_executions': daily_stats.get('high_volatility_executions', 0),
+                        'medium_volatility_executions': daily_stats.get('medium_volatility_executions', 0),
+                        'low_volatility_executions': daily_stats.get('low_volatility_executions', 0),
+                        'avg_confidence': daily_stats.get('avg_confidence', 0.85)
+                    }
+                    
+                    # 計算執行效率
+                    total_exec = daily_stats.get('total_executions', 0)
+                    if total_exec > 0:
+                        high_vol_ratio = daily_stats.get('high_volatility_executions', 0) / total_exec
+                        analytics_report['trading_performance']['high_volatility_ratio'] = round(high_vol_ratio, 3)
+                        
+                        if high_vol_ratio > 0.3:
+                            analytics_report['recommendations'].append('高波動期執行比例較高，系統響應良好')
+                        elif high_vol_ratio < 0.1:
+                            analytics_report['recommendations'].append('建議檢查波動性檢測邏輯')
+                
+            except Exception as e:
+                analytics_report['trading_performance']['error'] = str(e)
+            
+            # 數據健康檢查
+            try:
+                data_health = {
+                    'total_data_files': 0,
+                    'total_size_mb': 0,
+                    'backup_status': 'unknown',
+                    'last_backup': None,
+                    'data_integrity': 'good'
+                }
+                
+                # 統計數據文件
+                for root, dirs, files in os.walk('data'):
+                    data_health['total_data_files'] += len(files)
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        if os.path.exists(file_path):
+                            data_health['total_size_mb'] += os.path.getsize(file_path)
+                
+                data_health['total_size_mb'] = round(data_health['total_size_mb'] / (1024 * 1024), 2)
+                
+                # 檢查備份狀態
+                if os.path.exists('data/states/last_backup_result.json'):
+                    with open('data/states/last_backup_result.json', 'r') as f:
+                        backup_result = json.load(f)
+                    
+                    data_health['backup_status'] = backup_result.get('status', 'unknown')
+                    data_health['last_backup'] = backup_result.get('timestamp')
+                
+                analytics_report['data_health'] = data_health
+                
+                # 數據健康建議
+                if data_health['total_size_mb'] > 80:
+                    analytics_report['recommendations'].append('數據使用量接近限制，建議執行清理')
+                
+                if data_health['backup_status'] != 'success':
+                    analytics_report['recommendations'].append('最近備份未成功，建議檢查備份系統')
+                
+            except Exception as e:
+                analytics_report['data_health']['error'] = str(e)
+            
+            # 保存分析報告
+            os.makedirs('data/analytics', exist_ok=True)
+            report_file = f'data/analytics/daily_analytics_{today}.json'
+            with open(report_file, 'w') as f:
+                json.dump(analytics_report, f, indent=2)
+            
+            # 保存最新報告副本
+            with open('data/analytics/latest_analytics.json', 'w') as f:
+                json.dump(analytics_report, f, indent=2)
+            
+            print('📈 === AImax 數據分析報告 ===')
+            print(f'📅 報告日期: {today}')
+            print(f'🤖 交易策略: {analytics_report[\"system_overview\"].get(\"current_strategy\", \"unknown\")}')
+            print(f'📊 今日執行: {analytics_report[\"system_overview\"].get(\"executions_today\", 0)}次')
+            print(f'💰 當前BTC: NT\${analytics_report[\"system_overview\"].get(\"current_btc_price\", 0):,.0f}')
+            print(f'📈 波動性: {analytics_report[\"system_overview\"].get(\"volatility_level\", \"unknown\")}')
+            print(f'💾 數據大小: {analytics_report[\"data_health\"].get(\"total_size_mb\", 0)}MB')
+            
+            if analytics_report['recommendations']:
+                print('💡 建議:')
+                for rec in analytics_report['recommendations']:
+                    print(f'  - {rec}')
+            
+            return analytics_report
+        
+        # 生成分析報告
+        report = generate_analytics_report()
+        "
+        
+    - name: 📤 保存數據管理結果
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: data-management-${{ github.run_number }}
+        path: |
+          data/
+          logs/
+        retention-days: 7
+        
+    - name: 🔧 數據清理和優化
+      if: github.event.inputs.operation_type == 'data_cleanup'
+      run: |
+        echo "🔧 執行數據清理和優化..."
+        python -c "
+        import json
+        import os
+        import shutil
+        from datetime import datetime, timedelta
+        
+        def cleanup_and_optimize():
+            print('🔧 開始數據清理和優化...')
+            
+            cleanup_result = {
+                'timestamp': datetime.now().isoformat(),
+                'files_cleaned': [],
+                'space_freed_mb': 0,
+                'optimization_applied': []
+            }
+            
+            # 清理過期的臨時文件
+            temp_patterns = [
+                'data/keep_alive/keep_alive_log.json',
+                'data/monitoring/frequency_control.json'
+            ]
+            
+            for pattern in temp_patterns:
+                if os.path.exists(pattern):
+                    try:
+                        # 檢查文件年齡
+                        file_age = datetime.now() - datetime.fromtimestamp(os.path.getmtime(pattern))
+                        if file_age.total_seconds() > 86400:  # 超過24小時
+                            file_size = os.path.getsize(pattern)
+                            os.remove(pattern)
+                            cleanup_result['files_cleaned'].append(pattern)
+                            cleanup_result['space_freed_mb'] += file_size / (1024 * 1024)
+                    except Exception as e:
+                        print(f'⚠️ 清理文件失敗 {pattern}: {str(e)}')
+            
+            # 壓縮舊的日誌文件
+            log_dirs = ['logs/trading', 'logs/system', 'logs/errors']
+            for log_dir in log_dirs:
+                if os.path.exists(log_dir):
+                    for file in os.listdir(log_dir):
+                        file_path = os.path.join(log_dir, file)
+                        if os.path.isfile(file_path) and file.endswith('.log'):
+                            try:
+                                file_age = datetime.now() - datetime.fromtimestamp(os.path.getmtime(file_path))
+                                if file_age.days > 7:  # 超過7天的日誌
+                                    # 這裡可以添加壓縮邏輯
+                                    cleanup_result['optimization_applied'].append(f'標記壓縮: {file_path}')
+                            except Exception as e:
+                                print(f'⚠️ 處理日誌文件失敗 {file_path}: {str(e)}')
+            
+            cleanup_result['space_freed_mb'] = round(cleanup_result['space_freed_mb'], 2)
+            
+            # 保存清理結果
+            with open('data/states/last_cleanup_result.json', 'w') as f:
+                json.dump(cleanup_result, f, indent=2)
+            
+            print(f'🔧 清理完成: 釋放 {cleanup_result[\"space_freed_mb\"]}MB 空間')
+            print(f'📁 清理文件: {len(cleanup_result[\"files_cleaned\"])}個')
+            
+            return cleanup_result
+        
+        # 執行清理
+        result = cleanup_and_optimize()
+        "
