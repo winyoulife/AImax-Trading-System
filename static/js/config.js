@@ -7,9 +7,8 @@
 const CONFIG = {
     // GitHub API設置
     github: {
-        token: '{{GH_TOKEN}}', // 部署時自動替換
-        owner: 'your-username', // 需要手動設置你的GitHub用戶名
-        repo: 'AImax', // 倉庫名稱
+        owner: 'your-username', // 部署時自動替換
+        repo: 'AImax-Trading-System', // 倉庫名稱
         apiUrl: 'https://api.github.com'
     },
     
