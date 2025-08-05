@@ -469,8 +469,10 @@
         window.CleanDashboard = {
             // 配置
             config: {
-                maxApiUrl: 'https://max-api.maicoin.com/api/v2/tickers/btctwd', // 雲端直接使用MAX API
+                maxApiUrl: 'https://max-api.maicoin.com/api/v2/tickers/btctwd', // MAX API 直接連接
                 maxApiUrlProxy: 'http://localhost:5000/api/btc-price', // 本地代理（如果可用）
+                corsProxyUrl: 'https://api.allorigins.win/raw?url=', // CORS 代理
+                corsProxyUrl2: 'https://cors-anywhere.herokuapp.com/', // 備用 CORS 代理
                 updateInterval: 30000, // 30秒
                 loginAttempts: 0,
                 maxLoginAttempts: 5,
@@ -591,44 +593,64 @@
                 // 檢測環境：本地還是雲端
                 const isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost';
                 
-                try {
-                    let response, data;
-                    
-                    if (isLocal) {
-                        // 本地環境：優先嘗試代理
+                // 方法1: 本地代理（僅本地環境）
+                if (isLocal) {
+                    try {
                         console.log('🏠 本地環境：嘗試代理服務器...');
-                        try {
-                            response = await fetch(this.config.maxApiUrlProxy, {
-                                method: 'GET',
-                                headers: {
-                                    'Accept': 'application/json'
-                                }
-                            });
-                            
-                            if (response.ok) {
-                                data = await response.json();
-                                if (data.success) {
-                                    const newPrice = data.price;
-                                    const oldPrice = this.state.currentPrice;
-                                    
-                                    this.displayPrice(newPrice, oldPrice);
-                                    this.state.currentPrice = newPrice;
-                                    this.state.lastUpdate = new Date();
-                                    document.getElementById('priceIndicator').className = 'status-indicator online';
-                                    
-                                    console.log(`💰 通過代理獲取價格: ${data.formatted_price}`);
-                                    return;
-                                }
+                        const response = await fetch(this.config.maxApiUrlProxy, {
+                            method: 'GET',
+                            headers: { 'Accept': 'application/json' }
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data.success) {
+                                this.displayPrice(data.price, this.state.currentPrice);
+                                this.state.currentPrice = data.price;
+                                this.state.lastUpdate = new Date();
+                                document.getElementById('priceIndicator').className = 'status-indicator online';
+                                console.log(`💰 通過代理獲取價格: ${data.formatted_price}`);
+                                return;
                             }
-                        } catch (proxyError) {
-                            console.log('⚠️ 代理不可用，嘗試直接連接...');
                         }
+                    } catch (proxyError) {
+                        console.log('⚠️ 代理不可用，嘗試其他方法...');
                     }
+                }
+                
+                // 方法2: CORS 代理 (allorigins.win)
+                try {
+                    console.log('🌐 嘗試 CORS 代理 (allorigins.win)...');
+                    const corsUrl = this.config.corsProxyUrl + encodeURIComponent(this.config.maxApiUrl);
+                    const response = await fetch(corsUrl, {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' }
+                    });
                     
-                    // 雲端環境或代理失敗：直接連接 MAX API
-                    console.log(isLocal ? '🔄 本地直接連接...' : '☁️ 雲端環境：直接連接MAX API...');
-                    
-                    response = await fetch(this.config.maxApiUrl, {
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('📊 CORS 代理響應數據:', data);
+                        
+                        let price = parseFloat(data.last);
+                        if (isNaN(price) || price <= 0) {
+                            throw new Error('CORS 代理返回無效價格');
+                        }
+                        
+                        this.displayPrice(price, this.state.currentPrice);
+                        this.state.currentPrice = price;
+                        this.state.lastUpdate = new Date();
+                        document.getElementById('priceIndicator').className = 'status-indicator online';
+                        console.log(`💰 CORS 代理價格已更新: NT$${price.toLocaleString()}`);
+                        return;
+                    }
+                } catch (corsError) {
+                    console.log('⚠️ CORS 代理失敗，嘗試直接連接...', corsError);
+                }
+                
+                // 方法3: 直接連接 MAX API
+                try {
+                    console.log('🔄 嘗試直接連接 MAX API...');
+                    const response = await fetch(this.config.maxApiUrl, {
                         method: 'GET',
                         headers: {
                             'Accept': 'application/json',
@@ -637,44 +659,50 @@
                         mode: 'cors'
                     });
                     
-                    if (!response.ok) {
-                        throw new Error(`MAX API 響應錯誤: ${response.status}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('📊 MAX API直接響應數據:', data);
+                        
+                        let price = parseFloat(data.last);
+                        if (isNaN(price) || price <= 0) {
+                            throw new Error('MAX API 返回無效價格');
+                        }
+                        
+                        this.displayPrice(price, this.state.currentPrice);
+                        this.state.currentPrice = price;
+                        this.state.lastUpdate = new Date();
+                        document.getElementById('priceIndicator').className = 'status-indicator online';
+                        console.log(`💰 MAX API直接連接價格已更新: NT$${price.toLocaleString()}`);
+                        return;
                     }
+                } catch (directError) {
+                    console.log('⚠️ 直接連接失敗，嘗試備用方案...', directError);
+                }
+                
+                // 方法4: 使用靜態價格作為最後備用方案
+                try {
+                    console.log('🔄 使用備用價格數據...');
+                    // 使用一個合理的 BTC 價格作為備用
+                    const fallbackPrice = 3450000; // 約 345 萬台幣
                     
-                    data = await response.json();
-                    console.log('📊 MAX API響應數據:', data);
-                    
-                    // 解析價格（支援兩種格式）
-                    let price;
-                    if (data.ticker && data.ticker.last) {
-                        // 格式1: {ticker: {last: "price"}}
-                        price = parseFloat(data.ticker.last);
-                    } else if (data.last) {
-                        // 格式2: {last: "price"}
-                        price = parseFloat(data.last);
-                    } else {
-                        throw new Error('MAX API 返回無效的價格數據格式');
-                    }
-                    
-                    if (isNaN(price) || price <= 0) {
-                        throw new Error('MAX API 返回無效的價格數值');
-                    }
-                    
-                    const oldPrice = this.state.currentPrice;
-                    
-                    // 更新價格顯示
-                    this.displayPrice(price, oldPrice);
-                    this.state.currentPrice = price;
+                    this.displayPrice(fallbackPrice, this.state.currentPrice);
+                    this.state.currentPrice = fallbackPrice;
                     this.state.lastUpdate = new Date();
+                    document.getElementById('priceIndicator').className = 'status-indicator offline';
                     
-                    // 更新狀態指示器
-                    document.getElementById('priceIndicator').className = 'status-indicator online';
+                    // 顯示備用價格警告
+                    const changeElement = document.getElementById('priceChange');
+                    if (changeElement) {
+                        changeElement.textContent = '⚠️ 使用備用價格數據';
+                        changeElement.style.color = '#e17055';
+                    }
                     
-                    console.log(`💰 MAX API價格已更新: NT$${price.toLocaleString()}`);
+                    console.log('💰 使用備用價格數據');
+                    return;
                     
-                } catch (error) {
-                    console.error('❌ 所有連接方式都失敗:', error);
-                    this.displayPriceError(`無法連接 MAX API: ${error.message}`);
+                } catch (fallbackError) {
+                    console.error('❌ 所有方法都失敗:', fallbackError);
+                    this.displayPriceError('無法連接 MAX API (所有方法都失敗)');
                     document.getElementById('priceIndicator').className = 'status-indicator offline';
                 }
             },
