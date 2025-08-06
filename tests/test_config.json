@@ -1,0 +1,201 @@
+{
+  "test_configuration": {
+    "version": "1.0.0",
+    "description": "AImax 測試套件配置",
+    "created": "2025-01-08",
+    "author": "AImax Development Team"
+  },
+  
+  "test_environments": {
+    "development": {
+      "description": "開發環境測試",
+      "data_source": "mock",
+      "api_timeout": 30,
+      "max_test_duration": 300,
+      "parallel_execution": false
+    },
+    "staging": {
+      "description": "預發布環境測試",
+      "data_source": "sandbox",
+      "api_timeout": 60,
+      "max_test_duration": 600,
+      "parallel_execution": true
+    },
+    "production": {
+      "description": "生產環境測試（只讀）",
+      "data_source": "live",
+      "api_timeout": 120,
+      "max_test_duration": 900,
+      "parallel_execution": false
+    }
+  },
+  
+  "test_suites": {
+    "unit_tests": {
+      "description": "單元測試套件",
+      "priority": 1,
+      "timeout": 60,
+      "retry_count": 2,
+      "required_modules": [
+        "src.data.simple_data_fetcher",
+        "src.core.clean_ultimate_signals",
+        "src.trading.simulation_manager"
+      ],
+      "test_cases": [
+        "TestDataFetcher",
+        "TestTradingSignals", 
+        "TestSimulationManager",
+        "TestWebDashboard",
+        "TestGitHubActions",
+        "TestTelegramNotifications",
+        "TestErrorHandling"
+      ]
+    },
+    
+    "integration_tests": {
+      "description": "集成測試套件",
+      "priority": 2,
+      "timeout": 180,
+      "retry_count": 1,
+      "dependencies": ["unit_tests"],
+      "test_categories": [
+        "github_actions_integration",
+        "web_dashboard_integration",
+        "trading_system_integration"
+      ]
+    },
+    
+    "e2e_tests": {
+      "description": "端到端測試套件",
+      "priority": 3,
+      "timeout": 300,
+      "retry_count": 1,
+      "dependencies": ["unit_tests", "integration_tests"],
+      "test_scenarios": [
+        "complete_trading_cycle",
+        "web_dashboard_deployment",
+        "github_actions_workflow",
+        "system_resilience"
+      ]
+    },
+    
+    "simulation_tests": {
+      "description": "模擬交易測試套件",
+      "priority": 4,
+      "timeout": 240,
+      "retry_count": 1,
+      "simulation_config": {
+        "initial_balance": 10000,
+        "max_position_size": 0.1,
+        "max_daily_trades": 50,
+        "stop_loss_pct": 0.05,
+        "max_drawdown_pct": 0.2
+      }
+    },
+    
+    "performance_tests": {
+      "description": "性能測試套件",
+      "priority": 5,
+      "timeout": 180,
+      "retry_count": 1,
+      "performance_thresholds": {
+        "data_fetch_time": 10,
+        "signal_detection_time": 5,
+        "trade_execution_time": 2,
+        "memory_usage_mb": 500
+      }
+    }
+  },
+  
+  "test_data": {
+    "mock_data_config": {
+      "symbols": ["BTCUSDT", "ETHUSDT", "ADAUSDT"],
+      "timeframes": ["1m", "5m", "15m", "1h", "4h", "1d"],
+      "data_points": {
+        "min": 50,
+        "default": 200,
+        "max": 1000
+      },
+      "price_volatility": 0.02,
+      "volume_range": [100, 10000]
+    },
+    
+    "test_accounts": {
+      "simulation_account": {
+        "username": "test_user",
+        "initial_balance": 10000,
+        "currency": "USDT"
+      }
+    }
+  },
+  
+  "reporting": {
+    "output_formats": ["json", "html", "text"],
+    "include_details": true,
+    "include_performance_metrics": true,
+    "include_screenshots": false,
+    "auto_open_html_report": false,
+    
+    "report_sections": [
+      "executive_summary",
+      "test_results_overview", 
+      "detailed_test_results",
+      "performance_metrics",
+      "error_analysis",
+      "recommendations"
+    ],
+    
+    "notification_settings": {
+      "email_reports": false,
+      "telegram_notifications": false,
+      "slack_notifications": false
+    }
+  },
+  
+  "quality_gates": {
+    "minimum_success_rate": 80,
+    "maximum_execution_time": 600,
+    "maximum_memory_usage": 1024,
+    "required_coverage": 70,
+    
+    "critical_tests": [
+      "test_data_fetching",
+      "test_trading_signals",
+      "test_web_authentication",
+      "test_github_actions_syntax"
+    ]
+  },
+  
+  "continuous_integration": {
+    "run_on_commit": true,
+    "run_on_pull_request": true,
+    "run_scheduled": {
+      "enabled": true,
+      "cron": "0 2 * * *",
+      "timezone": "Asia/Taipei"
+    },
+    
+    "failure_handling": {
+      "retry_failed_tests": true,
+      "max_retries": 2,
+      "notify_on_failure": true,
+      "block_deployment_on_failure": true
+    }
+  },
+  
+  "security_testing": {
+    "enabled": true,
+    "check_secrets_exposure": true,
+    "validate_authentication": true,
+    "test_input_sanitization": true,
+    "check_dependency_vulnerabilities": false
+  },
+  
+  "cleanup": {
+    "cleanup_after_tests": true,
+    "preserve_logs": true,
+    "preserve_reports": true,
+    "cleanup_test_data": true,
+    "max_report_age_days": 30
+  }
+}

@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AImax 幫助中心 - 智能交易系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: rgba(255,255,255,0.95);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #6c5ce7;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.2em;
+        }
+        
+        .search-box {
+            background: rgba(255,255,255,0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+        
+        .help-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .help-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .help-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .help-card.active {
+            border: 2px solid #6c5ce7;
+        }
+        
+        .card-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+        
+        .card-title {
+            font-size: 1.4em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .card-description {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .tag {
+            background: #f1f3f4;
+            color: #5f6368;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+        
+        .content-area {
+            background: rgba(255,255,255,0.95);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            display: none;
+        }
+        
+        .content-area.active {
+            display: block;
+        }
+        
+        .content-title {
+            font-size: 2em;
+            color: #6c5ce7;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .back-btn {
+            background: #6c5ce7;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: #5a4fcf;
+        }
+        
+        .faq-item {
+            border-bottom: 1px solid #e1e5e9;
+            padding: 20px 0;
+        }
+        
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+        
+        .faq-question {
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 10px 0;
+        }
+        
+        .faq-question:hover {
+            color: #6c5ce7;
+        }
+        
+        .faq-answer {
+            color: #666;
+            margin-top: 10px;
+            padding-left: 20px;
+            display: none;
+        }
+        
+        .faq-answer.active {
+            display: block;
+        }
+        
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .alert.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .alert.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .quick-link {
+            background: #6c5ce7;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            text-align: center;
+            transition: background 0.3s;
+        }
+        
+        .quick-link:hover {
+            background: #5a4fcf;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .help-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AImax 幫助中心</h1>
+            <p>智能交易系統完整支援文檔</p>
+        </div>
+        
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="🔍 搜尋幫助內容..." id="searchInput">
+        </div>
+        
+        <div id="helpGrid" class="help-grid">
+            <div class="help-card" data-content="quickStart">
+                <div class="card-icon">🚀</div>
+                <div class="card-title">快速開始</div>
+                <div class="card-description">5分鐘快速部署和使用AImax系統</div>
+                <div class="card-tags">
+                    <span class="tag">新手</span>
+                    <span class="tag">部署</span>
+                    <span class="tag">基礎</span>
+                </div>
+            </div>
+            
+            <div class="help-card" data-content="login">
+                <div class="card-icon">🔐</div>
+                <div class="card-title">登入問題</div>
+                <div class="card-description">解決登入、密碼和認證相關問題</div>
+                <div class="card-tags">
+                    <span class="tag">登入</span>
+                    <span class="tag">密碼</span>
+                    <span class="tag">安全</span>
+                </div>
+            </div>
+            
+            <div class="help-card" data-content="trading">
+                <div class="card-icon">💰</div>
+                <div class="card-title">交易功能</div>
+                <div class="card-description">85%勝率策略和交易系統使用說明</div>
+                <div class="card-tags">
+                    <span class="tag">交易</span>
+                    <span class="tag">MACD</span>
+                    <span class="tag">策略</span>
+                </div>
+            </div>
+            
+            <div class="help-card" data-content="dashboard">
+                <div class="card-icon">📊</div>
+                <div class="card-title">儀表板使用</div>
+                <div class="card-description">儀表板功能詳解和數據監控</div>
+                <div class="card-tags">
+                    <span class="tag">儀表板</span>
+                    <span class="tag">監控</span>
+                    <span class="tag">數據</span>
+                </div>
+            </div>
+            
+            <div class="help-card" data-content="config">
+                <div class="card-icon">⚙️</div>
+                <div class="card-title">系統配置</div>
+                <div class="card-description">GitHub Secrets、Telegram等配置指南</div>
+                <div class="card-tags">
+                    <span class="tag">配置</span>
+                    <span class="tag">GitHub</span>
+                    <span class="tag">Telegram</span>
+                </div>
+            </div>
+            
+            <div class="help-card" data-content="troubleshooting">
+                <div class="card-icon">🔧</div>
+                <div class="card-title">故障排除</div>
+                <div class="card-description">常見問題診斷和解決方案</div>
+                <div class="card-tags">
+                    <span class="tag">故障</span>
+                    <span class="tag">診斷</span>
+                    <span class="tag">修復</span>
+                </div>
+            </div>
+            
+            <div class="help-card" data-content="mobile">
+                <div class="card-icon">📱</div>
+                <div class="card-title">移動端使用</div>
+                <div class="card-description">手機和平板設備使用指南</div>
+                <div class="card-tags">
+                    <span class="tag">移動端</span>
+                    <span class="tag">手機</span>
+                    <span class="tag">響應式</span>
+                </div>
+            </div>
+            
+            <div class="help-card" data-content="advanced">
+                <div class="card-icon">🎓</div>
+                <div class="card-title">進階功能</div>
+                <div class="card-description">高級配置和自定義開發</div>
+                <div class="card-tags">
+                    <span class="tag">進階</span>
+                    <span class="tag">開發</span>
+                    <span class="tag">自定義</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 快速開始內容 -->
+        <div id="quickStart" class="content-area">
+            <div class="content-title">
+                <button class="back-btn" onclick="showGrid()">← 返回</button>
+                🚀 快速開始指南
+            </div>
+            
+            <div class="alert info">
+                <strong>歡迎使用AImax！</strong> 這個5分鐘指南將幫助您快速部署和使用您的專屬智能交易系統。
+            </div>
+            
+            <h3>第一步：部署系統</h3>
+            <p>選擇適合您的部署方式：</p>
+            
+            <div class="code-block">
+# Python完整版 (推薦)
+python3 deploy_aimax.py
+
+# Linux/macOS快速版
+./quick_deploy.sh
+
+# Windows批處理版
+quick_deploy.bat
+            </div>
+            
+            <h3>第二步：訪問系統</h3>
+            <p>部署完成後，訪問您的GitHub Pages網址：</p>
+            <div class="code-block">https://您的用戶名.github.io/倉庫名/</div>
+            
+            <h3>第三步：安全登入</h3>
+            <p>使用部署時設置的專屬帳號和密碼登入系統。</p>
+            
+            <div class="alert success">
+                <strong>恭喜！</strong> 您已成功部署AImax智能交易系統。現在可以開始監控BTC價格和交易狀態了。
+            </div>
+            
+            <div class="quick-links">
+                <a href="#" class="quick-link" onclick="showContent('dashboard')">📊 學習使用儀表板</a>
+                <a href="#" class="quick-link" onclick="showContent('config')">⚙️ 配置系統功能</a>
+                <a href="#" class="quick-link" onclick="showContent('trading')">💰 了解交易策略</a>
+            </div>
+        </div>
+        
+        <!-- 登入問題內容 -->
+        <div id="login" class="content-area">
+            <div class="content-title">
+                <button class="back-btn" onclick="showGrid()">← 返回</button>
+                🔐 登入問題解決
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ❓ 忘記登入密碼怎麼辦？
+                </div>
+                <div class="faq-answer">
+                    <p>有兩種解決方案：</p>
+                    <p><strong>方案1 - 重新部署：</strong></p>
+                    <ol>
+                        <li>重新運行部署腳本</li>
+                        <li>設置新的帳號密碼</li>
+                        <li>推送更新到GitHub</li>
+                    </ol>
+                    <p><strong>方案2 - 手動修改：</strong></p>
+                    <div class="code-block">
+# 生成新密碼哈希
+python3 -c "import hashlib; print(hashlib.sha256('新密碼'.encode()).hexdigest())"
+                    </div>
+                    <p>然後更新 static/secure-login-fixed.html 中的哈希值。</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ❓ 登入後顯示"會話已過期"？
+                </div>
+                <div class="faq-answer">
+                    <p>這是正常的安全機制：</p>
+                    <ul>
+                        <li>會話有效期為24小時</li>
+                        <li>超時後需要重新登入</li>
+                        <li>可以點擊"安全登出"後重新登入</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ❓ 帳號密碼正確但無法登入？
+                </div>
+                <div class="faq-answer">
+                    <p>請檢查以下項目：</p>
+                    <ul>
+                        <li><strong>大小寫敏感</strong>：確保帳號密碼大小寫正確</li>
+                        <li><strong>特殊字符</strong>：確保密碼中的特殊字符正確輸入</li>
+                        <li><strong>瀏覽器兼容性</strong>：嘗試使用Chrome或Firefox最新版本</li>
+                        <li><strong>清除緩存</strong>：清除瀏覽器緩存和Cookie</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 交易功能內容 -->
+        <div id="trading" class="content-area">
+            <div class="content-title">
+                <button class="back-btn" onclick="showGrid()">← 返回</button>
+                💰 交易功能說明
+            </div>
+            
+            <div class="alert info">
+                <strong>85%勝率策略</strong> 基於優化的MACD技術分析，結合智能頻率控制和風險管理。
+            </div>
+            
+            <h3>🤖 交易策略核心</h3>
+            <ul>
+                <li><strong>MACD指標</strong>：使用12、26、9參數的優化MACD</li>
+                <li><strong>信號確認</strong>：多重條件確認交易信號</li>
+                <li><strong>風險控制</strong>：智能止損和資金管理</li>
+                <li><strong>頻率調整</strong>：根據市場波動性調整執行頻率</li>
+            </ul>
+            
+            <h3>⚡ 智能頻率控制</h3>
+            <div class="code-block">
+高波動期 (價格變化 > 2%):
+  - 台灣交易時段: 每1分鐘執行
+  - 其他時段: 每3分鐘執行
+
+中等波動期 (價格變化 0.5-2%):
+  - 台灣交易時段: 每3分鐘執行
+  - 其他時段: 每5分鐘執行
+
+低波動期 (價格變化 < 0.5%):
+  - 台灣交易時段: 每5分鐘執行
+  - 其他時段: 每15分鐘執行
+            </div>
+            
+            <div class="alert warning">
+                <strong>風險提醒</strong>：加密貨幣交易存在風險，請只投資您能承受損失的資金。
+            </div>
+        </div>
+        
+        <!-- 其他內容區域... -->
+        <div id="dashboard" class="content-area">
+            <div class="content-title">
+                <button class="back-btn" onclick="showGrid()">← 返回</button>
+                📊 儀表板使用指南
+            </div>
+            <p>儀表板功能詳細說明...</p>
+        </div>
+        
+        <div id="config" class="content-area">
+            <div class="content-title">
+                <button class="back-btn" onclick="showGrid()">← 返回</button>
+                ⚙️ 系統配置指南
+            </div>
+            <p>系統配置詳細說明...</p>
+        </div>
+        
+        <div id="troubleshooting" class="content-area">
+            <div class="content-title">
+                <button class="back-btn" onclick="showGrid()">← 返回</button>
+                🔧 故障排除指南
+            </div>
+            <p>故障排除詳細說明...</p>
+        </div>
+        
+        <div id="mobile" class="content-area">
+            <div class="content-title">
+                <button class="back-btn" onclick="showGrid()">← 返回</button>
+                📱 移動端使用指南
+            </div>
+            <p>移動端使用詳細說明...</p>
+        </div>
+        
+        <div id="advanced" class="content-area">
+            <div class="content-title">
+                <button class="back-btn" onclick="showGrid()">← 返回</button>
+                🎓 進階功能指南
+            </div>
+            <p>進階功能詳細說明...</p>
+        </div>
+    </div>
+
+    <script>
+        // 顯示網格
+        function showGrid() {
+            document.getElementById('helpGrid').style.display = 'grid';
+            document.querySelectorAll('.content-area').forEach(area => {
+                area.classList.remove('active');
+            });
+            document.querySelectorAll('.help-card').forEach(card => {
+                card.classList.remove('active');
+            });
+        }
+        
+        // 顯示內容
+        function showContent(contentId) {
+            document.getElementById('helpGrid').style.display = 'none';
+            document.querySelectorAll('.content-area').forEach(area => {
+                area.classList.remove('active');
+            });
+            document.getElementById(contentId).classList.add('active');
+            
+            // 高亮對應的卡片
+            document.querySelectorAll('.help-card').forEach(card => {
+                card.classList.remove('active');
+                if (card.dataset.content === contentId) {
+                    card.classList.add('active');
+                }
+            });
+        }
+        
+        // 切換FAQ
+        function toggleFAQ(element) {
+            const answer = element.nextElementSibling;
+            const isActive = answer.classList.contains('active');
+            
+            // 關閉所有其他FAQ
+            document.querySelectorAll('.faq-answer').forEach(ans => {
+                ans.classList.remove('active');
+            });
+            
+            // 切換當前FAQ
+            if (!isActive) {
+                answer.classList.add('active');
+            }
+        }
+        
+        // 搜索功能
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.help-card');
+            
+            cards.forEach(card => {
+                const title = card.querySelector('.card-title').textContent.toLowerCase();
+                const description = card.querySelector('.card-description').textContent.toLowerCase();
+                const tags = Array.from(card.querySelectorAll('.tag')).map(tag => tag.textContent.toLowerCase()).join(' ');
+                
+                if (title.includes(query) || description.includes(query) || tags.includes(query)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = query ? 'none' : 'block';
+                }
+            });
+        });
+        
+        // 卡片點擊事件
+        document.querySelectorAll('.help-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const contentId = this.dataset.content;
+                showContent(contentId);
+            });
+        });
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🤖 AImax 幫助中心已載入');
+        });
+    </script>
+</body>
+</html>

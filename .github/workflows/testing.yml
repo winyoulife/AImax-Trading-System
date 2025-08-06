@@ -1,0 +1,339 @@
+name: 🧪 AImax 自動化測試套件
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # 每天凌晨2點運行完整測試
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: '選擇要運行的測試套件'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - unit
+        - integration
+        - e2e
+        - simulation
+
+jobs:
+  test-setup:
+    name: 🔧 測試環境設置
+    runs-on: ubuntu-latest
+    outputs:
+      test-matrix: ${{ steps.setup.outputs.test-matrix }}
+    
+    steps:
+    - name: 📥 檢出代碼
+      uses: actions/checkout@v4
+    
+    - name: 🐍 設置 Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+    
+    - name: 📦 安裝依賴
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-html pytest-xdist
+    
+    - name: 🔧 設置測試矩陣
+      id: setup
+      run: |
+        if [ "${{ github.event.inputs.test_suite }}" = "unit" ]; then
+          echo "test-matrix=[\"unit_tests\"]" >> $GITHUB_OUTPUT
+        elif [ "${{ github.event.inputs.test_suite }}" = "integration" ]; then
+          echo "test-matrix=[\"integration_tests\"]" >> $GITHUB_OUTPUT
+        elif [ "${{ github.event.inputs.test_suite }}" = "e2e" ]; then
+          echo "test-matrix=[\"e2e_tests\"]" >> $GITHUB_OUTPUT
+        elif [ "${{ github.event.inputs.test_suite }}" = "simulation" ]; then
+          echo "test-matrix=[\"simulation_tests\"]" >> $GITHUB_OUTPUT
+        else
+          echo "test-matrix=[\"unit_tests\",\"integration_tests\",\"e2e_tests\",\"simulation_tests\"]" >> $GITHUB_OUTPUT
+        fi
+
+  unit-tests:
+    name: 🧪 單元測試
+    runs-on: ubuntu-latest
+    needs: test-setup
+    if: contains(needs.test-setup.outputs.test-matrix, 'unit_tests')
+    
+    steps:
+    - name: 📥 檢出代碼
+      uses: actions/checkout@v4
+    
+    - name: 🐍 設置 Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+    
+    - name: 📦 安裝依賴
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-html
+    
+    - name: 🧪 運行單元測試
+      run: |
+        python -m pytest tests/unit_tests.py -v --html=reports/unit_test_report.html --self-contained-html
+      continue-on-error: true
+    
+    - name: 📊 上傳測試報告
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: unit-test-reports
+        path: reports/
+        retention-days: 30
+
+  integration-tests:
+    name: 🔗 集成測試
+    runs-on: ubuntu-latest
+    needs: test-setup
+    if: contains(needs.test-setup.outputs.test-matrix, 'integration_tests')
+    
+    steps:
+    - name: 📥 檢出代碼
+      uses: actions/checkout@v4
+    
+    - name: 🐍 設置 Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+    
+    - name: 📦 安裝依賴
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: 🔗 運行集成測試
+      run: |
+        python tests/integration_tests.py
+      continue-on-error: true
+    
+    - name: 📊 上傳測試報告
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: integration-test-reports
+        path: reports/
+        retention-days: 30
+
+  e2e-tests:
+    name: 🎯 端到端測試
+    runs-on: ubuntu-latest
+    needs: test-setup
+    if: contains(needs.test-setup.outputs.test-matrix, 'e2e_tests')
+    
+    steps:
+    - name: 📥 檢出代碼
+      uses: actions/checkout@v4
+    
+    - name: 🐍 設置 Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+    
+    - name: 📦 安裝依賴
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: 🎯 運行端到端測試
+      run: |
+        python tests/e2e_tests.py
+      continue-on-error: true
+    
+    - name: 📊 上傳測試報告
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: e2e-test-reports
+        path: reports/
+        retention-days: 30
+
+  simulation-tests:
+    name: 🎮 模擬交易測試
+    runs-on: ubuntu-latest
+    needs: test-setup
+    if: contains(needs.test-setup.outputs.test-matrix, 'simulation_tests')
+    
+    steps:
+    - name: 📥 檢出代碼
+      uses: actions/checkout@v4
+    
+    - name: 🐍 設置 Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+    
+    - name: 📦 安裝依賴
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: 🎮 運行模擬交易測試
+      run: |
+        python tests/simulation_tests.py
+      continue-on-error: true
+    
+    - name: 📊 上傳測試報告
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: simulation-test-reports
+        path: reports/
+        retention-days: 30
+
+  comprehensive-test:
+    name: 📋 綜合測試報告
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests, e2e-tests, simulation-tests]
+    if: always()
+    
+    steps:
+    - name: 📥 檢出代碼
+      uses: actions/checkout@v4
+    
+    - name: 🐍 設置 Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+    
+    - name: 📦 安裝依賴
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: 📥 下載所有測試報告
+      uses: actions/download-artifact@v3
+      with:
+        path: downloaded-reports/
+    
+    - name: 📋 運行綜合測試
+      run: |
+        python run_all_tests.py
+      continue-on-error: true
+    
+    - name: 📊 生成最終報告
+      run: |
+        echo "## 🧪 AImax 測試套件執行結果" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ -f "reports/complete_test_report_*.json" ]; then
+          echo "### 📊 測試摘要" >> $GITHUB_STEP_SUMMARY
+          python -c "
+import json, glob
+files = glob.glob('reports/complete_test_report_*.json')
+if files:
+    with open(files[0], 'r', encoding='utf-8') as f:
+        report = json.load(f)
+    summary = report['summary']
+    print(f'- 總測試套件: {summary[\"total_test_suites\"]}')
+    print(f'- 通過套件: {summary[\"passed_suites\"]} ✅')
+    print(f'- 失敗套件: {summary[\"failed_suites\"]} ❌')
+    print(f'- 成功率: {summary[\"success_rate\"]:.1f}%')
+    print(f'- 總耗時: {summary[\"total_duration\"]:.2f}秒')
+    print(f'- 整體狀態: {summary[\"overall_status\"]}')
+" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ 無法找到測試報告文件" >> $GITHUB_STEP_SUMMARY
+        fi
+    
+    - name: 📊 上傳最終報告
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: comprehensive-test-reports
+        path: reports/
+        retention-days: 90
+    
+    - name: 📄 部署測試報告到 GitHub Pages
+      if: github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./reports
+        destination_dir: test-reports
+        keep_files: true
+
+  notify-results:
+    name: 📢 通知測試結果
+    runs-on: ubuntu-latest
+    needs: [comprehensive-test]
+    if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    
+    steps:
+    - name: 📥 檢出代碼
+      uses: actions/checkout@v4
+    
+    - name: 📥 下載測試報告
+      uses: actions/download-artifact@v3
+      with:
+        name: comprehensive-test-reports
+        path: reports/
+    
+    - name: 📢 發送 Telegram 通知
+      if: ${{ secrets.TELEGRAM_BOT_TOKEN && secrets.TELEGRAM_CHAT_ID }}
+      run: |
+        if [ -f "reports/complete_test_report_*.json" ]; then
+          python -c "
+import json, glob, requests, os
+files = glob.glob('reports/complete_test_report_*.json')
+if files:
+    with open(files[0], 'r', encoding='utf-8') as f:
+        report = json.load(f)
+    summary = report['summary']
+    
+    status_emoji = '✅' if summary['overall_status'] == 'PASSED' else '❌'
+    message = f'''
+{status_emoji} AImax 自動化測試報告
+    
+📊 測試摘要:
+• 總測試套件: {summary['total_test_suites']}
+• 通過: {summary['passed_suites']} ✅
+• 失敗: {summary['failed_suites']} ❌
+• 成功率: {summary['success_rate']:.1f}%
+• 總耗時: {summary['total_duration']:.2f}秒
+• 狀態: {summary['overall_status']}
+
+🔗 查看詳細報告: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    '''
+    
+    bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
+    chat_id = os.environ.get('TELEGRAM_CHAT_ID')
+    
+    if bot_token and chat_id:
+        url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
+        data = {'chat_id': chat_id, 'text': message, 'parse_mode': 'HTML'}
+        requests.post(url, data=data)
+"
+        fi
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+  cleanup:
+    name: 🧹 清理
+    runs-on: ubuntu-latest
+    needs: [notify-results]
+    if: always()
+    
+    steps:
+    - name: 🧹 清理工作空間
+      run: |
+        echo "清理完成"
+        df -h
