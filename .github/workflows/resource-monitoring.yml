@@ -1,0 +1,429 @@
+name: 📊 AImax 資源使用監控和優化
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'src/monitoring/**'
+      - 'scripts/test_resource_monitoring.py'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/monitoring/**'
+  schedule:
+    # 每4小時運行一次資源監控
+    - cron: '0 */4 * * *'
+  workflow_dispatch:
+    inputs:
+      monitoring_type:
+        description: '選擇監控類型'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - system_resources
+        - github_usage
+        - storage_optimization
+
+jobs:
+  system-resource-monitoring:
+    name: 🖥️ 系統資源監控
+    runs-on: ubuntu-latest
+    if: github.event.inputs.monitoring_type == 'system_resources' || github.event.inputs.monitoring_type == 'all' || github.event.inputs.monitoring_type == ''
+    
+    steps:
+    - name: 📥 檢出代碼
+      uses: actions/checkout@v4
+    
+    - name: 🐍 設置 Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+    
+    - name: 📦 安裝依賴
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install psutil requests
+    
+    - name: 🖥️ 監控系統資源
+      run: |
+        python -c "
+import sys
+sys.path.append('.')
+from src.monitoring.resource_monitor import resource_monitor
+import time
+
+print('🖥️ 系統資源監控測試...')
+
+# 收集系統資源
+usage = resource_monitor._collect_system_resources()
+print(f'CPU使用率: {usage.cpu_percent:.1f}%')
+print(f'記憶體使用率: {usage.memory_percent:.1f}%')
+print(f'磁碟使用: {usage.disk_usage_gb:.2f} GB')
+print(f'磁碟剩餘: {usage.disk_free_gb:.2f} GB')
+
+# 檢查資源警告
+stats = resource_monitor.get_resource_statistics()
+if 'current_usage' in stats:
+    current = stats['current_usage']
+    
+    # 檢查警告閾值
+    if current['cpu_percent'] > 80:
+        print(f'⚠️ CPU使用率過高: {current[\"cpu_percent\"]:.1f}%')
+    
+    if current['memory_percent'] > 85:
+        print(f'⚠️ 記憶體使用率過高: {current[\"memory_percent\"]:.1f}%')
+    
+    if current['disk_free_gb'] < 1:
+        print(f'⚠️ 磁碟空間不足: {current[\"disk_free_gb\"]:.2f} GB')
+
+# 生成優化建議
+recommendations = resource_monitor.generate_optimization_recommendations()
+if recommendations:
+    print(f'\\n💡 優化建議 ({len(recommendations)} 條):')
+    for i, rec in enumerate(recommendations[:3], 1):
+        print(f'  {i}. {rec[\"category\"]}: {rec[\"issue\"]}')
+else:
+    print('\\n✅ 系統資源使用正常')
+"
+    
+    - name: 🧹 自動清理資源
+      run: |
+        python -c "
+import sys
+sys.path.append('.')
+from src.monitoring.resource_monitor import resource_monitor
+
+print('🧹 執行自動資源清理...')
+
+# 清理臨時文件
+cleanup_result = resource_monitor.cleanup_temporary_files()
+print(f'清理結果: 釋放 {cleanup_result[\"freed_space_mb\"]:.2f} MB 空間')
+
+if cleanup_result['freed_space_mb'] > 0:
+    print(f'清理目錄: {cleanup_result[\"cleaned_directories\"]}')
+"
+
+  github-usage-monitoring:
+    name: 🚀 GitHub Actions使用量監控
+    runs-on: ubuntu-latest
+    if: github.event.inputs.monitoring_type == 'github_usage' || github.event.inputs.monitoring_type == 'all' || github.event.inputs.monitoring_type == ''
+    
+    steps:
+    - name: 📥 檢出代碼
+      uses: actions/checkout@v4
+    
+    - name: 🐍 設置 Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+    
+    - name: 📦 安裝依賴
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install requests
+    
+    - name: 🚀 監控GitHub Actions使用量
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        python -c "
+import sys
+sys.path.append('.')
+from src.monitoring.github_usage_monitor import github_usage_monitor
+import os
+
+print('🚀 GitHub Actions使用量監控...')
+
+# 檢查API訪問
+if not github_usage_monitor.can_access_github_api():
+    print('⚠️ 無法訪問GitHub API，請檢查配置')
+    exit(0)
+
+# 獲取當前配額
+quota = github_usage_monitor.get_current_quota()
+if quota:
+    print(f'📊 GitHub Actions配額:')
+    print(f'  總配額: {quota.total_minutes} 分鐘/月')
+    print(f'  已使用: {quota.used_minutes} 分鐘 ({quota.usage_percentage:.1f}%)')
+    print(f'  剩餘: {quota.remaining_minutes} 分鐘')
+    
+    # 檢查使用量警告
+    if quota.usage_percentage >= 90:
+        print(f'🚨 GitHub Actions使用量危險: {quota.usage_percentage:.1f}%')
+        print('建議立即減少工作流執行頻率')
+    elif quota.usage_percentage >= 75:
+        print(f'⚠️ GitHub Actions使用量警告: {quota.usage_percentage:.1f}%')
+        print('建議優化工作流以減少使用量')
+    else:
+        print('✅ GitHub Actions使用量正常')
+else:
+    print('❌ 無法獲取GitHub配額信息')
+
+# 獲取工作流運行記錄
+workflow_runs = github_usage_monitor.get_workflow_runs(days=7)
+print(f'\\n📋 最近7天工作流運行: {len(workflow_runs)} 次')
+
+if workflow_runs:
+    # 分析使用模式
+    usage_analysis = github_usage_monitor.analyze_usage_patterns()
+    if 'error' not in usage_analysis:
+        print(f'總執行時間: {usage_analysis[\"total_duration_minutes\"]:.1f} 分鐘')
+        print(f'平均執行時間: {usage_analysis[\"avg_duration_per_run\"]:.1f} 分鐘/次')
+        print(f'最常用工作流: {usage_analysis[\"most_used_workflow\"] or \"N/A\"}')
+
+# 獲取優化建議
+suggestions = github_usage_monitor.get_optimization_suggestions()
+if suggestions:
+    print(f'\\n💡 優化建議 ({len(suggestions)} 條):')
+    for i, suggestion in enumerate(suggestions[:3], 1):
+        print(f'  {i}. {suggestion[\"category\"]}: {suggestion[\"issue\"]}')
+"
+    
+    - name: 📊 生成使用量報告
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        python -c "
+import sys
+sys.path.append('.')
+from src.monitoring.github_usage_monitor import github_usage_monitor
+
+if github_usage_monitor.can_access_github_api():
+    print('📊 生成GitHub使用量報告...')
+    report = github_usage_monitor.generate_usage_report()
+    print(report[:500] + '...' if len(report) > 500 else report)
+    
+    # 保存報告
+    data_file = github_usage_monitor.save_usage_data()
+    print(f'📄 使用量數據已保存')
+"
+
+  storage-optimization:
+    name: 💾 存儲空間優化
+    runs-on: ubuntu-latest
+    if: github.event.inputs.monitoring_type == 'storage_optimization' || github.event.inputs.monitoring_type == 'all' || github.event.inputs.monitoring_type == ''
+    
+    steps:
+    - name: 📥 檢出代碼
+      uses: actions/checkout@v4
+    
+    - name: 🐍 設置 Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+    
+    - name: 📦 安裝依賴
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: 💾 掃描存儲使用情況
+      run: |
+        python -c "
+import sys
+sys.path.append('.')
+from src.monitoring.storage_optimizer import storage_optimizer
+
+print('💾 掃描存儲使用情況...')
+
+# 掃描存儲
+storage_info = storage_optimizer.scan_storage_usage()
+
+if 'error' not in storage_info:
+    print(f'📊 存儲統計:')
+    print(f'  總大小: {storage_info[\"total_size_mb\"]:.2f} MB ({storage_info[\"total_size_gb\"]:.2f} GB)')
+    print(f'  總文件數: {storage_info[\"total_files\"]:,}')
+    print(f'  掃描時間: {storage_info[\"scan_time_seconds\"]:.2f} 秒')
+    
+    # 顯示最大目錄
+    if 'largest_directories' in storage_info:
+        print('\\n📁 最大目錄 (前5名):')
+        for dir_name, size_mb in storage_info['largest_directories'][:5]:
+            print(f'  {dir_name}: {size_mb:.2f} MB')
+    
+    # 檢查存儲警告
+    if storage_info['total_size_gb'] > 1.0:
+        print(f'⚠️ 項目大小過大: {storage_info[\"total_size_gb\"]:.2f} GB')
+    
+    if storage_info['total_files'] > 10000:
+        print(f'⚠️ 文件數量過多: {storage_info[\"total_files\"]:,}')
+else:
+    print(f'❌ 存儲掃描失敗: {storage_info[\"error\"]}')
+"
+    
+    - name: 🧹 執行存儲清理
+      run: |
+        python -c "
+import sys
+sys.path.append('.')
+from src.monitoring.storage_optimizer import storage_optimizer
+
+print('🧹 執行存儲清理...')
+
+# 清理日誌文件
+log_result = storage_optimizer.cleanup_log_files()
+if log_result.freed_space_mb > 0:
+    print(f'📄 清理日誌: {log_result.cleaned_files} 個文件，釋放 {log_result.freed_space_mb:.2f} MB')
+
+# 清理臨時文件
+temp_result = storage_optimizer.cleanup_temporary_files()
+if temp_result.freed_space_mb > 0:
+    print(f'🗂️ 清理臨時文件: {temp_result.cleaned_files} 個文件，釋放 {temp_result.freed_space_mb:.2f} MB')
+
+# 清理舊報告
+report_result = storage_optimizer.cleanup_old_reports()
+if report_result.freed_space_mb > 0:
+    print(f'📊 清理舊報告: {report_result.cleaned_files} 個文件，釋放 {report_result.freed_space_mb:.2f} MB')
+
+total_freed = log_result.freed_space_mb + temp_result.freed_space_mb + report_result.freed_space_mb
+print(f'\\n✅ 總共釋放: {total_freed:.2f} MB 空間')
+
+# 顯示錯誤（如果有）
+all_errors = log_result.errors + temp_result.errors + report_result.errors
+if all_errors:
+    print(f'\\n⚠️ 清理過程中的錯誤:')
+    for error in all_errors[:3]:  # 只顯示前3個錯誤
+        print(f'  • {error}')
+"
+
+  comprehensive-monitoring:
+    name: 📋 綜合監控報告
+    runs-on: ubuntu-latest
+    needs: [system-resource-monitoring, github-usage-monitoring, storage-optimization]
+    if: always()
+    
+    steps:
+    - name: 📥 檢出代碼
+      uses: actions/checkout@v4
+    
+    - name: 🐍 設置 Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+    
+    - name: 📦 安裝依賴
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install psutil requests
+    
+    - name: 📋 生成綜合監控報告
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        python -c "
+import sys
+sys.path.append('.')
+from src.monitoring.resource_monitor import resource_monitor
+from src.monitoring.github_usage_monitor import github_usage_monitor
+from src.monitoring.storage_optimizer import storage_optimizer
+from datetime import datetime
+
+print('📋 生成AImax綜合監控報告...')
+
+# 收集系統資源數據
+resource_usage = resource_monitor._collect_system_resources()
+
+# 收集存儲數據
+storage_info = storage_optimizer.scan_storage_usage()
+
+# 收集GitHub數據（如果可用）
+github_quota = None
+if github_usage_monitor.can_access_github_api():
+    github_quota = github_usage_monitor.get_current_quota()
+
+# 生成報告
+report = f'''
+📊 AImax 資源監控綜合報告 (GitHub Actions)
+{'='*60}
+
+🖥️ 系統資源狀態:
+   CPU使用率: {resource_usage.cpu_percent:.1f}%
+   記憶體使用率: {resource_usage.memory_percent:.1f}%
+   磁碟使用: {resource_usage.disk_usage_gb:.2f} GB
+   磁碟剩餘: {resource_usage.disk_free_gb:.2f} GB
+   文件數量: {resource_usage.file_count:,}
+'''
+
+if 'error' not in storage_info:
+    report += f'''
+💾 存儲空間狀態:
+   總大小: {storage_info['total_size_mb']:.2f} MB ({storage_info['total_size_gb']:.2f} GB)
+   總文件數: {storage_info['total_files']:,}
+'''
+
+if github_quota:
+    report += f'''
+🚀 GitHub Actions狀態:
+   使用率: {github_quota.usage_percentage:.1f}%
+   已用分鐘: {github_quota.used_minutes}
+   剩餘分鐘: {github_quota.remaining_minutes}
+'''
+
+report += f'''
+{'='*60}
+報告生成時間: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+GitHub Actions Runner: ubuntu-latest
+'''
+
+print(report)
+
+# 檢查警告條件
+warnings = []
+
+if resource_usage.cpu_percent > 80:
+    warnings.append(f'CPU使用率過高: {resource_usage.cpu_percent:.1f}%')
+
+if resource_usage.memory_percent > 85:
+    warnings.append(f'記憶體使用率過高: {resource_usage.memory_percent:.1f}%')
+
+if resource_usage.disk_free_gb < 1:
+    warnings.append(f'磁碟空間不足: {resource_usage.disk_free_gb:.2f} GB')
+
+if github_quota and github_quota.usage_percentage > 80:
+    warnings.append(f'GitHub Actions使用量過高: {github_quota.usage_percentage:.1f}%')
+
+if 'error' not in storage_info and storage_info['total_size_gb'] > 1:
+    warnings.append(f'項目大小過大: {storage_info[\"total_size_gb\"]:.2f} GB')
+
+if warnings:
+    print('\\n⚠️ 發現以下警告:')
+    for warning in warnings:
+        print(f'  • {warning}')
+else:
+    print('\\n✅ 所有資源使用正常')
+"
+    
+    - name: 📊 生成GitHub Step Summary
+      run: |
+        echo '## 📊 AImax 資源監控結果' >> $GITHUB_STEP_SUMMARY
+        echo '' >> $GITHUB_STEP_SUMMARY
+        echo '### ✅ 監控完成項目' >> $GITHUB_STEP_SUMMARY
+        echo '- 系統資源監控 (CPU、記憶體、磁碟)' >> $GITHUB_STEP_SUMMARY
+        echo '- GitHub Actions使用量監控' >> $GITHUB_STEP_SUMMARY
+        echo '- 存儲空間優化和清理' >> $GITHUB_STEP_SUMMARY
+        echo '- 自動資源清理和優化' >> $GITHUB_STEP_SUMMARY
+        echo '' >> $GITHUB_STEP_SUMMARY
+        echo '### 📈 監控範圍' >> $GITHUB_STEP_SUMMARY
+        echo '- GitHub Actions免費額度使用量' >> $GITHUB_STEP_SUMMARY
+        echo '- 項目存儲空間使用統計' >> $GITHUB_STEP_SUMMARY
+        echo '- 系統性能指標監控' >> $GITHUB_STEP_SUMMARY
+        echo '- 自動清理和優化建議' >> $GITHUB_STEP_SUMMARY
+        echo '' >> $GITHUB_STEP_SUMMARY
+        echo '🎉 資源監控和優化完成！' >> $GITHUB_STEP_SUMMARY
+    
+    - name: 📊 上傳監控報告
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: resource-monitoring-reports
+        path: reports/
+        retention-days: 30
