@@ -57,6 +57,10 @@ jobs:
           # 複製登入測試頁面
           cp static/test-login-only.html _site/test-login.html
           
+          # 複製JavaScript模組
+          mkdir -p _site/js
+          cp static/js/github-actions-monitor.js _site/js/
+          
           # 創建重定向頁面
           cat > _site/login.html << 'EOF'
           <!DOCTYPE html>

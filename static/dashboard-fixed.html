@@ -252,24 +252,25 @@
                 </div>
                 <div class="metric-grid">
                     <div class="metric">
-                        <div class="metric-label">執行模式</div>
-                        <div class="metric-value" id="executionMode">高頻模式</div>
+                        <div class="metric-label">系統狀態</div>
+                        <div class="metric-value" id="systemStatus">載入中...</div>
                     </div>
                     <div class="metric">
-                        <div class="metric-label">波動性</div>
-                        <div class="metric-value" id="volatilityLevel">中等</div>
+                        <div class="metric-label">最後執行</div>
+                        <div class="metric-value" id="lastExecution">載入中...</div>
                     </div>
                     <div class="metric">
                         <div class="metric-label">今日執行</div>
-                        <div class="metric-value" id="todayExecutions">127</div>
+                        <div class="metric-value" id="todayExecutions">載入中...</div>
                     </div>
                     <div class="metric">
-                        <div class="metric-label">信心度</div>
-                        <div class="metric-value" id="confidenceLevel">87%</div>
+                        <div class="metric-label">成功率</div>
+                        <div class="metric-value" id="successRate">載入中...</div>
                     </div>
                 </div>
-                <div style="text-align: center; margin-top: 15px; color: #00b894; font-weight: 600;">
-                    🎯 目標勝率: 85%+
+                <div style="text-align: center; margin-top: 15px;">
+                    <div style="color: #00b894; font-weight: 600; margin-bottom: 5px;">🎯 目標勝率: 85%+</div>
+                    <div style="font-size: 0.9em; color: #666;" id="nextExecution">下次執行: 載入中...</div>
                 </div>
             </div>
             
@@ -281,22 +282,23 @@
                 </div>
                 <div class="metric-grid">
                     <div class="metric">
-                        <div class="metric-label">GitHub Actions</div>
-                        <div class="metric-value" id="githubActionsStatus">✅ 正常</div>
+                        <div class="metric-label">高頻交易</div>
+                        <div class="metric-value" id="highFreqStatus">載入中...</div>
                     </div>
                     <div class="metric">
-                        <div class="metric-label">API連接</div>
-                        <div class="metric-value" id="apiConnectivity">✅ 連接</div>
+                        <div class="metric-label">主交易系統</div>
+                        <div class="metric-value" id="mainTradingStatus">載入中...</div>
                     </div>
                     <div class="metric">
-                        <div class="metric-label">數據完整性</div>
-                        <div class="metric-value" id="dataIntegrity">✅ 完整</div>
+                        <div class="metric-label">監控系統</div>
+                        <div class="metric-value" id="monitoringStatus">載入中...</div>
                     </div>
                     <div class="metric">
-                        <div class="metric-label">磁盤使用</div>
-                        <div class="metric-value" id="diskUsage">23.5%</div>
+                        <div class="metric-label">數據管理</div>
+                        <div class="metric-value" id="dataManagementStatus">載入中...</div>
                     </div>
                 </div>
+                <div id="workflowDetails" style="margin-top: 15px; font-size: 0.9em; color: #666;"></div>
             </div>
         </div>
         
@@ -305,6 +307,7 @@
             <div class="card-title">🎛️ 系統控制面板</div>
             <div style="text-align: center; margin: 20px 0;">
                 <button class="refresh-btn" onclick="refreshAllData()">🔄 刷新所有數據</button>
+                <button class="refresh-btn" onclick="toggleUpdateFrequency()">⚡ 切換更新頻率</button>
                 <button class="refresh-btn" onclick="viewGitHubActions()">⚙️ GitHub Actions</button>
                 <button class="refresh-btn" onclick="viewTelegramGuide()">📱 Telegram設置</button>
                 <button class="refresh-btn" onclick="emergencyStop()">🚨 緊急停止</button>
@@ -314,6 +317,9 @@
         </div>
     </div>
 
+    <!-- 引入GitHub Actions監控模組 -->
+    <script src="./js/github-actions-monitor.js"></script>
+    
     <script>
         // 簡單的認證檢查
         function checkAuth() {
@@ -382,12 +388,107 @@
             }
         }
         
+        // 更新GitHub Actions交易狀態
+        async function updateTradingSystemStatus() {
+            try {
+                console.log('🔄 更新交易系統狀態...');
+                
+                // 獲取高頻交易狀態
+                const tradingStatus = await window.githubMonitor.getHighFrequencyTradingStatus();
+                const todayStats = await window.githubMonitor.getTodayTradingStats();
+                const allWorkflows = await window.githubMonitor.getAllTradingStatus();
+                
+                // 更新交易系統狀態
+                if (tradingStatus.status) {
+                    const statusIcon = window.githubMonitor.getStatusIcon(tradingStatus.status, tradingStatus.conclusion);
+                    const statusText = tradingStatus.isRunning ? '🔄 運行中' : 
+                        (tradingStatus.conclusion === 'success' ? '✅ 正常' : '⚠️ 待檢查');
+                    
+                    document.getElementById('systemStatus').textContent = statusText;
+                    document.getElementById('lastExecution').textContent = 
+                        window.githubMonitor.formatRunTime(tradingStatus.lastRun);
+                    
+                    // 更新狀態指示器
+                    const statusDot = document.getElementById('tradingStatus');
+                    statusDot.className = tradingStatus.isRunning ? 'status-dot' : 
+                        (tradingStatus.conclusion === 'success' ? 'status-dot' : 'status-dot warning');
+                }
+                
+                // 更新今日統計
+                if (todayStats) {
+                    document.getElementById('todayExecutions').textContent = todayStats.totalExecutions;
+                    document.getElementById('successRate').textContent = 
+                        `${todayStats.successRate.toFixed(1)}%`;
+                    
+                    if (todayStats.nextScheduledRun) {
+                        const nextRun = window.githubMonitor.formatRunTime(todayStats.nextScheduledRun);
+                        document.getElementById('nextExecution').textContent = `下次執行: ${nextRun}`;
+                    }
+                }
+                
+                // 更新工作流狀態
+                const workflowMap = {
+                    'high-frequency-trading': 'highFreqStatus',
+                    'main-trading': 'mainTradingStatus', 
+                    'monitoring': 'monitoringStatus',
+                    'data-management': 'dataManagementStatus'
+                };
+                
+                allWorkflows.forEach(workflow => {
+                    const elementId = workflowMap[workflow.workflow];
+                    if (elementId) {
+                        const element = document.getElementById(elementId);
+                        if (element) {
+                            const icon = window.githubMonitor.getStatusIcon(workflow.status, workflow.conclusion);
+                            const status = workflow.isRunning ? '運行中' : 
+                                (workflow.conclusion === 'success' ? '正常' : '待檢查');
+                            element.textContent = `${icon} ${status}`;
+                        }
+                    }
+                });
+                
+                // 更新系統健康狀態
+                const healthyWorkflows = allWorkflows.filter(w => w.conclusion === 'success').length;
+                const totalWorkflows = allWorkflows.length;
+                const healthStatus = document.getElementById('systemHealthStatus');
+                
+                if (healthyWorkflows === totalWorkflows) {
+                    healthStatus.className = 'status-dot';
+                } else if (healthyWorkflows > totalWorkflows / 2) {
+                    healthStatus.className = 'status-dot warning';
+                } else {
+                    healthStatus.className = 'status-dot offline';
+                }
+                
+                // 顯示詳細信息
+                const details = document.getElementById('workflowDetails');
+                if (details && todayStats.lastExecution) {
+                    details.innerHTML = `最後執行: ${todayStats.lastExecution.toLocaleString('zh-TW')} | 
+                        今日成功: ${todayStats.successfulExecutions}/${todayStats.totalExecutions}`;
+                }
+                
+                console.log('✅ 交易系統狀態更新成功');
+                
+            } catch (error) {
+                console.error('❌ 交易系統狀態更新失敗:', error);
+                
+                // 顯示錯誤狀態
+                document.getElementById('systemStatus').textContent = '❌ 連接失敗';
+                document.getElementById('tradingStatus').className = 'status-dot offline';
+                document.getElementById('systemHealthStatus').className = 'status-dot offline';
+            }
+        }
+        
         // 刷新所有數據
         async function refreshAllData() {
             console.log('🔄 開始刷新所有數據...');
             
             try {
-                await updateBTCPrice();
+                // 並行更新所有數據
+                await Promise.all([
+                    updateBTCPrice(),
+                    updateTradingSystemStatus()
+                ]);
                 
                 const now = new Date();
                 document.getElementById('controlPanelStatus').innerHTML = 
@@ -447,8 +548,10 @@
             // 立即更新一次數據
             refreshAllData();
             
-            // 每30秒自動更新
-            setInterval(refreshAllData, 30000);
+            // 保守的前端更新 - 不影響交易決策
+            setInterval(refreshAllData, 30000); // 30秒更新，純顯示用途
+            
+            console.log('📱 前端儀表板：純顯示模式，不影響85%勝率交易決策');
             
             console.log('✅ 儀表板初始化完成');
         });
