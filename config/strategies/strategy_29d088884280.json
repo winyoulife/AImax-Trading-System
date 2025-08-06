@@ -1,0 +1,46 @@
+{
+  "strategy_id": "strategy_29d088884280",
+  "strategy_name": "保守型策略副本",
+  "strategy_type": "macd",
+  "version": "1.0.0",
+  "created_at": "2025-08-06T20:38:56.530188",
+  "updated_at": "2025-08-06T20:38:56.530188",
+  "is_active": false,
+  "description": "克隆自: 保守型MACD策略",
+  "macd_config": {
+    "fast_period": 12,
+    "slow_period": 26,
+    "signal_period": 9,
+    "min_confidence": 0.95,
+    "volume_threshold": 2.5,
+    "rsi_overbought": 70.0,
+    "rsi_oversold": 30.0,
+    "enable_volume_filter": true,
+    "enable_rsi_filter": true
+  },
+  "risk_config": {
+    "max_position_size": 0.03,
+    "max_daily_trades": 5,
+    "stop_loss_pct": 0.02,
+    "take_profit_pct": 0.06,
+    "max_drawdown_pct": 0.1,
+    "min_balance_usdt": 100.0,
+    "cooldown_minutes": 30,
+    "enable_trailing_stop": true
+  },
+  "trading_limits": {
+    "min_trade_amount": 10.0,
+    "max_trade_amount": 500.0,
+    "daily_loss_limit": 200.0,
+    "weekly_loss_limit": 2000.0,
+    "monthly_loss_limit": 5000.0,
+    "max_open_positions": 2,
+    "allowed_symbols": [
+      "BTCUSDT",
+      "ETHUSDT"
+    ]
+  },
+  "backtest_results": {},
+  "performance_metrics": {},
+  "custom_params": {}
+}

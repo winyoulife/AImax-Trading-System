@@ -1,0 +1,40 @@
+{
+  "comparison_time": "2025-08-06T20:38:56.594429",
+  "symbol": "BTCUSDT",
+  "backtest_days": 5,
+  "strategies_compared": 2,
+  "results": {
+    "strategy_5aab2172b91a": {
+      "strategy_name": "保守型MACD策略",
+      "total_return": 0.0,
+      "win_rate": 0,
+      "max_drawdown": 0.0,
+      "sharpe_ratio": 0.0,
+      "total_trades": 0
+    },
+    "strategy_b39fb27e7325": {
+      "strategy_name": "激進型MACD策略",
+      "total_return": 0.0,
+      "win_rate": 0,
+      "max_drawdown": 0.0,
+      "sharpe_ratio": 0.0,
+      "total_trades": 0
+    }
+  },
+  "best_strategy": [
+    "strategy_5aab2172b91a",
+    {
+      "strategy_name": "保守型MACD策略",
+      "total_return": 0.0,
+      "win_rate": 0,
+      "max_drawdown": 0.0,
+      "sharpe_ratio": 0.0,
+      "total_trades": 0
+    }
+  ],
+  "summary": {
+    "avg_return": 0.0,
+    "avg_win_rate": 0.0,
+    "avg_drawdown": 0.0
+  }
+}
