@@ -36,14 +36,16 @@ jobs:
           # 創建部署目錄
           mkdir -p _site
           
-          # 複製MAX API直連版儀表板作為主頁
-          cp static/simple-max-dashboard.html _site/index.html
+          # 複製終極智能儀表板作為主頁
+          cp static/ultimate-smart-dashboard.html _site/index.html
           
           # 複製測試頁面
           cp static/test-max-api.html _site/test-max-api.html
           
-          # 複製原版儀表板作為備用
+          # 複製各版本儀表板作為備用
           cp static/clean-dashboard.html _site/dashboard.html
+          cp static/simple-max-dashboard.html _site/simple.html
+          cp static/ultimate-smart-dashboard.html _site/smart.html
           
           # 創建重定向頁面
           cat > _site/login.html << 'EOF'
@@ -78,14 +80,15 @@ jobs:
           </head>
           <body>
               <div class="header">
-                  <h1>🤖 AImax v3.0 簡潔版交易儀表板</h1>
-                  <p>智能交易系統 - 85%勝率目標</p>
+                  <h1>🤖 AImax 終極智能交易儀表板</h1>
+                  <p>85%勝率策略 • 高頻智能交易系統 • 即時數據監控</p>
               </div>
               
               <div class="card">
                   <h2>🚀 快速開始</h2>
-                  <a href="./index.html" class="btn">💰 查看即時價格</a>
-                  <a href="./dashboard.html" class="btn">🔐 進入完整儀表板</a>
+                  <a href="./index.html" class="btn">🤖 終極智能儀表板</a>
+                  <a href="./simple.html" class="btn">💰 簡潔價格顯示</a>
+                  <a href="./dashboard.html" class="btn">🔐 完整登入儀表板</a>
                   <p><strong>完整儀表板登入資訊：</strong></p>
                   <ul>
                       <li>帳號：<code>admin</code></li>
@@ -94,14 +97,16 @@ jobs:
               </div>
               
               <div class="card">
-                  <h2>✨ 主要功能</h2>
+                  <h2>✨ 終極智能功能</h2>
                   <ul>
-                      <li>💰 MAX API 直連即時 BTC/TWD 價格</li>
-                      <li>📊 買賣價差和24小時成交量</li>
-                      <li>📈 價格變化趨勢顯示</li>
-                      <li>📱 響應式設計，支援移動設備</li>
-                      <li>🔄 每30秒自動更新 + 手動刷新</li>
-                      <li>🔒 完整儀表板含登入系統</li>
+                      <li>🤖 85%勝率高頻交易系統監控</li>
+                      <li>💰 MAX API 即時 BTC/TWD 價格</li>
+                      <li>🏥 完整系統健康監控</li>
+                      <li>📊 即時交易統計和分析</li>
+                      <li>📱 Telegram通知系統整合</li>
+                      <li>💾 數據管理和備份狀態</li>
+                      <li>🔄 智能頻率控制顯示</li>
+                      <li>📋 即時交易日誌</li>
                   </ul>
               </div>
               

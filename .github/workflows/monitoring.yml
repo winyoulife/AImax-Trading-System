@@ -1,0 +1,144 @@
+name: AImax 系統監控和健康檢查
+
+on:
+  schedule:
+    # 每5分鐘執行健康檢查
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      check_type:
+        description: '檢查類型'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+        - full
+        - quick
+
+env:
+  MONITORING_MODE: active
+  PYTHON_VERSION: '3.10'
+  
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+    - name: 🔄 檢出代碼
+      uses: actions/checkout@v4
+      
+    - name: 🐍 設置Python環境
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 安裝依賴
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests pandas numpy
+        
+    - name: 🔍 執行系統健康檢查
+      id: health_check
+      run: |
+        echo "🔍 執行AImax系統健康檢查..."
+        python -c "
+        import json
+        import os
+        import requests
+        from datetime import datetime
+        
+        def check_system_health():
+            health_status = {
+                'timestamp': datetime.now().isoformat(),
+                'overall_status': 'healthy',
+                'checks': {},
+                'issues': [],
+                'btc_price': 0
+            }
+            
+            print('🔍 開始系統健康檢查...')
+            
+            # 檢查MAX API連接性
+            try:
+                print('📡 檢查MAX API連接性...')
+                response = requests.get('https://max-api.maicoin.com/api/v2/tickers/btctwd', timeout=10)
+                if response.status_code == 200:
+                    health_status['checks']['max_api'] = 'healthy'
+                    data = response.json()
+                    health_status['btc_price'] = float(data.get('last', 0))
+                    print(f'✅ MAX API正常，BTC價格: NT\${health_status[\"btc_price\"]:,.0f}')
+                else:
+                    health_status['checks']['max_api'] = 'warning'
+                    health_status['issues'].append(f'MAX API回應異常: {response.status_code}')
+            except Exception as e:
+                health_status['checks']['max_api'] = 'error'
+                health_status['issues'].append(f'MAX API連接失敗: {str(e)}')
+            
+            # 檢查磁盤使用
+            try:
+                import shutil
+                total, used, free = shutil.disk_usage('.')
+                disk_usage_percent = (used / total) * 100
+                
+                if disk_usage_percent > 90:
+                    health_status['checks']['disk_usage'] = 'warning'
+                    health_status['issues'].append(f'磁盤使用率較高: {disk_usage_percent:.1f}%')
+                else:
+                    health_status['checks']['disk_usage'] = 'healthy'
+                    
+                print(f'💾 磁盤使用率: {disk_usage_percent:.1f}%')
+            except Exception as e:
+                health_status['checks']['disk_usage'] = 'unknown'
+            
+            # 綜合評估
+            error_count = sum(1 for check in health_status['checks'].values() if check == 'error')
+            warning_count = sum(1 for check in health_status['checks'].values() if check == 'warning')
+            
+            if error_count > 0:
+                health_status['overall_status'] = 'critical'
+            elif warning_count > 0:
+                health_status['overall_status'] = 'warning'
+            else:
+                health_status['overall_status'] = 'healthy'
+            
+            return health_status
+        
+        # 執行健康檢查
+        health_result = check_system_health()
+        
+        # 保存結果
+        os.makedirs('data/monitoring', exist_ok=True)
+        with open('data/monitoring/health_status.json', 'w') as f:
+            json.dump(health_result, f, indent=2)
+        
+        print(f'✅ 健康檢查完成，狀態: {health_result[\"overall_status\"]}')
+        if health_result['issues']:
+            print('⚠️ 發現問題:')
+            for issue in health_result['issues']:
+                print(f'  - {issue}')
+        
+        # 設置輸出
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+            f.write(f'overall_status={health_result[\"overall_status\"]}\\n')
+            f.write(f'btc_price={health_result[\"btc_price\"]}\\n')
+        "
+        
+    - name: 📊 生成監控報告
+      run: |
+        echo "📊 === AImax 系統監控報告 ==="
+        echo "🕐 檢查時間: $(date)"
+        echo "🤖 系統: AImax 智能交易系統"
+        echo "☁️ 環境: GitHub Actions"
+        echo "📈 狀態: ${{ steps.health_check.outputs.overall_status }}"
+        echo "💰 BTC價格: NT\$${{ steps.health_check.outputs.btc_price }}"
+        echo "✅ 監控檢查完成"
+        echo "🔄 下次檢查: 5分鐘後"
+        
+    - name: 📤 保存監控數據
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: monitoring-data-${{ github.run_number }}
+        path: data/monitoring/
+        retention-days: 3

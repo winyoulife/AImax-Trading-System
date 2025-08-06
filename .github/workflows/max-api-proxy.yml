@@ -1,0 +1,230 @@
+name: AImax MAX API 數據代理服務
+
+on:
+  schedule:
+    # 每分鐘獲取一次MAX API數據
+    - cron: '* * * * *'
+  workflow_dispatch:
+    inputs:
+      force_update:
+        description: '強制更新數據'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  PYTHON_VERSION: '3.10'
+  
+jobs:
+  max-api-proxy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    
+    steps:
+    - name: 🔄 檢出代碼
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 🐍 設置Python環境
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 安裝依賴
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests pytz
+        
+    - name: 📡 獲取MAX API數據並生成靜態文件
+      run: |
+        echo "📡 獲取MAX API數據..."
+        python -c "
+        import json
+        import os
+        import requests
+        from datetime import datetime
+        import pytz
+        
+        def fetch_max_api_data():
+            taipei_tz = pytz.timezone('Asia/Taipei')
+            now = datetime.now()
+            now_taipei = now.astimezone(taipei_tz)
+            
+            api_data = {
+                'timestamp': now.isoformat(),
+                'taipei_time': now_taipei.isoformat(),
+                'success': False,
+                'data': {},
+                'meta': {
+                    'source': 'MAX API v2',
+                    'fetch_method': 'github_actions_direct',
+                    'data_age_seconds': 0,
+                    'api_response_time_ms': 0
+                },
+                'status': {
+                    'message': 'unknown',
+                    'consecutive_failures': 0
+                }
+            }
+            
+            try:
+                print('📡 直接調用MAX API...')
+                start_time = datetime.now()
+                
+                response = requests.get(
+                    'https://max-api.maicoin.com/api/v2/tickers/btctwd',
+                    timeout=10,
+                    headers={'User-Agent': 'AImax-Trading-System/1.0'}
+                )
+                
+                end_time = datetime.now()
+                response_time = (end_time - start_time).total_seconds() * 1000
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    # 處理和增強數據
+                    enhanced_data = {
+                        'price': float(data.get('last', 0)),
+                        'buy_price': float(data.get('buy', 0)),
+                        'sell_price': float(data.get('sell', 0)),
+                        'volume': float(data.get('vol', 0)),
+                        'high_24h': float(data.get('high', 0)),
+                        'low_24h': float(data.get('low', 0)),
+                        'open_24h': float(data.get('open', 0)),
+                        'formatted_price': f'NT\${float(data.get(\"last\", 0)):,.0f}',
+                        'price_change_24h': 0,
+                        'price_change_percent_24h': 0
+                    }
+                    
+                    # 計算24小時變化
+                    if enhanced_data['open_24h'] > 0:
+                        price_change = enhanced_data['price'] - enhanced_data['open_24h']
+                        price_change_percent = (price_change / enhanced_data['open_24h']) * 100
+                        enhanced_data['price_change_24h'] = price_change
+                        enhanced_data['price_change_percent_24h'] = price_change_percent
+                    
+                    api_data['success'] = True
+                    api_data['data'] = enhanced_data
+                    api_data['meta']['api_response_time_ms'] = round(response_time, 2)
+                    api_data['status']['message'] = 'success'
+                    
+                    print(f'✅ MAX API調用成功')
+                    print(f'💰 BTC價格: {enhanced_data[\"formatted_price\"]}')
+                    print(f'📊 24小時變化: {enhanced_data[\"price_change_percent_24h\"]:.2f}%')
+                    print(f'⏱️ 響應時間: {response_time:.0f}ms')
+                    
+                else:
+                    api_data['status']['message'] = f'API響應錯誤: {response.status_code}'
+                    print(f'❌ MAX API響應錯誤: {response.status_code}')
+                    
+            except Exception as e:
+                api_data['status']['message'] = f'API調用失敗: {str(e)}'
+                print(f'❌ MAX API調用失敗: {str(e)}')
+            
+            return api_data
+        
+        # 獲取數據
+        result = fetch_max_api_data()
+        
+        # 創建靜態API文件目錄
+        os.makedirs('static/api', exist_ok=True)
+        
+        # 保存為靜態API文件
+        with open('static/api/btc-price.json', 'w', encoding='utf-8') as f:
+            json.dump(result, f, indent=2, ensure_ascii=False)
+        
+        # 保存歷史數據（用於趨勢分析）
+        history_file = 'static/api/price-history.jsonl'
+        if result['success']:
+            history_entry = {
+                'timestamp': result['timestamp'],
+                'price': result['data']['price'],
+                'volume': result['data']['volume'],
+                'change_24h': result['data']['price_change_percent_24h']
+            }
+            
+            with open(history_file, 'a', encoding='utf-8') as f:
+                f.write(json.dumps(history_entry, ensure_ascii=False) + '\\n')
+            
+            # 保持歷史文件大小（只保留最近1000條記錄）
+            try:
+                with open(history_file, 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+                
+                if len(lines) > 1000:
+                    with open(history_file, 'w', encoding='utf-8') as f:
+                        f.writelines(lines[-1000:])
+                    print('📝 歷史數據已清理，保留最近1000條記錄')
+            except:
+                pass
+        
+        # 創建CORS友好的響應頭文件
+        cors_headers = '''Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Cache-Control: no-cache, no-store, must-revalidate
+Pragma: no-cache
+Expires: 0'''
+        
+        with open('static/api/.htaccess', 'w') as f:
+            f.write(cors_headers)
+        
+        print('✅ 靜態API文件已生成')
+        print(f'📁 文件位置: static/api/btc-price.json')
+        "
+        
+    - name: 📊 更新系統狀態
+      run: |
+        echo "📊 更新系統狀態..."
+        python -c "
+        import json
+        import os
+        from datetime import datetime
+        
+        # 讀取剛生成的API數據
+        api_data = {}
+        try:
+            with open('static/api/btc-price.json', 'r', encoding='utf-8') as f:
+                api_data = json.load(f)
+        except:
+            pass
+        
+        # 更新系統狀態
+        if api_data.get('success'):
+            # 更新交易數據管理器的價格數據
+            os.makedirs('data/monitoring', exist_ok=True)
+            
+            price_data = {
+                'price': api_data['data']['price'],
+                'timestamp': api_data['timestamp'],
+                'source': 'github_actions_max_api',
+                'formatted_price': api_data['data']['formatted_price'],
+                'change_24h': api_data['data']['price_change_percent_24h']
+            }
+            
+            with open('data/monitoring/last_price.json', 'w', encoding='utf-8') as f:
+                json.dump(price_data, f, indent=2, ensure_ascii=False)
+            
+            print('✅ 系統狀態已更新')
+            print(f'💰 當前價格: {price_data[\"formatted_price\"]}')
+        else:
+            print('⚠️ API數據獲取失敗，跳過狀態更新')
+        "
+        
+    - name: 📤 提交更新的靜態文件
+      run: |
+        git config --local user.email \"action@github.com\"
+        git config --local user.name \"GitHub Action\"
+        
+        # 檢查是否有變更
+        if git diff --quiet static/api/btc-price.json; then
+          echo \"📊 價格數據無變化，跳過提交\"
+        else
+          git add static/api/
+          git add data/monitoring/ || true
+          git commit -m \"📊 自動更新MAX API數據 - $(date +'%Y-%m-%d %H:%M:%S')\" || echo \"無需提交\"
+          git push || echo \"推送失敗，可能無變更\"
+          echo \"✅ 靜態API數據已更新\"
+        fi

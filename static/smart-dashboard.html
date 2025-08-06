@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AImax 智能交易儀表板 - 混合數據源</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: rgba(255,255,255,0.95);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #6c5ce7;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .data-source-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #f8f9fa;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        
+        .source-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+        
+        .source-dot.static { background: #ffc107; }
+        .source-dot.fallback { background: #dc3545; }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .price-display {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #00b894;
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .price-change {
+            text-align: center;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        
+        .price-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .detail-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .detail-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            color: #333;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        
+        .last-update {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 15px;
+        }
+        
+        .system-status {
+            background: linear-gradient(135deg, #00b894, #00a085);
+            color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .system-status h3 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .status-item {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+        }
+        
+        .status-value {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .status-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .refresh-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            background: #6c5ce7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #5a4fcf;
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .btn.secondary {
+            background: #74b9ff;
+        }
+        
+        .btn.secondary:hover {
+            background: #0984e3;
+        }
+        
+        .error-message {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #6c5ce7;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .price-display {
+                font-size: 2em;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .price-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AImax 智能交易儀表板</h1>
+            <p>混合數據源 - 靜態 + 實時 API</p>
+            <div class="data-source-indicator" id="dataSourceIndicator">
+                <span class="source-dot" id="sourceDot"></span>
+                <span id="sourceText">正在載入...</span>
+            </div>
+        </div>
+        
+        <div class="dashboard-grid">
+            <!-- BTC價格卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">💰 BTC/TWD 價格</span>
+                </div>
+                
+                <div class="price-display" id="priceDisplay">
+                    <span class="loading"></span> 載入中...
+                </div>
+                
+                <div class="price-change" id="priceChange">正在獲取數據...</div>
+                
+                <div class="price-details">
+                    <div class="detail-item">
+                        <div class="detail-label">買入價</div>
+                        <div class="detail-value" id="buyPrice">--</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">賣出價</div>
+                        <div class="detail-value" id="sellPrice">--</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">24小時最高</div>
+                        <div class="detail-value" id="highPrice">--</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">24小時最低</div>
+                        <div class="detail-value" id="lowPrice">--</div>
+                    </div>
+                </div>
+                
+                <div class="refresh-controls">
+                    <button class="btn" id="refreshBtn" onclick="updatePrice()">
+                        🔄 刷新價格
+                    </button>
+                    <button class="btn secondary" id="switchSourceBtn" onclick="switchDataSource()">
+                        🔀 切換數據源
+                    </button>
+                </div>
+                
+                <div class="last-update" id="lastUpdate">等待數據...</div>
+                
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+            </div>
+            
+            <!-- 系統狀態卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">📊 系統狀態</span>
+                </div>
+                
+                <div class="system-status">
+                    <h3>🎯 85%勝率策略運行中</h3>
+                    <p>智能頻率控制 + 高頻交易系統</p>
+                    
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <div class="status-value" id="systemStatus">運行正常</div>
+                            <div class="status-label">系統狀態</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-value" id="dataFreshness">實時</div>
+                            <div class="status-label">數據新鮮度</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-value" id="apiCalls">0</div>
+                            <div class="status-label">今日API調用</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-value" id="uptime">計算中</div>
+                            <div class="status-label">運行時間</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 智能數據源管理器
+        class SmartDataSourceManager {
+            constructor() {
+                this.currentSource = 'auto'; // auto, static, realtime
+                this.staticApiUrl = '/api/btc-price.json';
+                this.corsProxyUrl = 'https://api.allorigins.win/get?url=';
+                this.maxApiUrl = 'https://max-api.maicoin.com/api/v2/tickers/btctwd';
+                this.lastSuccessfulSource = null;
+                this.apiCallCount = 0;
+                this.startTime = new Date();
+                
+                this.updateSourceIndicator('正在初始化...');
+            }
+            
+            updateSourceIndicator(text, type = 'loading') {
+                const indicator = document.getElementById('dataSourceIndicator');
+                const dot = document.getElementById('sourceDot');
+                const textEl = document.getElementById('sourceText');
+                
+                dot.className = `source-dot ${type}`;
+                textEl.textContent = text;
+            }
+            
+            async fetchStaticData() {
+                try {
+                    console.log('📊 嘗試獲取靜態API數據...');
+                    
+                    const response = await fetch(this.staticApiUrl + '?t=' + Date.now(), {
+                        cache: 'no-cache'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`靜態API響應錯誤: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.success && data.data) {
+                        this.updateSourceIndicator('GitHub Actions 靜態數據', 'static');
+                        this.lastSuccessfulSource = 'static';
+                        
+                        // 計算數據年齡
+                        const dataTime = new Date(data.timestamp);
+                        const ageSeconds = (new Date() - dataTime) / 1000;
+                        
+                        return {
+                            ...data.data,
+                            _meta: {
+                                source: 'GitHub Actions (靜態)',
+                                data_age_seconds: Math.floor(ageSeconds),
+                                fetch_method: 'static_api',
+                                response_time_ms: data.meta?.api_response_time_ms || 0
+                            }
+                        };
+                    } else {
+                        throw new Error('靜態數據格式無效');
+                    }
+                    
+                } catch (error) {
+                    console.warn('⚠️ 靜態API獲取失敗:', error.message);
+                    throw error;
+                }
+            }
+            
+            async fetchRealtimeData() {
+                try {
+                    console.log('📡 嘗試獲取實時API數據...');
+                    this.apiCallCount++;
+                    
+                    const proxyUrl = this.corsProxyUrl + encodeURIComponent(this.maxApiUrl);
+                    const response = await fetch(proxyUrl);
+                    
+                    if (!response.ok) {
+                        throw new Error(`CORS代理響應錯誤: ${response.status}`);
+                    }
+                    
+                    const proxyData = await response.json();
+                    
+                    if (proxyData.status.http_code === 200) {
+                        const data = JSON.parse(proxyData.contents);
+                        
+                        if (data && data.last) {
+                            this.updateSourceIndicator('MAX API 實時數據', 'realtime');
+                            this.lastSuccessfulSource = 'realtime';
+                            
+                            // 計算24小時變化
+                            const price = parseFloat(data.last);
+                            const open = parseFloat(data.open || price);
+                            const change24h = ((price - open) / open) * 100;
+                            
+                            return {
+                                price: price,
+                                buy_price: parseFloat(data.buy || price),
+                                sell_price: parseFloat(data.sell || price),
+                                volume: parseFloat(data.vol || 0),
+                                high_24h: parseFloat(data.high || price),
+                                low_24h: parseFloat(data.low || price),
+                                open_24h: open,
+                                formatted_price: `NT$${price.toLocaleString()}`,
+                                price_change_24h: price - open,
+                                price_change_percent_24h: change24h,
+                                _meta: {
+                                    source: 'MAX API v2 (實時)',
+                                    data_age_seconds: 0,
+                                    fetch_method: 'cors_proxy',
+                                    response_time_ms: 0
+                                }
+                            };
+                        }
+                    }
+                    
+                    throw new Error('實時API數據格式無效');
+                    
+                } catch (error) {
+                    console.warn('⚠️ 實時API獲取失敗:', error.message);
+                    throw error;
+                }
+            }
+            
+            async fetchData() {
+                const errors = [];
+                
+                // 智能選擇數據源
+                const sources = this.currentSource === 'auto' 
+                    ? ['static', 'realtime'] 
+                    : [this.currentSource];
+                
+                for (const source of sources) {
+                    try {
+                        if (source === 'static') {
+                            return await this.fetchStaticData();
+                        } else if (source === 'realtime') {
+                            return await this.fetchRealtimeData();
+                        }
+                    } catch (error) {
+                        errors.push(`${source}: ${error.message}`);
+                        continue;
+                    }
+                }
+                
+                // 如果都失敗了，嘗試使用上次成功的源
+                if (this.lastSuccessfulSource && !sources.includes(this.lastSuccessfulSource)) {
+                    try {
+                        if (this.lastSuccessfulSource === 'static') {
+                            return await this.fetchStaticData();
+                        } else if (this.lastSuccessfulSource === 'realtime') {
+                            return await this.fetchRealtimeData();
+                        }
+                    } catch (error) {
+                        errors.push(`fallback: ${error.message}`);
+                    }
+                }
+                
+                this.updateSourceIndicator('所有數據源失敗', 'fallback');
+                throw new Error('所有數據源都不可用: ' + errors.join(', '));
+            }
+            
+            switchSource() {
+                const sources = ['auto', 'static', 'realtime'];
+                const currentIndex = sources.indexOf(this.currentSource);
+                this.currentSource = sources[(currentIndex + 1) % sources.length];
+                
+                const sourceNames = {
+                    'auto': '自動選擇',
+                    'static': '靜態數據',
+                    'realtime': '實時數據'
+                };
+                
+                console.log(`🔀 切換到數據源: ${sourceNames[this.currentSource]}`);
+                return this.currentSource;
+            }
+        }
+        
+        // 全局變量
+        const dataManager = new SmartDataSourceManager();
+        let updateTimer = null;
+        let currentPrice = null;
+        
+        // 更新價格函數
+        async function updatePrice() {
+            const priceDisplay = document.getElementById('priceDisplay');
+            const priceChange = document.getElementById('priceChange');
+            const lastUpdate = document.getElementById('lastUpdate');
+            const errorMessage = document.getElementById('errorMessage');
+            const refreshBtn = document.getElementById('refreshBtn');
+            
+            // 顯示載入狀態
+            refreshBtn.disabled = true;
+            refreshBtn.innerHTML = '<span class=\"loading\"></span> 更新中...';
+            errorMessage.style.display = 'none';
+            
+            try {
+                const data = await dataManager.fetchData();
+                
+                if (data && data.price) {
+                    const newPrice = data.price;
+                    const oldPrice = currentPrice;
+                    
+                    // 更新價格顯示
+                    priceDisplay.textContent = data.formatted_price || `NT$${newPrice.toLocaleString()}`;
+                    priceDisplay.style.color = '#00b894';
+                    
+                    // 更新詳細信息
+                    document.getElementById('buyPrice').textContent = 
+                        data.buy_price ? `NT$${data.buy_price.toLocaleString()}` : '--';
+                    document.getElementById('sellPrice').textContent = 
+                        data.sell_price ? `NT$${data.sell_price.toLocaleString()}` : '--';
+                    document.getElementById('highPrice').textContent = 
+                        data.high_24h ? `NT$${data.high_24h.toLocaleString()}` : '--';
+                    document.getElementById('lowPrice').textContent = 
+                        data.low_24h ? `NT$${data.low_24h.toLocaleString()}` : '--';
+                    
+                    // 顯示24小時變化
+                    const change24h = data.price_change_percent_24h || 0;
+                    const changeElement = document.getElementById('priceChange');
+                    changeElement.textContent = `24小時變化: ${change24h >= 0 ? '+' : ''}${change24h.toFixed(2)}%`;
+                    changeElement.style.color = change24h >= 0 ? '#00b894' : '#e17055';
+                    
+                    // 更新系統狀態
+                    const dataAge = data._meta?.data_age_seconds || 0;
+                    document.getElementById('dataFreshness').textContent = 
+                        dataAge < 60 ? '實時' : `${Math.floor(dataAge/60)}分鐘前`;
+                    document.getElementById('apiCalls').textContent = dataManager.apiCallCount;
+                    
+                    // 計算運行時間
+                    const uptime = Math.floor((new Date() - dataManager.startTime) / 1000 / 60);
+                    document.getElementById('uptime').textContent = `${uptime}分鐘`;
+                    
+                    currentPrice = newPrice;
+                    lastUpdate.textContent = `最後更新: ${new Date().toLocaleString('zh-TW')} (${data._meta?.source || '未知'})`;
+                    
+                    console.log(`✅ 價格更新成功: ${data.formatted_price}`);
+                    console.log(`📊 數據來源: ${data._meta?.source}`);
+                    
+                } else {
+                    throw new Error('獲取的數據格式無效');
+                }
+                
+            } catch (error) {
+                console.error('❌ 價格更新失敗:', error);
+                
+                priceDisplay.textContent = '無法獲取價格';
+                priceDisplay.style.color = '#e17055';
+                priceChange.textContent = `錯誤: ${error.message}`;
+                priceChange.style.color = '#e17055';
+                
+                errorMessage.textContent = `連接失敗: ${error.message}`;
+                errorMessage.style.display = 'block';
+                
+                lastUpdate.textContent = `錯誤時間: ${new Date().toLocaleString('zh-TW')}`;
+            }
+            
+            // 恢復按鈕狀態
+            refreshBtn.disabled = false;
+            refreshBtn.innerHTML = '🔄 刷新價格';
+        }
+        
+        // 切換數據源
+        function switchDataSource() {
+            const newSource = dataManager.switchSource();
+            const sourceNames = {
+                'auto': '自動選擇',
+                'static': '靜態數據',
+                'realtime': '實時數據'
+            };
+            
+            alert(`已切換到: ${sourceNames[newSource]}`);
+            updatePrice();
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 AImax 智能儀表板啟動...');
+            
+            // 立即更新一次
+            updatePrice();
+            
+            // 每30秒自動更新
+            updateTimer = setInterval(updatePrice, 30000);
+            
+            console.log('✅ 系統初始化完成，每30秒自動更新');
+        });
+        
+        // 頁面卸載時清理定時器
+        window.addEventListener('beforeunload', function() {
+            if (updateTimer) {
+                clearInterval(updateTimer);
+            }
+        });
+    </script>
+</body>
+</html>
