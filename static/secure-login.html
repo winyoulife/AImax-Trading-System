@@ -344,7 +344,7 @@
                 
                 if (now < expiryDate) {
                     // 會話仍然有效，重定向到儀表板
-                    window.location.href = './index.html';
+                    window.location.href = './dashboard.html';
                     return true;
                 } else {
                     // 會話已過期，清除登入狀態
@@ -387,7 +387,7 @@
                     
                     // 延遲跳轉以顯示成功訊息
                     setTimeout(() => {
-                        window.location.href = './index.html';
+                        window.location.href = './dashboard.html';
                     }, 1500);
                     
                 } else {

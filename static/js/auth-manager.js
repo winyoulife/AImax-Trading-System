@@ -69,7 +69,15 @@ class AuthManager {
     
     // 檢查頁面訪問權限
     requireAuth() {
+        const currentPath = window.location.pathname;
+        const isLoginPage = currentPath.includes('secure-login.html') || currentPath.endsWith('/');
+        
+        if (isLoginPage) {
+            return true; // 登入頁面不需要檢查
+        }
+        
         if (!this.checkAuthStatus()) {
+            console.log('🔐 未授權訪問，重定向到登入頁面');
             window.location.href = './secure-login.html';
             return false;
         }
@@ -104,7 +112,10 @@ window.authManager = new AuthManager();
 // 頁面載入時自動檢查認證
 document.addEventListener('DOMContentLoaded', function() {
     // 如果不是登入頁面，則檢查認證
-    if (!window.location.pathname.includes('secure-login.html')) {
+    const currentPath = window.location.pathname;
+    const isLoginPage = currentPath.includes('secure-login.html') || currentPath.endsWith('index.html');
+    
+    if (!isLoginPage) {
         window.authManager.requireAuth();
     }
 });

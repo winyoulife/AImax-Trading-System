@@ -468,7 +468,9 @@ style>
             console.log('🚀 AImax 終極智能儀表板啟動...');
             
             // 檢查認證狀態
-            if (!window.authManager.requireAuth()) {
+            if (!window.authManager.checkAuthStatus()) {
+                console.log('🔐 未授權訪問，重定向到登入頁面');
+                window.location.href = './secure-login.html';
                 return;
             }
             
