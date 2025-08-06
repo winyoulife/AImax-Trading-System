@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AImax 登入測試 - 專屬帳號系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 450px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+        
+        .logo h1 {
+            color: #333;
+            font-size: 2.8em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .logo p {
+            color: #666;
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+        
+        .security-badge {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin: 15px auto;
+            display: inline-block;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 18px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .login-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .error {
+            background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 500;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        .success {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .test-info {
+            margin-top: 35px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            border-left: 5px solid #00b894;
+        }
+        
+        .test-info h3 {
+            color: #00b894;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .test-info ul {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+            list-style: none;
+            padding: 0;
+        }
+        
+        .test-info li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .test-info li:before {
+            content: '✅';
+            position: absolute;
+            left: 0;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .version-info {
+            text-align: center;
+            margin-top: 20px;
+            color: #999;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            .logo h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>🤖 AImax</h1>
+            <p>登入系統測試</p>
+            <div class="security-badge">🔐 專屬認證測試</div>
+        </div>
+        
+        <div id="errorMessage" class="error" style="display: none;"></div>
+        <div id="successMessage" class="success" style="display: none;"></div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">🔑 專屬帳號</label>
+                <input type="text" id="username" name="username" required autocomplete="username" placeholder="請輸入專屬帳號">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">🔒 專屬密碼</label>
+                <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="請輸入專屬密碼">
+            </div>
+            
+            <button type="submit" class="login-btn" id="loginBtn">
+                🚀 測試登入系統
+            </button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>正在驗證身份...</p>
+        </div>
+        
+        <div class="test-info">
+            <h3>🧪 登入系統測試</h3>
+            <ul>
+                <li>專屬帳號: lovejk1314</li>
+                <li>專屬密碼: Ichen5978</li>
+                <li>加密方式: SHA-256</li>
+                <li>會話管理: 24小時</li>
+                <li>測試目的: 驗證認證系統正常運作</li>
+            </ul>
+        </div>
+        
+        <div class="version-info">
+            AImax Login Test v1.0 | 專屬認證系統測試
+        </div>
+    </div>
+
+    <script>
+        // 專屬帳號密碼配置 (SHA-256加密)
+        const SECURE_CREDENTIALS = {
+            username: 'lovejk1314',
+            passwordHash: '898535a8764bb8b3ccfebd1c2ac92163adafb69300370881a7beaa2dda7af4ae' // Ichen5978的SHA-256
+        };
+        
+        // SHA-256哈希函數
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
+        
+        // 顯示錯誤訊息
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            
+            successDiv.style.display = 'none';
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            
+            // 3秒後自動隱藏
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        // 顯示成功訊息
+        function showSuccess(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            
+            errorDiv.style.display = 'none';
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+        }
+        
+        // 處理登入表單提交
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const loading = document.getElementById('loading');
+            
+            if (!username || !password) {
+                showError('請輸入帳號和密碼');
+                return;
+            }
+            
+            // 顯示載入狀態
+            loginBtn.disabled = true;
+            loading.style.display = 'block';
+            
+            try {
+                // 計算密碼哈希
+                const passwordHash = await sha256(password);
+                
+                console.log('🔐 測試登入資訊:');
+                console.log('輸入帳號:', username);
+                console.log('預期帳號:', SECURE_CREDENTIALS.username);
+                console.log('密碼哈希:', passwordHash);
+                console.log('預期哈希:', SECURE_CREDENTIALS.passwordHash);
+                
+                // 驗證憑證
+                if (username === SECURE_CREDENTIALS.username && passwordHash === SECURE_CREDENTIALS.passwordHash) {
+                    showSuccess('✅ 登入測試成功！認證系統運作正常！');
+                    
+                    // 設置測試登入狀態
+                    localStorage.setItem('aimax_test_authenticated', 'true');
+                    localStorage.setItem('aimax_test_username', username);
+                    localStorage.setItem('aimax_test_login_time', new Date().toISOString());
+                    
+                    console.log('✅ 登入測試通過 - 認證系統正常');
+                    
+                } else {
+                    showError('❌ 帳號或密碼錯誤，請檢查後重試');
+                    console.log('❌ 登入測試失敗 - 憑證不匹配');
+                    
+                    // 清空密碼欄位
+                    document.getElementById('password').value = '';
+                    document.getElementById('password').focus();
+                }
+                
+            } catch (error) {
+                console.error('登入錯誤:', error);
+                showError('❌ 登入過程發生錯誤，請稍後重試');
+            } finally {
+                // 隱藏載入狀態
+                loginBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+        
+        // 頁面載入時的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🧪 AImax 登入系統測試頁面已載入');
+            
+            // 檢查是否有測試登入記錄
+            const testAuth = localStorage.getItem('aimax_test_authenticated');
+            if (testAuth === 'true') {
+                const username = localStorage.getItem('aimax_test_username');
+                const loginTime = localStorage.getItem('aimax_test_login_time');
+                showSuccess(`🎉 檢測到測試登入記錄 - 用戶: ${username}, 時間: ${new Date(loginTime).toLocaleString('zh-TW')}`);
+            }
+            
+            // 焦點設置到帳號欄位
+            document.getElementById('username').focus();
+        });
+        
+        console.log('🛡️ 登入測試系統已載入 - SHA-256加密保護');
+    </script>
+</body>
+</html>

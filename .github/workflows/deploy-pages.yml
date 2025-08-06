@@ -54,6 +54,9 @@ jobs:
           cp static/secure-login-fixed.html _site/login-fixed.html
           cp static/dashboard-fixed.html _site/dashboard-fixed.html
           
+          # 複製登入測試頁面
+          cp static/test-login-only.html _site/test-login.html
+          
           # 創建重定向頁面
           cat > _site/login.html << 'EOF'
           <!DOCTYPE html>
@@ -95,6 +98,7 @@ jobs:
                   <h2>🔐 安全登入</h2>
                   <a href="./index.html" class="btn">🔑 專屬安全登入</a>
                   <a href="./dashboard.html" class="btn">🤖 終極智能儀表板</a>
+                  <a href="./test-login.html" class="btn">🧪 登入系統測試</a>
                   <a href="./simple.html" class="btn">💰 簡潔價格顯示</a>
                   <p><strong>專屬帳號登入資訊：</strong></p>
                   <ul>
