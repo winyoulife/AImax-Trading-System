@@ -36,16 +36,23 @@ jobs:
           # 創建部署目錄
           mkdir -p _site
           
-          # 複製終極智能儀表板作為主頁
-          cp static/ultimate-smart-dashboard.html _site/index.html
+          # 複製安全登入頁面作為主頁
+          cp static/secure-login.html _site/index.html
+          
+          # 複製終極智能儀表板
+          cp static/ultimate-smart-dashboard.html _site/dashboard.html
           
           # 複製測試頁面
           cp static/test-max-api.html _site/test-max-api.html
           
           # 複製各版本儀表板作為備用
-          cp static/clean-dashboard.html _site/dashboard.html
+          cp static/clean-dashboard.html _site/clean.html
           cp static/simple-max-dashboard.html _site/simple.html
           cp static/ultimate-smart-dashboard.html _site/smart.html
+          
+          # 複製認證管理器
+          mkdir -p _site/js
+          cp static/js/auth-manager.js _site/js/
           
           # 創建重定向頁面
           cat > _site/login.html << 'EOF'
@@ -85,28 +92,29 @@ jobs:
               </div>
               
               <div class="card">
-                  <h2>🚀 快速開始</h2>
-                  <a href="./index.html" class="btn">🤖 終極智能儀表板</a>
+                  <h2>🔐 安全登入</h2>
+                  <a href="./index.html" class="btn">🔑 專屬安全登入</a>
+                  <a href="./dashboard.html" class="btn">🤖 終極智能儀表板</a>
                   <a href="./simple.html" class="btn">💰 簡潔價格顯示</a>
-                  <a href="./dashboard.html" class="btn">🔐 完整登入儀表板</a>
-                  <p><strong>完整儀表板登入資訊：</strong></p>
+                  <p><strong>專屬帳號登入資訊：</strong></p>
                   <ul>
-                      <li>帳號：<code>admin</code></li>
-                      <li>密碼：<code>aimax2025</code></li>
+                      <li>專屬帳號：<code>lovejk1314</code></li>
+                      <li>專屬密碼：<code>Ichen5978</code></li>
+                      <li>安全等級：<code>SHA-256加密</code></li>
                   </ul>
               </div>
               
               <div class="card">
-                  <h2>✨ 終極智能功能</h2>
+                  <h2>🛡️ 安全功能特色</h2>
                   <ul>
-                      <li>🤖 85%勝率高頻交易系統監控</li>
-                      <li>💰 MAX API 即時 BTC/TWD 價格</li>
-                      <li>🏥 完整系統健康監控</li>
-                      <li>📊 即時交易統計和分析</li>
-                      <li>📱 Telegram通知系統整合</li>
-                      <li>💾 數據管理和備份狀態</li>
-                      <li>🔄 智能頻率控制顯示</li>
-                      <li>📋 即時交易日誌</li>
+                      <li>🔐 專屬帳號密碼認證系統</li>
+                      <li>🛡️ SHA-256加密技術保護</li>
+                      <li>⏰ 24小時會話管理</li>
+                      <li>🚪 安全登出機制</li>
+                      <li>🤖 85%勝率高頻交易系統</li>
+                      <li>💰 MAX API 即時價格監控</li>
+                      <li>📊 完整系統狀態顯示</li>
+                      <li>📱 Telegram即時通知</li>
                   </ul>
               </div>
               

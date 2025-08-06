@@ -438,6 +438,7 @@ style>
                 <button class="refresh-btn" onclick="viewGitHubActions()">⚙️ GitHub Actions</button>
                 <button class="refresh-btn" onclick="viewTelegramGuide()">📱 Telegram設置</button>
                 <button class="refresh-btn" onclick="emergencyStop()">🚨 緊急停止</button>
+                <button class="refresh-btn" onclick="logout()" style="background: #e17055;">🚪 安全登出</button>
             </div>
             <div id="controlPanelStatus"></div>
         </div>        
@@ -454,6 +455,9 @@ style>
         </div>
     </div>
 
+    <!-- 引入認證管理器 -->
+    <script src="./js/auth-manager.js"></script>
+    
     <script>
         // 全局變量
         let updateInterval;
@@ -462,6 +466,23 @@ style>
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 AImax 終極智能儀表板啟動...');
+            
+            // 檢查認證狀態
+            if (!window.authManager.requireAuth()) {
+                return;
+            }
+            
+            // 顯示用戶信息
+            const userInfo = window.authManager.getUserInfo();
+            if (userInfo) {
+                console.log(`👤 歡迎回來, ${userInfo.username}!`);
+                
+                // 在頁面上顯示用戶信息
+                const header = document.querySelector('.header .subtitle');
+                if (header) {
+                    header.innerHTML += ` | 👤 ${userInfo.username}`;
+                }
+            }
             
             // 立即更新一次數據
             refreshAllData();
@@ -704,6 +725,14 @@ style>
             if (confirm('⚠️ 確定要執行緊急停止嗎？\\n\\n這將暫停所有交易活動。')) {
                 alert('🚨 緊急停止功能需要通過GitHub Actions手動觸發\\n\\n請前往Actions頁面執行緊急停止工作流');
                 viewGitHubActions();
+            }
+        }
+        
+        // 登出功能
+        function logout() {
+            if (confirm('🔐 確定要安全登出嗎？')) {
+                window.authManager.logout();
+                window.location.href = './secure-login.html';
             }
         }
         
