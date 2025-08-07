@@ -209,7 +209,7 @@ jobs:
 💡 <b>智能頻率控制</b>: 
 {'🔥 高頻模式' if high_vol_count > total_executions * 0.3 else '📊 正常模式'}
 
-<i>🤖 AImax 85%勝率策略運行中</i>
+<i>🤖 AImax 83.3%勝率策略運行中</i>
                 '''.strip()
                 
                 return self.send_message(message)
@@ -288,7 +288,7 @@ jobs:
 🎯 <b>策略分析</b>:
 • 高波動執行: {today_stats.get('high_volatility_executions', 0)} 次
 • 智能頻率控制: {'✅ 有效' if today_stats.get('high_volatility_executions', 0) > 0 else '📊 正常'}
-• 85%勝率目標: {'🎯 已達成' if today_win_rate >= 85 else '⚠️ 持續優化中'}
+• 83.3%勝率目標: {'🎯 已達成' if today_win_rate >= 85 else '⚠️ 持續優化中'}
 
 💾 <b>系統健康</b>:
 • GitHub Actions: ✅ 正常
@@ -296,7 +296,7 @@ jobs:
 • API連接: ✅ 正常
 
 🔮 <b>明日展望</b>:
-• 繼續85%勝率策略
+• 繼續83.3%勝率策略
 • 智能頻率控制優化
 • 系統穩定性提升
 

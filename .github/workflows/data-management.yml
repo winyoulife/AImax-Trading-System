@@ -215,7 +215,7 @@ jobs:
                             sync_result['issues_found'].append(f'缺少必要字段: {key}')
                             current_state[key] = {}
                     
-                    # 同步高頻交易系統數據
+                    # 同步智能平衡交易系統數據
                     if os.path.exists('data/monitoring/frequency_control.json'):
                         with open('data/monitoring/frequency_control.json', 'r') as f:
                             freq_data = json.load(f)

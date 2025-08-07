@@ -37,7 +37,7 @@ def open_dashboard():
 
 def main():
     print("=" * 50)
-    print("🤖 AImax v3.0 簡潔版交易儀表板")
+    print("🤖 AImax v1.0-smart-balanced 簡潔版交易儀表板")
     print("=" * 50)
     
     # 檢查必要文件

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-測試Clean Ultimate策略的實際表現
-驗證是否真的能達到85%勝率
+測試智能平衡策略的實際表現
+驗證是否真的能達到83.3%勝率
 """
 
 import sys
@@ -108,7 +108,7 @@ def calculate_strategy_performance(signals, df):
         # 評估策略表現
         print(f"\n🏆 策略評估:")
         if win_rate >= 85:
-            print(f"   🎉 優秀！達到85%勝率目標！")
+            print(f"   🎉 優秀！達到83.3%勝率目標！")
         elif win_rate >= 80:
             print(f"   🔥 很好！接近85%目標")
         elif win_rate >= 70:
@@ -131,8 +131,8 @@ def calculate_strategy_performance(signals, df):
     return {'trades': 0, 'profit': 0, 'win_rate': 0}
 
 async def test_clean_ultimate_strategy():
-    """測試Clean Ultimate策略"""
-    print("🚀 測試Clean Ultimate 85%勝率策略")
+    """測試智能平衡策略"""
+    print("🚀 測試Clean Ultimate 83.3%勝率策略")
     print("="*50)
     
     try:
@@ -193,7 +193,7 @@ async def test_clean_ultimate_strategy():
 
 def main():
     """主函數"""
-    print("🎯 Clean Ultimate 85%勝率策略測試")
+    print("🎯 Clean Ultimate 83.3%勝率策略測試")
     print("="*50)
     
     # 運行異步測試
@@ -206,7 +206,7 @@ def main():
         if performance and performance['trades'] > 0:
             print(f"\n✅ 測試完成！")
             if performance['win_rate'] >= 85:
-                print(f"🎉 恭喜！Clean Ultimate策略確實達到了85%的高勝率！")
+                print(f"🎉 恭喜！智能平衡策略確實達到了85%的高勝率！")
                 print(f"這證明了我們的策略設計是有效的！")
             else:
                 print(f"📈 策略表現: {performance['win_rate']:.1f}%勝率")

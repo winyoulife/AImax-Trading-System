@@ -106,7 +106,7 @@ quick_deploy.bat
 - 專屬帳號系統
 
 ### 💰 交易功能
-- 85%勝率MACD策略
+- 83.3%勝率MACD策略
 - MAX API即時價格
 - 智能頻率控制
 - GitHub Actions自動執行

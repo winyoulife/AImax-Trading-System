@@ -177,7 +177,7 @@ def test_simple_macd_strategy(df):
         return {'name': 'Simple MACD', 'error': str(e), 'trades': 0, 'profit': 0, 'win_rate': 0}
 
 def test_optimized_parameters_strategy(df):
-    """測試優化參數策略 - 嘗試找到85%勝率的參數組合"""
+    """測試優化參數策略 - 嘗試找到83.3%勝率的參數組合"""
     best_result = {'name': 'Optimized MACD', 'trades': 0, 'profit': 0, 'win_rate': 0}
     
     # 測試不同的MACD參數組合

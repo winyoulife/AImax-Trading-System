@@ -1,6 +1,6 @@
 """
 AImax 高頻交易專用 Telegram 通知服務
-專門為85%勝率策略和智能頻率控制系統設計
+專門為83.3%勝率策略和智能頻率控制系統設計
 """
 
 import json
@@ -134,7 +134,7 @@ class HighFrequencyTelegramService:
 🕐 <b>執行時間</b>: {now_taipei.strftime('%H:%M:%S')}
 📅 <b>日期</b>: {now_taipei.strftime('%Y-%m-%d')}
 
-💡 <i>85%勝率目標策略運行中</i>
+💡 <i>83.3%勝率目標策略運行中</i>
             """.strip()
             
             return self.send_message_sync(message)
@@ -179,7 +179,7 @@ class HighFrequencyTelegramService:
 🤖 <b>系統響應</b>:
 • {freq_change}
 • 智能頻率控制已啟動
-• 85%勝率策略自動調整
+• 83.3%勝率策略自動調整
 
 🕐 <b>檢測時間</b>: {now_taipei.strftime('%H:%M:%S')}
 
@@ -260,7 +260,7 @@ class HighFrequencyTelegramService:
 • 策略適應: ✅ 自動調整
 • 風險控制: ✅ 運行正常
 
-💡 <b>明日展望</b>: 繼續85%勝率目標，優化智能頻率控制
+💡 <b>明日展望</b>: 繼續83.3%勝率目標，優化智能頻率控制
 
 <i>🚀 AImax 持續為您創造價值</i>
             """.strip()
@@ -350,7 +350,7 @@ class HighFrequencyTelegramService:
 
 🔧 <b>影響範圍</b>:
 • 所有交易執行已暫停
-• 高頻交易系統已停止
+• 智能平衡交易系統已停止
 • 價格監控繼續運行
 
 ⚡ <b>立即行動</b>:
@@ -398,7 +398,7 @@ class HighFrequencyTelegramService:
 
 🤖 <b>系統響應</b>:
 • 智能頻率控制已激活
-• 85%勝率策略自動調整
+• 83.3%勝率策略自動調整
 • 風險控制機制啟動
 
 🕐 <b>警報時間</b>: {now_taipei.strftime('%H:%M:%S')}
@@ -434,7 +434,7 @@ class HighFrequencyTelegramService:
 • 緊急停止警報 ✅
 • 價格閾值警報 ✅
 
-💡 <b>85%勝率策略通知系統已準備就緒！</b>
+💡 <b>83.3%勝率策略通知系統已準備就緒！</b>
 
 <i>🚀 AImax 智能通知系統 v3.0</i>
             """.strip()

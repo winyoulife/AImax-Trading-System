@@ -92,14 +92,14 @@ jobs:
               
               # 添加meta標籤
               meta_tags = f'''
-              <meta name="description" content="AImax 85%勝率智能交易系統 - 專業的BTC/TWD高頻交易平台，採用先進的MACD策略和GitHub Actions雲端部署">
-              <meta name="keywords" content="AImax,比特幣交易,BTC,TWD,高頻交易,MACD,85%勝率,智能交易系統">
+              <meta name="description" content="AImax 83.3%勝率智能交易系統 - 專業的BTC/TWD高頻交易平台，採用先進的MACD策略和GitHub Actions雲端部署">
+              <meta name="keywords" content="AImax,比特幣交易,BTC,TWD,高頻交易,MACD,83.3%勝率,智能交易系統">
               <meta name="author" content="AImax Trading System">
               <meta name="robots" content="noindex, nofollow">
               <meta name="build-time" content="{build_time}">
               <meta name="build-hash" content="{build_hash}">
               <meta property="og:title" content="AImax 智能交易系統">
-              <meta property="og:description" content="85%勝率的專業比特幣交易系統">
+              <meta property="og:description" content="83.3%勝率的專業比特幣交易系統">
               <meta property="og:type" content="website">
               <link rel="preconnect" href="https://api.github.com">
               <link rel="preconnect" href="https://api.allorigins.win">
@@ -226,7 +226,7 @@ jobs:
           {
             "name": "AImax 智能交易系統",
             "short_name": "AImax",
-            "description": "85%勝率的專業比特幣交易系統",
+            "description": "83.3%勝率的專業比特幣交易系統",
             "start_url": "/",
             "display": "standalone",
             "background_color": "#667eea",
@@ -264,7 +264,7 @@ jobs:
           <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>AImax v3.0 簡潔版交易儀表板</title>
+              <title>AImax v1.0-smart-balanced 簡潔版交易儀表板</title>
               <style>
                   body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
                   .header { background: #6c5ce7; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
@@ -276,8 +276,8 @@ jobs:
           </head>
           <body>
               <div class="header">
-                  <h1>🤖 AImax 終極智能交易儀表板 v3.0</h1>
-                  <p>85%勝率策略 • 高頻智能交易系統 • 即時數據監控</p>
+                  <h1>🤖 AImax 智能平衡交易儀表板 v3.0</h1>
+                  <p>83.3%勝率策略 • 智能平衡交易系統 • 即時數據監控</p>
                   <div style="background: #00b894; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9em; margin-top: 10px; display: inline-block;">
                       🚀 已優化部署 | 構建時間: $BUILD_TIME | 版本: $BUILD_HASH
                   </div>
@@ -304,7 +304,7 @@ jobs:
                       <li>🛡️ SHA-256加密技術保護</li>
                       <li>⏰ 24小時會話管理</li>
                       <li>🚪 安全登出機制</li>
-                      <li>🤖 85%勝率高頻交易系統</li>
+                      <li>🤖 83.3%勝率智能平衡交易系統</li>
                       <li>💰 MAX API 即時價格監控</li>
                       <li>📊 GitHub Actions 真實狀態監控</li>
                       <li>📱 Telegram即時通知</li>
@@ -330,7 +330,7 @@ jobs:
                   <ul>
                       <li>此為私有交易系統，僅限授權用戶使用</li>
                       <li>價格數據直接來自 MAX Exchange 官方 API</li>
-                      <li>85%勝率交易策略已啟用並受到保護</li>
+                      <li>83.3%勝率交易策略已啟用並受到保護</li>
                       <li>請勿在公共網路環境下使用</li>
                   </ul>
               </div>
@@ -384,7 +384,7 @@ jobs:
               fi
           done
           
-          echo "✅ AImax v3.0 優化部署文件準備完成"
+          echo "✅ AImax v1.0-smart-balanced 優化部署文件準備完成"
           echo "📁 部署文件列表:"
           find _site -type f | sort
           echo ""
@@ -410,7 +410,7 @@ jobs:
         
       - name: ✅ 優化部署完成通知
         run: |
-          echo "🎉 AImax v3.0 智能交易系統優化部署完成！"
+          echo "🎉 AImax v1.0-smart-balanced 智能交易系統優化部署完成！"
           echo ""
           echo "🌐 訪問地址:"
           echo "   主頁 (安全登入): ${{ steps.deployment.outputs.page_url }}"

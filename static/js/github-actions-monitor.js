@@ -50,7 +50,7 @@ class GitHubActionsMonitor {
         }
     }
     
-    // 獲取高頻交易系統狀態
+    // 獲取智能平衡交易系統狀態
     async getHighFrequencyTradingStatus() {
         try {
             const data = await this.getWorkflowRuns('high-frequency-trading.yml');

@@ -1,4 +1,4 @@
-name: AImax 高頻交易系統 - 智能頻率控制
+name: AImax 智能平衡交易系統 - 智能頻率控制
 
 on:
   schedule:
@@ -237,9 +237,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install requests pandas numpy ta-lib
         
-    - name: 🚀 執行85%勝率交易策略
+    - name: 🚀 執行83.3%勝率交易策略
       run: |
-        echo "🚀 執行AImax 85%勝率高頻交易策略..."
+        echo "🚀 執行AImax 83.3%勝率高頻交易策略..."
         echo "💰 當前BTC價格: NT\$${{ needs.smart-frequency-control.outputs.btc_price }}"
         echo "📊 波動性等級: ${{ needs.smart-frequency-control.outputs.volatility_level }}"
         echo "⏱️ 執行間隔: ${{ needs.smart-frequency-control.outputs.execution_interval }}秒"
@@ -249,7 +249,7 @@ jobs:
         import os
         from datetime import datetime
         
-        # 模擬85%勝率交易邏輯
+        # 模擬83.3%勝率交易邏輯
         trading_result = {
             'timestamp': datetime.now().isoformat(),
             'btc_price': float('${{ needs.smart-frequency-control.outputs.btc_price }}'),
