@@ -1,0 +1,15 @@
+{
+  "main_dashboard_file": "smart-balanced-dashboard.html",
+  "backup_enabled": true,
+  "auto_version_increment": true,
+  "target_files": [
+    "smart-balanced-dashboard.html",
+    "smart-balanced-dashboard-static.html"
+  ],
+  "version_format": "v{major}.{minor}-{tag}",
+  "current_version": {
+    "major": 2,
+    "minor": 2,
+    "tag": "realtime"
+  }
+}
