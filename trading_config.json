@@ -1,0 +1,13 @@
+{
+  "trading_amount": 50000,
+  "max_daily_loss": 5000,
+  "max_daily_trades": 5,
+  "max_position_time": 24,
+  "emergency_stop_loss": 0.05,
+  "enable_trading": true,
+  "notification_enabled": true,
+  "telegram_chat_id": "",
+  "dry_run": true,
+  "exchange": "max",
+  "symbol": "BTCTWD"
+}

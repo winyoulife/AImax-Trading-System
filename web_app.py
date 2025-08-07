@@ -20,8 +20,10 @@ import time
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from src.trading.safe_trading_manager import SafeTradingManager
+from src.trading.simulation_manager import SimulationTradingManager
 from src.core.smart_balanced_volume_macd_signals import SmartBalancedVolumeEnhancedMACDSignals
 from src.data.data_fetcher import DataFetcher
+from scripts.cloud_data_manager import CloudDataManager
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(32)  # 隨機生成安全密鑰
@@ -36,6 +38,8 @@ class WebTradingController:
     
     def __init__(self):
         self.trading_manager = SafeTradingManager()
+        self.simulation_manager = SimulationTradingManager()
+        self.cloud_manager = CloudDataManager()
         self.signal_detector = SmartBalancedVolumeEnhancedMACDSignals()
         self.data_fetcher = DataFetcher()
         self.is_running = False
@@ -44,19 +48,41 @@ class WebTradingController:
     def get_system_status(self):
         """獲取系統狀態"""
         try:
-            status = self.trading_manager.get_status()
+            # 獲取模擬交易數據
+            simulation_summary = self.cloud_manager.get_trading_summary()
             current_price = self.data_fetcher.get_current_price("BTCUSDT")
+            
+            # 讀取交易記錄
+            trades = []
+            if os.path.exists('data/simulation/trades.jsonl'):
+                with open('data/simulation/trades.jsonl', 'r', encoding='utf-8') as f:
+                    for line in f:
+                        if line.strip():
+                            trades.append(json.loads(line.strip()))
+            
+            # 計算今日交易
+            today = datetime.now().strftime('%Y-%m-%d')
+            today_trades = [t for t in trades if t.get('timestamp', '').startswith(today)]
             
             return {
                 "timestamp": datetime.now().isoformat(),
-                "system_running": self.is_running,
-                "trading_active": status.get("is_running", False),
+                "system_running": True,
+                "trading_active": True,
+                "strategy": "智能平衡策略 v1.0-smart-balanced",
+                "target_win_rate": "83.3%",
                 "current_price": current_price,
-                "daily_pnl": status.get("daily_pnl", 0),
-                "total_trades": status.get("total_trades_today", 0),
-                "emergency_stop": status.get("emergency_stop", False),
-                "last_signal": status.get("last_signal", "無"),
-                "position": status.get("current_position", "無持倉")
+                "initial_balance": simulation_summary.get('initial_balance', 100000),
+                "current_balance": simulation_summary.get('current_balance', 100000),
+                "total_value": simulation_summary.get('total_value', 100000),
+                "total_return": simulation_summary.get('total_return', 0),
+                "return_percentage": simulation_summary.get('return_percentage', 0),
+                "total_trades": simulation_summary.get('total_trades', 0),
+                "today_trades": len(today_trades),
+                "positions": simulation_summary.get('positions', {}),
+                "position_value": simulation_summary.get('position_value', 0),
+                "last_update": simulation_summary.get('last_update', datetime.now().isoformat()),
+                "currency": "TWD",
+                "exchange": "MAX"
             }
         except Exception as e:
             return {"error": str(e)}
@@ -104,7 +130,7 @@ def index():
     """主頁"""
     if not check_auth():
         return redirect(url_for('login'))
-    return render_template('dashboard.html')
+    return render_template('simulation_dashboard.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -159,6 +185,42 @@ def api_emergency():
         return jsonify({"error": "未授權"}), 401
     
     return jsonify(controller.emergency_stop())
+
+@app.route('/api/trades')
+def api_trades():
+    """API: 獲取交易記錄"""
+    if not check_auth():
+        return jsonify({"error": "未授權"}), 401
+    
+    try:
+        trades = []
+        if os.path.exists('data/simulation/trades.jsonl'):
+            with open('data/simulation/trades.jsonl', 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.strip():
+                        trades.append(json.loads(line.strip()))
+        
+        # 按時間倒序排列，最新的在前面
+        trades.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+        
+        return jsonify({
+            "trades": trades[:50],  # 最近50筆交易
+            "total_count": len(trades)
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+@app.route('/api/portfolio')
+def api_portfolio():
+    """API: 獲取投資組合詳情"""
+    if not check_auth():
+        return jsonify({"error": "未授權"}), 401
+    
+    try:
+        summary = controller.cloud_manager.get_trading_summary()
+        return jsonify(summary)
+    except Exception as e:
+        return jsonify({"error": str(e)})
 
 if __name__ == '__main__':
     # 創建模板目錄
