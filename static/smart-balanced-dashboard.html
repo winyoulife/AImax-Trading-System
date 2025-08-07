@@ -395,14 +395,10 @@
             return new Intl.NumberFormat('zh-TW').format(num);
         }
         
-        // 模擬數據更新
+        
         function refreshData() {
-            // 模擬BTC價格波動
-            const basePrice = 95000;
-            const variation = (Math.random() - 0.5) * 2000;
-            const currentPrice = Math.round(basePrice + variation);
-            
-            document.getElementById('btc-price').textContent = `$${formatNumber(currentPrice)}`;
+            // 獲取真實的MAX API BTC價格
+            fetchRealBTCPrice();
             
             // 更新時間
             document.getElementById('last-update').textContent = 
@@ -432,7 +428,7 @@
     
     <!-- 版本信息 -->
     <div style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 8px 12px; border-radius: 5px; font-size: 0.8em; z-index: 1000;">
-        🔄 v2.1-stable | 2025/08/07 22:35 | 🔥 強制更新
+        🔄 v2.2-realtime | 2025/08/08 09:00 | 🔥 強制更新
     </div>
 </body>
 </html>
