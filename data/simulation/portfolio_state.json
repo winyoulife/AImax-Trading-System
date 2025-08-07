@@ -1,0 +1,10 @@
+{
+  "balance": 100000.0,
+  "positions": {},
+  "last_update": "2025-08-07T19:25:00.000000",
+  "total_trades": 0,
+  "initial_balance": 100000.0,
+  "currency": "TWD",
+  "exchange": "MAX",
+  "strategy_version": "v1.0-smart-balanced"
+}

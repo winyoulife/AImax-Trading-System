@@ -17,6 +17,14 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 from config.max_exchange_config import MAX_EXCHANGE_CONFIG, get_trading_fee, calculate_trading_cost
 
+# 添加雲端數據管理器
+try:
+    from scripts.cloud_data_manager import CloudDataManager
+    CLOUD_ENABLED = True
+except ImportError:
+    CLOUD_ENABLED = False
+    logger.warning("⚠️ 雲端數據管理器未載入，使用本地模式")
+
 logger = logging.getLogger(__name__)
 
 class SimulationTradingManager:
@@ -29,6 +37,14 @@ class SimulationTradingManager:
         self.trade_history = []
         self.simulation_data_dir = "data/simulation"
         
+        # 初始化雲端數據管理器
+        if CLOUD_ENABLED:
+            self.cloud_manager = CloudDataManager()
+            logger.info("✅ 雲端數據管理器已啟用")
+        else:
+            self.cloud_manager = None
+            logger.info("📝 使用本地數據模式")
+        
         # 確保數據目錄存在
         os.makedirs(self.simulation_data_dir, exist_ok=True)
         
@@ -38,15 +54,24 @@ class SimulationTradingManager:
     def load_simulation_state(self):
         """載入模擬交易狀態"""
         try:
+            # 優先使用雲端數據管理器
+            if self.cloud_manager:
+                state = self.cloud_manager.load_portfolio_state()
+                self.current_balance = state.get('balance', self.initial_balance)
+                self.positions = state.get('positions', {})
+                logger.info(f"✅ 從雲端載入模擬狀態: 餘額 {self.current_balance:,.0f} TWD")
+                return
+            
+            # 本地模式
             state_file = os.path.join(self.simulation_data_dir, "portfolio_state.json")
             if os.path.exists(state_file):
-                with open(state_file, 'r') as f:
+                with open(state_file, 'r', encoding='utf-8') as f:
                     state = json.load(f)
                     self.current_balance = state.get('balance', self.initial_balance)
                     self.positions = state.get('positions', {})
-                    logger.info(f"✅ 載入模擬狀態: 餘額 ${self.current_balance:.2f}")
+                    logger.info(f"✅ 載入本地模擬狀態: 餘額 {self.current_balance:,.0f} TWD")
             else:
-                logger.info(f"🆕 初始化模擬交易: 初始資金 ${self.initial_balance:.2f}")
+                logger.info(f"🆕 初始化模擬交易: 初始資金 {self.initial_balance:,.0f} TWD")
                 
         except Exception as e:
             logger.error(f"❌ 載入模擬狀態失敗: {e}")
@@ -58,12 +83,25 @@ class SimulationTradingManager:
                 'balance': self.current_balance,
                 'positions': self.positions,
                 'last_update': datetime.now().isoformat(),
-                'total_trades': len(self.trade_history)
+                'total_trades': len(self.trade_history),
+                'initial_balance': self.initial_balance,
+                'currency': 'TWD',
+                'exchange': 'MAX',
+                'strategy_version': 'v1.0-smart-balanced'
             }
             
+            # 優先保存到雲端
+            if self.cloud_manager:
+                success = self.cloud_manager.save_portfolio_state(state)
+                if success:
+                    logger.info("✅ 模擬狀態已保存到雲端")
+                else:
+                    logger.warning("⚠️ 雲端保存失敗，使用本地保存")
+            
+            # 本地備份
             state_file = os.path.join(self.simulation_data_dir, "portfolio_state.json")
-            with open(state_file, 'w') as f:
-                json.dump(state, f, indent=2)
+            with open(state_file, 'w', encoding='utf-8') as f:
+                json.dump(state, f, indent=2, ensure_ascii=False)
                 
             logger.info("✅ 模擬狀態已保存")
             
@@ -176,9 +214,18 @@ class SimulationTradingManager:
     def save_trade_record(self, trade_record: Dict):
         """保存交易記錄"""
         try:
+            # 優先保存到雲端
+            if self.cloud_manager:
+                success = self.cloud_manager.save_trade_record(trade_record)
+                if success:
+                    logger.info("✅ 交易記錄已保存到雲端")
+                else:
+                    logger.warning("⚠️ 雲端保存失敗，使用本地保存")
+            
+            # 本地備份
             trades_file = os.path.join(self.simulation_data_dir, "trades.jsonl")
-            with open(trades_file, 'a') as f:
-                f.write(json.dumps(trade_record) + '\n')
+            with open(trades_file, 'a', encoding='utf-8') as f:
+                f.write(json.dumps(trade_record, ensure_ascii=False) + '\n')
                 
         except Exception as e:
             logger.error(f"❌ 保存交易記錄失敗: {e}")

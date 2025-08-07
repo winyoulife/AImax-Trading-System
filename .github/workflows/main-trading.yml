@@ -28,6 +28,7 @@ on:
 env:
   TRADING_MODE: simulation  # 模擬交易模式
   PYTHON_VERSION: '3.10'
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 用於數據持久化
   
 jobs:
   trading-simulation:
