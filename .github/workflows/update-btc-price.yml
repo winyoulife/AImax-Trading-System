@@ -1,0 +1,160 @@
+name: 🔄 更新BTC價格數據
+
+on:
+  schedule:
+    # 每5分鐘更新一次BTC價格
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      force_update:
+        description: '強制更新'
+        required: false
+        default: 'false'
+
+jobs:
+  update-btc-price:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔄 檢出代碼
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 🐍 設置Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: 📦 安裝依賴
+        run: |
+          pip install requests
+      
+      - name: 💰 獲取BTC價格
+        run: |
+          python -c "
+          import requests
+          import json
+          import os
+          from datetime import datetime
+          
+          try:
+              # 直接調用MAX API
+              response = requests.get('https://max-api.maicoin.com/api/v2/tickers/btctwd', timeout=10)
+              
+              if response.status_code == 200:
+                  data = response.json()
+                  
+                  if 'last' in data:
+                      price = float(data['last'])
+                      
+                      # 創建價格數據
+                      price_data = {
+                          'price': price,
+                          'timestamp': datetime.now().isoformat(),
+                          'source': 'MAX_API_DIRECT',
+                          'currency': 'TWD',
+                          'symbol': 'BTCTWD',
+                          'additional_data': {
+                              'buy': float(data.get('buy', 0)),
+                              'sell': float(data.get('sell', 0)),
+                              'high': float(data.get('high', 0)),
+                              'low': float(data.get('low', 0)),
+                              'vol': float(data.get('vol', 0))
+                          }
+                      }
+                      
+                      # 確保目錄存在
+                      os.makedirs('data', exist_ok=True)
+                      
+                      # 保存價格數據
+                      with open('data/latest_btc_price.json', 'w', encoding='utf-8') as f:
+                          json.dump(price_data, f, indent=2, ensure_ascii=False)
+                      
+                      print(f'✅ BTC價格已更新: NT$ {price:,.0f}')
+                      
+                      # 設置環境變量供後續步驟使用
+                      with open(os.environ['GITHUB_ENV'], 'a') as f:
+                          f.write(f'BTC_PRICE={price}\n')
+                          f.write(f'UPDATE_SUCCESS=true\n')
+                  else:
+                      print('❌ API響應格式錯誤')
+                      with open(os.environ['GITHUB_ENV'], 'a') as f:
+                          f.write('UPDATE_SUCCESS=false\n')
+              else:
+                  print(f'❌ API調用失敗: {response.status_code}')
+                  with open(os.environ['GITHUB_ENV'], 'a') as f:
+                      f.write('UPDATE_SUCCESS=false\n')
+                      
+          except Exception as e:
+              print(f'❌ 獲取價格失敗: {e}')
+              with open(os.environ['GITHUB_ENV'], 'a') as f:
+                  f.write('UPDATE_SUCCESS=false\n')
+          "
+      
+      - name: 📊 更新儀表板狀態
+        if: env.UPDATE_SUCCESS == 'true'
+        run: |
+          python -c "
+          import json
+          import os
+          from datetime import datetime
+          
+          # 讀取價格數據
+          with open('data/latest_btc_price.json', 'r', encoding='utf-8') as f:
+              price_data = json.load(f)
+          
+          price = price_data['price']
+          
+          # 更新儀表板文件中的備用價格
+          dashboard_file = 'static/smart-balanced-dashboard.html'
+          
+          if os.path.exists(dashboard_file):
+              with open(dashboard_file, 'r', encoding='utf-8') as f:
+                  content = f.read()
+              
+              # 更新備用價格
+              old_fallback = 'const fallbackPrice = 3491828;'
+              new_fallback = f'const fallbackPrice = {int(price)};'
+              content = content.replace(old_fallback, new_fallback)
+              
+              # 更新最後更新時間
+              timestamp = datetime.now().strftime('%Y/%m/%d %H:%M')
+              content = content.replace(
+                  '最後檢查: 2025/08/08 07:02',
+                  f'最後檢查: {timestamp} (GitHub Actions)'
+              )
+              
+              with open(dashboard_file, 'w', encoding='utf-8') as f:
+                  f.write(content)
+              
+              print(f'✅ 儀表板備用價格已更新: NT$ {price:,.0f}')
+          "
+      
+      - name: 📝 提交更新
+        if: env.UPDATE_SUCCESS == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          git add data/latest_btc_price.json
+          git add static/smart-balanced-dashboard.html
+          
+          if git diff --staged --quiet; then
+            echo "沒有變更需要提交"
+          else
+            git commit -m "🔄 自動更新BTC價格: NT$ ${{ env.BTC_PRICE }} - $(date)"
+            git push
+            echo "✅ BTC價格數據已推送到倉庫"
+          fi
+      
+      - name: 📊 更新摘要
+        run: |
+          if [ "${{ env.UPDATE_SUCCESS }}" = "true" ]; then
+            echo "✅ BTC價格更新成功: NT$ ${{ env.BTC_PRICE }}"
+            echo "🎯 83.3%勝率策略現在基於最新真實數據運行"
+            echo "🔄 下次更新: 5分鐘後"
+          else
+            echo "❌ BTC價格更新失敗"
+            echo "⚠️ 將使用上次成功的價格數據"
+          fi
