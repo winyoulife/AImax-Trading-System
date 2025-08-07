@@ -1,0 +1,28 @@
+{
+  "timestamp": "2025-08-07T19:09:45.206241",
+  "components": {
+    "github_actions": {
+      "last_run": "2025-08-07T19:09:45.206241",
+      "status": "success",
+      "workflow": "smart-balanced-deploy",
+      "execution_count": 24,
+      "success_rate": 0.95,
+      "last_error": null
+    },
+    "trading_performance": {
+      "total_trades": 2,
+      "win_rate": 1.0,
+      "total_profit": 901.6916160196074,
+      "avg_profit": 450.8458080098037,
+      "recent_24h_trades": 1,
+      "expected_vs_actual": {
+        "expected_win_rate": 0.833,
+        "actual_win_rate": 1.0,
+        "performance_ratio": 1.2004801920768309
+      },
+      "status": "active"
+    }
+  },
+  "overall_status": "healthy",
+  "alerts": []
+}

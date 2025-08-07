@@ -11,13 +11,18 @@ import pandas as pd
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 import logging
+import sys
+
+# 添加配置路徑
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+from config.max_exchange_config import MAX_EXCHANGE_CONFIG, get_trading_fee, calculate_trading_cost
 
 logger = logging.getLogger(__name__)
 
 class SimulationTradingManager:
     """模擬交易管理器"""
     
-    def __init__(self, initial_balance: float = 10000.0):
+    def __init__(self, initial_balance: float = 100000.0):  # 10萬台幣
         self.initial_balance = initial_balance
         self.current_balance = initial_balance
         self.positions = {}
@@ -75,13 +80,20 @@ class SimulationTradingManager:
             
             # 計算交易數量
             if action == 'buy':
-                # 使用固定金額購買
-                trade_amount = min(1000.0, self.current_balance * 0.1)  # 最多使用10%資金
-                quantity = trade_amount / price
+                # 使用固定金額購買 (台幣計價)
+                trade_amount = min(10000.0, self.current_balance * 0.1)  # 最多使用10%資金，單筆最多1萬
                 
-                if self.current_balance >= trade_amount:
+                # 計算手續費
+                fee_rate = get_trading_fee('taker')  # 使用MAX實際手續費 0.15%
+                fee_amount = trade_amount * fee_rate
+                total_cost = trade_amount + fee_amount
+                
+                if self.current_balance >= total_cost:
+                    # 計算實際購買數量 (扣除手續費後)
+                    quantity = trade_amount / price
+                    
                     # 執行買入
-                    self.current_balance -= trade_amount
+                    self.current_balance -= total_cost
                     self.positions[symbol] = self.positions.get(symbol, 0) + quantity
                     
                     trade_record = {
@@ -91,9 +103,14 @@ class SimulationTradingManager:
                         'price': price,
                         'quantity': quantity,
                         'amount': trade_amount,
+                        'fee_rate': fee_rate,
+                        'fee_amount': fee_amount,
+                        'total_cost': total_cost,
                         'confidence': confidence,
                         'balance_after': self.current_balance,
-                        'position_after': self.positions.get(symbol, 0)
+                        'position_after': self.positions.get(symbol, 0),
+                        'exchange': 'MAX',
+                        'currency': 'TWD'
                     }
                     
                     self.trade_history.append(trade_record)
@@ -114,8 +131,13 @@ class SimulationTradingManager:
                     sell_quantity = current_position * 0.5
                     sell_amount = sell_quantity * price
                     
+                    # 計算手續費
+                    fee_rate = get_trading_fee('taker')  # 使用MAX實際手續費 0.15%
+                    fee_amount = sell_amount * fee_rate
+                    net_proceeds = sell_amount - fee_amount
+                    
                     # 執行賣出
-                    self.current_balance += sell_amount
+                    self.current_balance += net_proceeds
                     self.positions[symbol] = current_position - sell_quantity
                     
                     trade_record = {
@@ -125,9 +147,14 @@ class SimulationTradingManager:
                         'price': price,
                         'quantity': sell_quantity,
                         'amount': sell_amount,
+                        'fee_rate': fee_rate,
+                        'fee_amount': fee_amount,
+                        'net_proceeds': net_proceeds,
                         'confidence': confidence,
                         'balance_after': self.current_balance,
-                        'position_after': self.positions.get(symbol, 0)
+                        'position_after': self.positions.get(symbol, 0),
+                        'exchange': 'MAX',
+                        'currency': 'TWD'
                     }
                     
                     self.trade_history.append(trade_record)
