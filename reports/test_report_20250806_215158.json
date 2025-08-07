@@ -1,0 +1,230 @@
+{
+  "timestamp": "2025-08-06T21:51:58.436206",
+  "total_time": 0.07266068458557129,
+  "summary": {
+    "total_tests": 10,
+    "passed": 7,
+    "failed": 3,
+    "skipped": 0,
+    "errors": 0,
+    "success_rate": 70.0
+  },
+  "test_results": [
+    {
+      "test_name": "核心功能測試",
+      "status": "PASSED",
+      "duration": 0.007262229919433594,
+      "details": {
+        "current_price": 94968.14032544396,
+        "historical_data_count": 50,
+        "signals_detected": 0
+      },
+      "error_message": "",
+      "timestamp": "2025-08-06T21:51:58.370807"
+    },
+    {
+      "test_name": "數據獲取測試",
+      "status": "PASSED",
+      "duration": 0.0023555755615234375,
+      "details": {
+        "BTCUSDT": {
+          "price": 96120.28295345826,
+          "data_points": 24,
+          "price_valid": true,
+          "data_valid": true
+        },
+        "ETHUSDT": {
+          "price": 1012.1468830759645,
+          "data_points": 24,
+          "price_valid": true,
+          "data_valid": true
+        },
+        "ADAUSDT": {
+          "price": 1012.1468830759645,
+          "data_points": 24,
+          "price_valid": true,
+          "data_valid": true
+        }
+      },
+      "error_message": "",
+      "timestamp": "2025-08-06T21:51:58.374163"
+    },
+    {
+      "test_name": "交易信號測試",
+      "status": "PASSED",
+      "duration": 0.012361764907836914,
+      "details": {
+        "total_signals": 0,
+        "buy_signals": 0,
+        "sell_signals": 0,
+        "avg_confidence": 0
+      },
+      "error_message": "",
+      "timestamp": "2025-08-06T21:51:58.386525"
+    },
+    {
+      "test_name": "Web控制面板測試",
+      "status": "FAILED",
+      "duration": 0.0,
+      "details": {
+        "missing_files": [],
+        "auth_config_valid": false,
+        "static_files_count": 40
+      },
+      "error_message": "",
+      "timestamp": "2025-08-06T21:51:58.388523"
+    },
+    {
+      "test_name": "GitHub Actions測試",
+      "status": "PASSED",
+      "duration": 0.0029959678649902344,
+      "details": {
+        "workflow_count": 13,
+        "workflows": {
+          "data-management.yml": {
+            "exists": true,
+            "has_schedule": true,
+            "has_secrets": false,
+            "size": 26969
+          },
+          "deploy-pages.yml": {
+            "exists": true,
+            "has_schedule": false,
+            "has_secrets": false,
+            "size": 15958
+          },
+          "error-handling.yml": {
+            "exists": true,
+            "has_schedule": true,
+            "has_secrets": false,
+            "size": 10672
+          },
+          "fetch-max-api.yml": {
+            "exists": true,
+            "has_schedule": true,
+            "has_secrets": true,
+            "size": 6637
+          },
+          "high-frequency-trading.yml": {
+            "exists": true,
+            "has_schedule": true,
+            "has_secrets": false,
+            "size": 13120
+          },
+          "keep-alive.yml": {
+            "exists": true,
+            "has_schedule": true,
+            "has_secrets": false,
+            "size": 9033
+          },
+          "main-trading.yml": {
+            "exists": true,
+            "has_schedule": true,
+            "has_secrets": false,
+            "size": 5543
+          },
+          "max-api-proxy.yml": {
+            "exists": true,
+            "has_schedule": true,
+            "has_secrets": true,
+            "size": 8045
+          },
+          "monitoring.yml": {
+            "exists": true,
+            "has_schedule": true,
+            "has_secrets": false,
+            "size": 4738
+          },
+          "resource-monitoring.yml": {
+            "exists": true,
+            "has_schedule": true,
+            "has_secrets": true,
+            "size": 12248
+          },
+          "simple-trading.yml": {
+            "exists": true,
+            "has_schedule": true,
+            "has_secrets": false,
+            "size": 788
+          },
+          "telegram-notifications.yml": {
+            "exists": true,
+            "has_schedule": true,
+            "has_secrets": true,
+            "size": 14273
+          },
+          "testing.yml": {
+            "exists": true,
+            "has_schedule": true,
+            "has_secrets": true,
+            "size": 8872
+          }
+        }
+      },
+      "error_message": "",
+      "timestamp": "2025-08-06T21:51:58.391519"
+    },
+    {
+      "test_name": "安全認證測試",
+      "status": "FAILED",
+      "duration": 0.0,
+      "details": {
+        "missing_keys": [
+          "users"
+        ],
+        "users_configured": false,
+        "session_timeout": 3600
+      },
+      "error_message": "",
+      "timestamp": "2025-08-06T21:51:58.391519"
+    },
+    {
+      "test_name": "Telegram通知測試",
+      "status": "PASSED",
+      "duration": 0.0,
+      "details": {
+        "config_exists": true,
+        "bot_module_available": true
+      },
+      "error_message": "",
+      "timestamp": "2025-08-06T21:51:58.391519"
+    },
+    {
+      "test_name": "錯誤處理測試",
+      "status": "FAILED",
+      "duration": 0.0,
+      "details": {
+        "invalid_symbol_handled": false,
+        "network_error_handled": true
+      },
+      "error_message": "",
+      "timestamp": "2025-08-06T21:51:58.391519"
+    },
+    {
+      "test_name": "性能測試",
+      "status": "PASSED",
+      "duration": 0.025725603103637695,
+      "details": {
+        "data_fetch_time": 0.0020384788513183594,
+        "signal_detection_time": 0.023687124252319336,
+        "data_points": 200,
+        "signals_count": 0
+      },
+      "error_message": "",
+      "timestamp": "2025-08-06T21:51:58.418447"
+    },
+    {
+      "test_name": "系統集成測試",
+      "status": "PASSED",
+      "duration": 0.01775836944580078,
+      "details": {
+        "data_fetched": true,
+        "signals_generated": 0,
+        "trades_executed": 0,
+        "report_generated": true
+      },
+      "error_message": "",
+      "timestamp": "2025-08-06T21:51:58.436206"
+    }
+  ]
+}

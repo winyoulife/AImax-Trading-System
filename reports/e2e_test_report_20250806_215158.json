@@ -1,0 +1,578 @@
+{
+  "test_suite": "end_to_end_tests",
+  "start_time": "2025-08-06 21:51:58.291637",
+  "end_time": "2025-08-06 21:51:58.325628",
+  "total_duration": 0.033991,
+  "summary": {
+    "total_tests": 4,
+    "passed_tests": 4,
+    "failed_tests": 0,
+    "success_rate": 100.0
+  },
+  "test_results": [
+    {
+      "test_name": "complete_trading_cycle",
+      "start_time": "2025-08-06 21:51:58.291637",
+      "steps": [
+        {
+          "step": 1,
+          "name": "system_initialization",
+          "status": "PASSED",
+          "duration": 0.0
+        },
+        {
+          "step": 2,
+          "name": "market_data_fetch",
+          "status": "PASSED",
+          "duration": 0.0024302005767822266,
+          "details": {
+            "current_price": 94827.25604611755,
+            "historical_data_points": 200
+          }
+        },
+        {
+          "step": 3,
+          "name": "signal_generation",
+          "status": "PASSED",
+          "duration": 0.024200439453125,
+          "details": {
+            "signals_generated": 0,
+            "signal_types": []
+          }
+        },
+        {
+          "step": 4,
+          "name": "trade_execution",
+          "status": "PASSED",
+          "duration": 0.0,
+          "details": {
+            "trades_attempted": 0,
+            "trades_executed": 0,
+            "execution_rate": 0
+          }
+        },
+        {
+          "step": 5,
+          "name": "performance_reporting",
+          "status": "PASSED",
+          "duration": 0.0,
+          "details": {
+            "report_generated": true,
+            "report_length": 240
+          }
+        }
+      ],
+      "status": "PASSED",
+      "overall_success": true,
+      "end_time": "2025-08-06 21:51:58.318267",
+      "total_duration": 0.02663
+    },
+    {
+      "test_name": "web_dashboard_deployment",
+      "start_time": "2025-08-06 21:51:58.318267",
+      "checks": [
+        {
+          "check": "static_files_completeness",
+          "status": "PASSED",
+          "details": {
+            "required_files": 7,
+            "missing_files": []
+          }
+        },
+        {
+          "check": "html_structure_validation",
+          "status": "PASSED",
+          "details": {
+            "index.html": {
+              "has_doctype": true,
+              "has_meta_charset": true,
+              "has_viewport": true,
+              "has_title": true,
+              "size": 9363
+            },
+            "secure-login.html": {
+              "has_doctype": true,
+              "has_meta_charset": true,
+              "has_viewport": true,
+              "has_title": true,
+              "size": 13829
+            },
+            "help.html": {
+              "has_doctype": true,
+              "has_meta_charset": true,
+              "has_viewport": true,
+              "has_title": true,
+              "size": 19596
+            }
+          }
+        },
+        {
+          "check": "javascript_functionality",
+          "status": "PASSED",
+          "details": {
+            "auth-manager.js": {
+              "has_functions": true,
+              "has_error_handling": false,
+              "has_api_calls": false,
+              "size": 3426
+            },
+            "auth.js": {
+              "has_functions": false,
+              "has_error_handling": false,
+              "has_api_calls": false,
+              "size": 3307
+            },
+            "config.js": {
+              "has_functions": false,
+              "has_error_handling": false,
+              "has_api_calls": false,
+              "size": 1176
+            },
+            "cors-proxy.js": {
+              "has_functions": false,
+              "has_error_handling": true,
+              "has_api_calls": true,
+              "size": 1678
+            },
+            "dashboard-fix.js": {
+              "has_functions": true,
+              "has_error_handling": true,
+              "has_api_calls": false,
+              "size": 5057
+            },
+            "dashboard.js": {
+              "has_functions": false,
+              "has_error_handling": true,
+              "has_api_calls": false,
+              "size": 14827
+            },
+            "force-max-price.js": {
+              "has_functions": true,
+              "has_error_handling": true,
+              "has_api_calls": true,
+              "size": 5647
+            },
+            "github-actions-monitor.js": {
+              "has_functions": false,
+              "has_error_handling": true,
+              "has_api_calls": true,
+              "size": 8591
+            },
+            "github-api-adapter.js": {
+              "has_functions": false,
+              "has_error_handling": true,
+              "has_api_calls": true,
+              "size": 13844
+            },
+            "github-api.js": {
+              "has_functions": false,
+              "has_error_handling": true,
+              "has_api_calls": true,
+              "size": 8519
+            },
+            "max-api-price.js": {
+              "has_functions": false,
+              "has_error_handling": true,
+              "has_api_calls": true,
+              "size": 10574
+            },
+            "price-fix.js": {
+              "has_functions": false,
+              "has_error_handling": true,
+              "has_api_calls": true,
+              "size": 7510
+            },
+            "simple-price.js": {
+              "has_functions": false,
+              "has_error_handling": true,
+              "has_api_calls": true,
+              "size": 6679
+            }
+          }
+        },
+        {
+          "check": "authentication_config",
+          "status": "FAILED",
+          "details": {
+            "has_users": false,
+            "has_target_user": false,
+            "has_session_timeout": true,
+            "user_hash_length": 0
+          }
+        }
+      ],
+      "status": "PASSED",
+      "overall_success": true,
+      "end_time": "2025-08-06 21:51:58.321268",
+      "total_duration": 0.003001
+    },
+    {
+      "test_name": "github_actions_workflow",
+      "start_time": "2025-08-06 21:51:58.321268",
+      "workflows": [
+        {
+          "file": "data-management.yml",
+          "checks": [
+            {
+              "check": "syntax_validation",
+              "status": "PASSED",
+              "details": {
+                "has_name": true,
+                "has_trigger": true,
+                "has_jobs": true,
+                "has_steps": true,
+                "has_python_setup": true
+              }
+            },
+            {
+              "check": "security_validation",
+              "status": "WARNING",
+              "details": {
+                "uses_secrets": false,
+                "no_hardcoded_keys": true,
+                "has_permissions": false
+              }
+            }
+          ]
+        },
+        {
+          "file": "deploy-pages.yml",
+          "checks": [
+            {
+              "check": "syntax_validation",
+              "status": "PASSED",
+              "details": {
+                "has_name": true,
+                "has_trigger": true,
+                "has_jobs": true,
+                "has_steps": true,
+                "has_python_setup": true
+              }
+            },
+            {
+              "check": "security_validation",
+              "status": "WARNING",
+              "details": {
+                "uses_secrets": false,
+                "no_hardcoded_keys": true,
+                "has_permissions": true
+              }
+            }
+          ]
+        },
+        {
+          "file": "error-handling.yml",
+          "checks": [
+            {
+              "check": "syntax_validation",
+              "status": "PASSED",
+              "details": {
+                "has_name": true,
+                "has_trigger": true,
+                "has_jobs": true,
+                "has_steps": true,
+                "has_python_setup": true
+              }
+            },
+            {
+              "check": "security_validation",
+              "status": "WARNING",
+              "details": {
+                "uses_secrets": false,
+                "no_hardcoded_keys": true,
+                "has_permissions": false
+              }
+            }
+          ]
+        },
+        {
+          "file": "fetch-max-api.yml",
+          "checks": [
+            {
+              "check": "syntax_validation",
+              "status": "PASSED",
+              "details": {
+                "has_name": true,
+                "has_trigger": true,
+                "has_jobs": true,
+                "has_steps": true,
+                "has_python_setup": true
+              }
+            },
+            {
+              "check": "security_validation",
+              "status": "PASSED",
+              "details": {
+                "uses_secrets": true,
+                "no_hardcoded_keys": true,
+                "has_permissions": true
+              }
+            }
+          ]
+        },
+        {
+          "file": "high-frequency-trading.yml",
+          "checks": [
+            {
+              "check": "syntax_validation",
+              "status": "PASSED",
+              "details": {
+                "has_name": true,
+                "has_trigger": true,
+                "has_jobs": true,
+                "has_steps": true,
+                "has_python_setup": true
+              }
+            },
+            {
+              "check": "security_validation",
+              "status": "WARNING",
+              "details": {
+                "uses_secrets": false,
+                "no_hardcoded_keys": true,
+                "has_permissions": false
+              }
+            }
+          ]
+        },
+        {
+          "file": "keep-alive.yml",
+          "checks": [
+            {
+              "check": "syntax_validation",
+              "status": "PASSED",
+              "details": {
+                "has_name": true,
+                "has_trigger": true,
+                "has_jobs": true,
+                "has_steps": true,
+                "has_python_setup": true
+              }
+            },
+            {
+              "check": "security_validation",
+              "status": "WARNING",
+              "details": {
+                "uses_secrets": false,
+                "no_hardcoded_keys": true,
+                "has_permissions": false
+              }
+            }
+          ]
+        },
+        {
+          "file": "main-trading.yml",
+          "checks": [
+            {
+              "check": "syntax_validation",
+              "status": "PASSED",
+              "details": {
+                "has_name": true,
+                "has_trigger": true,
+                "has_jobs": true,
+                "has_steps": true,
+                "has_python_setup": true
+              }
+            },
+            {
+              "check": "security_validation",
+              "status": "WARNING",
+              "details": {
+                "uses_secrets": false,
+                "no_hardcoded_keys": true,
+                "has_permissions": false
+              }
+            }
+          ]
+        },
+        {
+          "file": "max-api-proxy.yml",
+          "checks": [
+            {
+              "check": "syntax_validation",
+              "status": "PASSED",
+              "details": {
+                "has_name": true,
+                "has_trigger": true,
+                "has_jobs": true,
+                "has_steps": true,
+                "has_python_setup": true
+              }
+            },
+            {
+              "check": "security_validation",
+              "status": "WARNING",
+              "details": {
+                "uses_secrets": true,
+                "no_hardcoded_keys": true,
+                "has_permissions": false
+              }
+            }
+          ]
+        },
+        {
+          "file": "monitoring.yml",
+          "checks": [
+            {
+              "check": "syntax_validation",
+              "status": "PASSED",
+              "details": {
+                "has_name": true,
+                "has_trigger": true,
+                "has_jobs": true,
+                "has_steps": true,
+                "has_python_setup": true
+              }
+            },
+            {
+              "check": "security_validation",
+              "status": "WARNING",
+              "details": {
+                "uses_secrets": false,
+                "no_hardcoded_keys": true,
+                "has_permissions": false
+              }
+            }
+          ]
+        },
+        {
+          "file": "resource-monitoring.yml",
+          "checks": [
+            {
+              "check": "syntax_validation",
+              "status": "PASSED",
+              "details": {
+                "has_name": true,
+                "has_trigger": true,
+                "has_jobs": true,
+                "has_steps": true,
+                "has_python_setup": true
+              }
+            },
+            {
+              "check": "security_validation",
+              "status": "WARNING",
+              "details": {
+                "uses_secrets": true,
+                "no_hardcoded_keys": true,
+                "has_permissions": false
+              }
+            }
+          ]
+        },
+        {
+          "file": "simple-trading.yml",
+          "checks": [
+            {
+              "check": "syntax_validation",
+              "status": "PASSED",
+              "details": {
+                "has_name": true,
+                "has_trigger": true,
+                "has_jobs": true,
+                "has_steps": true,
+                "has_python_setup": true
+              }
+            },
+            {
+              "check": "security_validation",
+              "status": "WARNING",
+              "details": {
+                "uses_secrets": false,
+                "no_hardcoded_keys": true,
+                "has_permissions": false
+              }
+            }
+          ]
+        },
+        {
+          "file": "telegram-notifications.yml",
+          "checks": [
+            {
+              "check": "syntax_validation",
+              "status": "PASSED",
+              "details": {
+                "has_name": true,
+                "has_trigger": true,
+                "has_jobs": true,
+                "has_steps": true,
+                "has_python_setup": true
+              }
+            },
+            {
+              "check": "security_validation",
+              "status": "WARNING",
+              "details": {
+                "uses_secrets": true,
+                "no_hardcoded_keys": true,
+                "has_permissions": false
+              }
+            }
+          ]
+        },
+        {
+          "file": "testing.yml",
+          "checks": [
+            {
+              "check": "syntax_validation",
+              "status": "PASSED",
+              "details": {
+                "has_name": true,
+                "has_trigger": true,
+                "has_jobs": true,
+                "has_steps": true,
+                "has_python_setup": true
+              }
+            },
+            {
+              "check": "security_validation",
+              "status": "WARNING",
+              "details": {
+                "uses_secrets": true,
+                "no_hardcoded_keys": true,
+                "has_permissions": false
+              }
+            }
+          ]
+        }
+      ],
+      "status": "PASSED",
+      "overall_success": true,
+      "end_time": "2025-08-06 21:51:58.324626",
+      "total_duration": 0.003358
+    },
+    {
+      "test_name": "system_resilience",
+      "start_time": "2025-08-06 21:51:58.324626",
+      "resilience_tests": [
+        {
+          "test": "network_error_handling",
+          "status": "FAILED",
+          "details": {
+            "error_properly_handled": false
+          }
+        },
+        {
+          "test": "empty_data_handling",
+          "status": "PASSED",
+          "details": {
+            "empty_data_handled": true
+          }
+        },
+        {
+          "test": "config_missing_handling",
+          "status": "PASSED",
+          "details": {
+            "telegram_config_missing": true,
+            "auth_config_missing": true,
+            "trading_config_missing": true
+          }
+        }
+      ],
+      "status": "PASSED",
+      "overall_success": true,
+      "end_time": "2025-08-06 21:51:58.325628",
+      "total_duration": 0.001002
+    }
+  ]
+}

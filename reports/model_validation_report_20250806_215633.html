@@ -1,0 +1,47 @@
+
+            <!DOCTYPE html>
+            <html lang="zh-TW">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>AImax 模型驗證報告</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    .header { background-color: #f0f0f0; padding: 20px; border-radius: 5px; }
+                    .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+                    .metric { display: inline-block; margin: 10px; padding: 10px; background-color: #f9f9f9; border-radius: 3px; }
+                    .recommendation { background-color: #e8f5e8; padding: 10px; margin: 5px 0; border-radius: 3px; }
+                    table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>🤖 AImax 模型驗證報告</h1>
+                    <p>生成時間: 2025-08-06T21:56:33.590965</p>
+                    <p>評估模型數: 2</p>
+                </div>
+                
+                <div class="section">
+                    <h2>📊 執行摘要</h2>
+                    <div class="metric">最佳模型: lstm_predictor</div>
+                    <div class="metric">平均準確率: 47.50%</div>
+                    <p>本次比較涵蓋 2 個模型 | 綜合表現最佳的模型是 lstm_predictor | 其準確率為 45.00%，穩定性分數為 0.853 | 所有模型的平均準確率為 47.50% | 模型間性能差異較小，可根據具體需求選擇 | 模型排名: lstm_predictor(第1名), ensemble_scorer(第2名)</p>
+                </div>
+                
+                <div class="section">
+                    <h2>🏆 模型排名</h2>
+                    <table>
+                        <tr><th>排名</th><th>模型名稱</th><th>綜合評分</th></tr>
+            <tr><td>1</td><td>lstm_predictor</td><td>0.471</td></tr><tr><td>2</td><td>ensemble_scorer</td><td>0.461</td></tr>
+                    </table>
+                </div>
+                
+                <div class="section">
+                    <h2>💡 建議</h2>
+            <div class="recommendation">⚠️ lstm_predictor 表現一般，建議進一步優化</div><div class="recommendation">🔄 考慮組合使用 ensemble_scorer 和 lstm_predictor 以提升整體性能</div><div class="recommendation">📈 lstm_predictor 準確率偏低，建議重新訓練或調整參數</div><div class="recommendation">🎯 lstm_predictor 信心度偏低，建議優化信心度計算方法</div><div class="recommendation">🎯 ensemble_scorer 信心度偏低，建議優化信心度計算方法</div>
+                </div>
+            </body>
+            </html>
+            

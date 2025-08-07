@@ -48,50 +48,40 @@ class UltimateOptimizedVolumeAnalyzer:
         df['ma20'] = df['close'].rolling(window=20).mean()
         df['ma50'] = df['close'].rolling(window=50).mean()
         df['ma200'] = df['close'].rolling(window=200).mean()
-        df['trend_strength'] = (df['close'] - df['ma50']) / df['ma50']
-        df['short_trend'] = (df['close'] - df['ma20']) / df['ma20']
         
-        # 價格動能指標
-        df['price_momentum_3'] = df['close'].pct_change(periods=3)
-        df['price_momentum_5'] = df['close'].pct_change(periods=5)
-        df['price_momentum_10'] = df['close'].pct_change(periods=10)
+        # 趨勢強度
+        df['trend_strength'] = (df['close'] - df['ma20']) / df['ma20']
+        df['short_trend'] = (df['ma20'] - df['ma50']) / df['ma50']
+        df['long_trend'] = (df['ma50'] - df['ma200']) / df['ma200']
         
-        # 市場波動性
-        df['volatility'] = df['close'].rolling(window=20).std() / df['close'].rolling(window=20).mean()
-        df['volatility_ma'] = df['volatility'].rolling(window=10).mean()
-        df['volatility_ratio'] = df['volatility'] / df['volatility_ma']
-        
-        # MACD強度指標
-        df['macd_strength'] = abs(df['macd_hist']) / df['close'] * 10000
-        df['macd_acceleration'] = df['macd_hist'].diff()
-        df['macd_momentum'] = df['macd'].pct_change(periods=3)
-        
-        # 成交量價格確認
-        df['volume_price_trend'] = np.where(
-            (df['close'].pct_change() > 0) & (df['volume_trend'] > 0), 1,
-            np.where((df['close'].pct_change() < 0) & (df['volume_trend'] > 0), -1, 0)
-        )
-        
-        # 新增：多重確認指標
+        # 趨勢對齊
         df['trend_alignment'] = np.where(
-            (df['ma20'] > df['ma50']) & (df['ma50'] > df['ma200']), 1,
-            np.where((df['ma20'] < df['ma50']) & (df['ma50'] < df['ma200']), -1, 0)
+            (df['close'] > df['ma20']) & (df['ma20'] > df['ma50']) & (df['ma50'] > df['ma200']), 1,
+            np.where((df['close'] < df['ma20']) & (df['ma20'] < df['ma50']) & (df['ma50'] < df['ma200']), -1, 0)
         )
         
-        # 新增：風險評估指標
-        df['risk_score'] = (
-            abs(df['price_momentum_5']) * 0.3 +
-            df['volatility_ratio'] * 0.3 +
-            abs(df['bb_position'] - 0.5) * 0.4
-        )
+        # 波動率指標
+        df['volatility'] = df['close'].rolling(window=20).std()
+        df['volatility_ratio'] = df['volatility'] / df['volatility'].rolling(window=50).mean()
         
-        # 新增：市場強度綜合指標
+        # 市場強度指標
         df['market_strength'] = (
-            (df['rsi'] - 50) / 50 * 0.2 +
-            df['trend_strength'] * 0.3 +
-            (df['volume_ratio'] - 1) * 0.2 +
-            df['short_trend'] * 0.3
+            df['trend_strength'] * 0.4 +
+            df['short_trend'] * 0.3 +
+            df['long_trend'] * 0.3
         )
+        
+        # 風險評分
+        df['risk_score'] = (
+            abs(df['trend_strength']) * 0.3 +
+            df['volatility_ratio'] * 0.4 +
+            (1 - abs(df['rsi'] - 50) / 50) * 0.3
+        )
+        
+        # MACD強度和動能
+        df['macd_strength'] = abs(df.get('macd_hist', 0))
+        df['macd_acceleration'] = df['macd_strength'].diff()
+        df['macd_momentum'] = df['macd_strength'].pct_change()
         
         # 新增：信號品質指標
         df['signal_quality'] = (
@@ -101,164 +91,6 @@ class UltimateOptimizedVolumeAnalyzer:
         )
         
         return df
-
-
-class UltimateOptimizedVolumeEnhancedMACDSignals:
-    """終極優化成交量增強MACD交易信號檢測系統"""
-    
-    def __init__(self):
-        self.volume_analyzer = UltimateOptimizedVolumeAnalyzer()
-        self.min_confidence = 0.85  # 85%最低信心度
-        
-    def calculate_macd(self, df: pd.DataFrame, fast=12, slow=26, signal=9) -> pd.DataFrame:
-        """計算MACD指標"""
-        df = df.copy()
-        
-        # 計算EMA
-        ema_fast = df['close'].ewm(span=fast).mean()
-        ema_slow = df['close'].ewm(span=slow).mean()
-        
-        # 計算MACD線
-        df['macd'] = ema_fast - ema_slow
-        df['macd_signal'] = df['macd'].ewm(span=signal).mean()
-        df['macd_hist'] = df['macd'] - df['macd_signal']
-        
-        return df
-        
-    def detect_signals(self, df: pd.DataFrame) -> List[Dict]:
-        """檢測交易信號"""
-        try:
-            # 計算MACD
-            df = self.calculate_macd(df)
-            
-            # 計算終極優化指標
-            df = self.volume_analyzer.calculate_ultimate_indicators(df)
-            
-            signals = []
-            
-            for i in range(50, len(df)):  # 從第50個數據點開始
-                current = df.iloc[i]
-                prev = df.iloc[i-1]
-                
-                # 檢測買入信號
-                buy_signal = self._detect_buy_signal(current, prev, df.iloc[i-10:i+1])
-                if buy_signal:
-                    signals.append({
-                        'timestamp': current.name if hasattr(current, 'name') else i,
-                        'action': 'buy',
-                        'price': current['close'],
-                        'confidence': buy_signal['confidence'],
-                        'reasons': buy_signal['reasons'],
-                        'symbol': 'BTCUSDT'
-                    })
-                
-                # 檢測賣出信號
-                sell_signal = self._detect_sell_signal(current, prev, df.iloc[i-10:i+1])
-                if sell_signal:
-                    signals.append({
-                        'timestamp': current.name if hasattr(current, 'name') else i,
-                        'action': 'sell',
-                        'price': current['close'],
-                        'confidence': sell_signal['confidence'],
-                        'reasons': sell_signal['reasons'],
-                        'symbol': 'BTCUSDT'
-                    })
-            
-            return signals
-            
-        except Exception as e:
-            logger.error(f"信號檢測失敗: {e}")
-            return []
-    
-    def _detect_buy_signal(self, current, prev, window) -> Optional[Dict]:
-        """檢測買入信號"""
-        try:
-            confidence = 0.0
-            reasons = []
-            
-            # 1. MACD金叉 (30分)
-            if (current['macd'] > current['macd_signal'] and 
-                prev['macd'] <= prev['macd_signal']):
-                confidence += 0.30
-                reasons.append("MACD金叉")
-            
-            # 2. 成交量確認 (25分)
-            if current['volume_ratio'] > 1.5:
-                confidence += 0.25
-                reasons.append(f"成交量放大{current['volume_ratio']:.1f}倍")
-            
-            # 3. RSI超賣反彈 (20分)
-            if 25 <= current['rsi'] <= 45:
-                confidence += 0.20
-                reasons.append(f"RSI反彈{current['rsi']:.1f}")
-            
-            # 4. 布林帶位置 (15分)
-            if current['bb_position'] < 0.3:
-                confidence += 0.15
-                reasons.append("布林帶下軌支撐")
-            
-            # 5. 趨勢確認 (10分)
-            if current['trend_alignment'] >= 0:
-                confidence += 0.10
-                reasons.append("趨勢向上")
-            
-            # 只有信心度達到85%以上才發出信號
-            if confidence >= self.min_confidence and len(reasons) >= 3:
-                return {
-                    'confidence': confidence,
-                    'reasons': reasons
-                }
-            
-            return None
-            
-        except Exception as e:
-            logger.error(f"買入信號檢測失敗: {e}")
-            return None
-    
-    def _detect_sell_signal(self, current, prev, window) -> Optional[Dict]:
-        """檢測賣出信號"""
-        try:
-            confidence = 0.0
-            reasons = []
-            
-            # 1. MACD死叉 (30分)
-            if (current['macd'] < current['macd_signal'] and 
-                prev['macd'] >= prev['macd_signal']):
-                confidence += 0.30
-                reasons.append("MACD死叉")
-            
-            # 2. 成交量確認 (25分)
-            if current['volume_ratio'] > 1.3:
-                confidence += 0.25
-                reasons.append(f"成交量放大{current['volume_ratio']:.1f}倍")
-            
-            # 3. RSI超買回調 (20分)
-            if 55 <= current['rsi'] <= 75:
-                confidence += 0.20
-                reasons.append(f"RSI回調{current['rsi']:.1f}")
-            
-            # 4. 布林帶位置 (15分)
-            if current['bb_position'] > 0.7:
-                confidence += 0.15
-                reasons.append("布林帶上軌阻力")
-            
-            # 5. 趨勢確認 (10分)
-            if current['trend_alignment'] <= 0:
-                confidence += 0.10
-                reasons.append("趨勢向下")
-            
-            # 只有信心度達到85%以上才發出信號
-            if confidence >= self.min_confidence and len(reasons) >= 3:
-                return {
-                    'confidence': confidence,
-                    'reasons': reasons
-                }
-            
-            return None
-            
-        except Exception as e:
-            logger.error(f"賣出信號檢測失敗: {e}")
-            return None
     
     @staticmethod
     def ultimate_signal_validation(row: pd.Series, signal_type: str, market_context: Dict, recent_trades: List) -> Tuple[bool, str, float]:
@@ -275,15 +107,15 @@ class UltimateOptimizedVolumeEnhancedMACDSignals:
             risk_score = row.get('risk_score', 1)
             signal_quality = row.get('signal_quality', 0.5)
             
-            # 動態調整基準分數和獎勵
-            if signal_quality > 0.7:
-                base_threshold = 65
-                quality_bonus = 8
-            elif signal_quality > 0.5:
-                base_threshold = 68
-                quality_bonus = 5
+            # 動態調整基準分數和獎勵 - 大幅提高閾值以達到高勝率
+            if signal_quality > 0.85:
+                base_threshold = 95  # 大幅提高閾值
+                quality_bonus = 15
+            elif signal_quality > 0.7:
+                base_threshold = 100  # 極高閾值
+                quality_bonus = 12
             else:
-                base_threshold = 72
+                base_threshold = 110  # 超高閾值，只接受最優質信號
                 quality_bonus = 0
             
             # 風險調整
@@ -298,13 +130,13 @@ class UltimateOptimizedVolumeEnhancedMACDSignals:
             volume_ratio = row.get('volume_ratio', 0)
             volatility_ratio = row.get('volatility_ratio', 1)
             
-            # 更智能的成交量閾值計算
+            # 極嚴格的成交量閾值計算 - 只接受高質量信號
             if abs(market_strength) > 0.15:  # 強勢市場
-                volume_threshold = 0.8 + (volatility_ratio - 1) * 0.1
+                volume_threshold = 1.8 + (volatility_ratio - 1) * 0.1  # 極高閾值
             else:  # 一般市場
-                volume_threshold = 1.0 + (volatility_ratio - 1) * 0.15
+                volume_threshold = 2.2 + (volatility_ratio - 1) * 0.15  # 超高閾值
             
-            volume_threshold = max(0.7, min(1.4, volume_threshold))
+            volume_threshold = max(1.8, min(3.0, volume_threshold))  # 大幅提高最低閾值
             
             if volume_ratio >= volume_threshold * 1.2:
                 score += 25
@@ -323,25 +155,25 @@ class UltimateOptimizedVolumeEnhancedMACDSignals:
             trend_alignment = row.get('trend_alignment', 0)
             
             if signal_type == 'buy':
-                if volume_trend > 0.08 and trend_alignment >= 0:
+                if volume_trend > 0.25 and trend_alignment >= 0:  # 極高要求
                     score += 20
                     reasons.append(f"量勢{volume_trend:.1%}✓")
-                elif volume_trend > 0.03:
+                elif volume_trend > 0.15:  # 高要求
                     score += 15
                     reasons.append(f"量勢{volume_trend:.1%}◐")
-                elif volume_trend > -0.05:
+                elif volume_trend > 0.08:  # 中等要求
                     score += 8
                     reasons.append(f"量勢{volume_trend:.1%}◑")
                 else:
                     reasons.append(f"量勢{volume_trend:.1%}✗")
             else:
-                if volume_trend > -0.08 and trend_alignment <= 0:
+                if volume_trend > 0.05 and trend_alignment <= 0:  # 極高要求
                     score += 20
                     reasons.append(f"量勢{volume_trend:.1%}✓")
-                elif volume_trend > -0.15:
+                elif volume_trend > -0.05:  # 高要求
                     score += 15
                     reasons.append(f"量勢{volume_trend:.1%}◐")
-                elif volume_trend > -0.25:
+                elif volume_trend > -0.15:  # 中等要求
                     score += 8
                     reasons.append(f"量勢{volume_trend:.1%}◑")
                 else:
@@ -443,31 +275,31 @@ class UltimateOptimizedVolumeEnhancedMACDSignals:
             macd_momentum = row.get('macd_momentum', 0)
             
             if signal_type == 'buy':
-                if macd_strength > 2 and macd_acceleration > 0 and macd_momentum > -0.1:
+                if macd_strength > 3 and macd_acceleration > 0.5 and macd_momentum > 0:  # 提高要求
                     score += 10
                     reasons.append(f"MACD✓")
-                elif macd_strength > 1.5:
+                elif macd_strength > 2.5 and macd_acceleration > 0:  # 提高要求
                     score += 8
                     reasons.append(f"MACD◐")
-                elif macd_strength > 1:
+                elif macd_strength > 2:  # 提高要求
                     score += 5
                     reasons.append(f"MACD◑")
                 else:
                     reasons.append(f"MACD✗")
             else:
-                if macd_strength > 2 and macd_acceleration < 0 and macd_momentum < 0.1:
+                if macd_strength > 3 and macd_acceleration < -0.5 and macd_momentum < 0:  # 提高要求
                     score += 10
                     reasons.append(f"MACD✓")
-                elif macd_strength > 1.5:
+                elif macd_strength > 2.5 and macd_acceleration < 0:  # 提高要求
                     score += 8
                     reasons.append(f"MACD◐")
-                elif macd_strength > 1:
+                elif macd_strength > 2:  # 提高要求
                     score += 5
                     reasons.append(f"MACD◑")
                 else:
                     reasons.append(f"MACD✗")
             
-            # 7. 近期交易歷史分析 (額外分數)
+            # 7. 近期交易歷史分析 (額外分數) - 加強交易間隔控制
             if recent_trades:
                 try:
                     last_trade = recent_trades[-1]
@@ -477,13 +309,22 @@ class UltimateOptimizedVolumeEnhancedMACDSignals:
                     if isinstance(current_time, pd.Timestamp) and isinstance(last_exit_time, pd.Timestamp):
                         time_since_last = (current_time - last_exit_time).total_seconds() / 3600
                         
-                        # 避免過於頻繁交易
-                        if time_since_last < 6:  # 6小時內
-                            score -= 5
-                            reasons.append(f"頻繁交易-5")
-                        elif time_since_last > 24:  # 24小時後
-                            score += 3
-                            reasons.append(f"間隔適當+3")
+                        # 更嚴格的交易間隔控制
+                        if time_since_last < 2:  # 2小時內 - 嚴格禁止
+                            score -= 20
+                            reasons.append(f"過度頻繁-20")
+                        elif time_since_last < 6:  # 6小時內 - 重度懲罰
+                            score -= 15
+                            reasons.append(f"頻繁交易-15")
+                        elif time_since_last < 12:  # 12小時內 - 輕度懲罰
+                            score -= 8
+                            reasons.append(f"間隔偏短-8")
+                        elif time_since_last > 48:  # 48小時後 - 獎勵
+                            score += 8
+                            reasons.append(f"間隔充足+8")
+                        elif time_since_last > 24:  # 24小時後 - 小獎勵
+                            score += 5
+                            reasons.append(f"間隔適當+5")
                 except Exception:
                     pass  # 忽略時間比較錯誤
             
@@ -501,6 +342,7 @@ class UltimateOptimizedVolumeEnhancedMACDSignals:
         except Exception as e:
             logger.error(f"終極優化信號驗證失敗: {e}")
             return False, f"驗證錯誤: {e}", 0
+
 
 class UltimateOptimizedVolumeEnhancedMACDSignals:
     """終極優化成交量增強MACD信號檢測器"""
@@ -529,65 +371,69 @@ class UltimateOptimizedVolumeEnhancedMACDSignals:
         
         return df
     
-    def analyze_market_context(self, df: pd.DataFrame, current_index: int) -> Dict:
-        """分析市場環境上下文"""
+    def _check_macd_buy_signal(self, current_row: pd.Series, previous_row: pd.Series) -> bool:
+        """檢查MACD買進信號"""
         try:
-            if current_index < 50:
-                return {'trend': 'unknown', 'volatility': 'normal', 'strength': 0}
+            # MACD金叉：MACD線上穿信號線
+            macd_cross = (current_row['macd'] > current_row['macd_signal'] and 
+                         previous_row['macd'] <= previous_row['macd_signal'])
             
-            recent_data = df.iloc[max(0, current_index-30):current_index+1]
+            # MACD柱狀圖轉正
+            hist_positive = current_row['macd_hist'] > 0 and previous_row['macd_hist'] <= 0
             
-            # 趨勢分析
-            ma50_slope = (recent_data['ma50'].iloc[-1] - recent_data['ma50'].iloc[-15]) / recent_data['ma50'].iloc[-15]
+            return macd_cross or hist_positive
             
-            if ma50_slope > 0.025:
-                trend = 'strong_bullish'
-            elif ma50_slope > 0.01:
-                trend = 'bullish'
-            elif ma50_slope < -0.025:
-                trend = 'strong_bearish'
-            elif ma50_slope < -0.01:
-                trend = 'bearish'
-            else:
-                trend = 'sideways'
+        except Exception as e:
+            logger.error(f"MACD買進信號檢測失敗: {e}")
+            return False
+    
+    def _check_macd_sell_signal(self, current_row: pd.Series, previous_row: pd.Series) -> bool:
+        """檢查MACD賣出信號"""
+        try:
+            # MACD死叉：MACD線下穿信號線
+            macd_cross = (current_row['macd'] < current_row['macd_signal'] and 
+                         previous_row['macd'] >= previous_row['macd_signal'])
             
-            # 波動性分析
-            avg_volatility = recent_data['volatility'].mean()
-            if avg_volatility > 0.035:
-                volatility = 'very_high'
-            elif avg_volatility > 0.025:
-                volatility = 'high'
-            elif avg_volatility < 0.012:
-                volatility = 'low'
-            else:
-                volatility = 'normal'
+            # MACD柱狀圖轉負
+            hist_negative = current_row['macd_hist'] < 0 and previous_row['macd_hist'] >= 0
             
-            return {
-                'trend': trend,
-                'volatility': volatility,
-                'strength': abs(ma50_slope),
-                'avg_volatility': avg_volatility,
-                'market_phase': self._determine_market_phase(recent_data)
+            return macd_cross or hist_negative
+            
+        except Exception as e:
+            logger.error(f"MACD賣出信號檢測失敗: {e}")
+            return False
+    
+    def analyze_market_context(self, df: pd.DataFrame, current_index: int) -> Dict:
+        """分析市場環境"""
+        try:
+            current_row = df.iloc[current_index]
+            
+            # 基本市場信息
+            context = {
+                'volatility': current_row.get('volatility_ratio', 1),
+                'trend_strength': current_row.get('trend_strength', 0),
+                'market_phase': self._determine_market_phase(current_row),
+                'risk_level': current_row.get('risk_score', 1)
             }
+            
+            return context
             
         except Exception as e:
             logger.error(f"市場環境分析失敗: {e}")
-            return {'trend': 'unknown', 'volatility': 'normal', 'strength': 0}
+            return {}
     
-    def _determine_market_phase(self, recent_data: pd.DataFrame) -> str:
+    def _determine_market_phase(self, row: pd.Series) -> str:
         """判斷市場階段"""
         try:
-            price_change = (recent_data['close'].iloc[-1] - recent_data['close'].iloc[0]) / recent_data['close'].iloc[0]
-            volume_trend = recent_data['volume_trend'].mean()
+            trend_strength = row.get('trend_strength', 0)
+            volatility = row.get('volatility_ratio', 1)
             
-            if price_change > 0.05 and volume_trend > 0.1:
-                return 'bull_run'
-            elif price_change < -0.05 and volume_trend > 0.1:
-                return 'bear_crash'
-            elif abs(price_change) < 0.02:
-                return 'consolidation'
-            else:
+            if abs(trend_strength) > 0.05 and volatility < 1.5:
                 return 'trending'
+            elif volatility > 2:
+                return 'volatile'
+            else:
+                return 'ranging'
         except:
             return 'unknown'
     
@@ -619,7 +465,7 @@ class UltimateOptimizedVolumeEnhancedMACDSignals:
             macd_buy_signal = self._check_macd_buy_signal(current_row, previous_row)
             if macd_buy_signal and self.current_position == 0:
                 # 終極優化驗證
-                passed, info, score = self.volume_analyzer.ultimate_signal_validation(
+                passed, info, score = UltimateOptimizedVolumeAnalyzer.ultimate_signal_validation(
                     current_row, 'buy', market_context, self.recent_trades
                 )
                 
@@ -648,28 +494,13 @@ class UltimateOptimizedVolumeEnhancedMACDSignals:
                     logger.info(f"✅ 終極確認買進 #{self.trade_sequence}: {current_row['close']:,.0f} - {info}")
                 else:
                     # 信號被拒絕
-                    signal = {
-                        'datetime': current_row['timestamp'],
-                        'close': current_row['close'],
-                        'signal_type': 'buy_rejected',
-                        'trade_sequence': 0,
-                        'macd': current_row['macd'],
-                        'macd_signal': current_row['macd_signal'],
-                        'macd_hist': current_row['macd_hist'],
-                        'volume_confirmed': False,
-                        'validation_info': info,
-                        'signal_strength': score,
-                        'market_context': market_context
-                    }
-                    signals.append(signal)
-                    
                     logger.info(f"❌ 買進信號被拒絕: {current_row['close']:,.0f} - {info}")
             
             # 檢查MACD賣出信號
             macd_sell_signal = self._check_macd_sell_signal(current_row, previous_row)
             if macd_sell_signal and self.current_position == 1:
                 # 終極優化驗證
-                passed, info, score = self.volume_analyzer.ultimate_signal_validation(
+                passed, info, score = UltimateOptimizedVolumeAnalyzer.ultimate_signal_validation(
                     current_row, 'sell', market_context, self.recent_trades
                 )
                 
@@ -692,60 +523,23 @@ class UltimateOptimizedVolumeEnhancedMACDSignals:
                         'exit_time': current_row['timestamp']
                     }
                     signals.append(signal)
-                    self.trade_history.append(signal)
                     
-                    # 更新近期交易記錄
-                    self.recent_trades.append({
-                        'exit_time': current_row['timestamp'],
-                        'sequence': self.trade_sequence
-                    })
+                    # 更新交易歷史
+                    if self.trade_history:
+                        last_buy = self.trade_history[-1]
+                        trade_record = {
+                            'entry_time': last_buy['entry_time'],
+                            'exit_time': current_row['timestamp'],
+                            'entry_price': last_buy['close'],
+                            'exit_price': current_row['close'],
+                            'profit': current_row['close'] - last_buy['close'],
+                            'profit_pct': (current_row['close'] - last_buy['close']) / last_buy['close']
+                        }
+                        self.recent_trades.append(trade_record)
                     
                     logger.info(f"✅ 終極確認賣出 #{self.trade_sequence}: {current_row['close']:,.0f} - {info}")
                 else:
                     # 信號被拒絕
-                    signal = {
-                        'datetime': current_row['timestamp'],
-                        'close': current_row['close'],
-                        'signal_type': 'sell_rejected',
-                        'trade_sequence': 0,
-                        'macd': current_row['macd'],
-                        'macd_signal': current_row['macd_signal'],
-                        'macd_hist': current_row['macd_hist'],
-                        'volume_confirmed': False,
-                        'validation_info': info,
-                        'signal_strength': score,
-                        'market_context': market_context
-                    }
-                    signals.append(signal)
-                    
                     logger.info(f"❌ 賣出信號被拒絕: {current_row['close']:,.0f} - {info}")
         
         return pd.DataFrame(signals)
-    
-    def _check_macd_buy_signal(self, current_row: pd.Series, previous_row: pd.Series) -> bool:
-        """檢查MACD買進信號"""
-        try:
-            return (
-                previous_row['macd_hist'] < 0 and
-                previous_row['macd'] <= previous_row['macd_signal'] and
-                current_row['macd'] > current_row['macd_signal'] and
-                current_row['macd'] < 0 and
-                current_row['macd_signal'] < 0
-            )
-        except Exception as e:
-            logger.error(f"MACD買進信號檢查失敗: {e}")
-            return False
-    
-    def _check_macd_sell_signal(self, current_row: pd.Series, previous_row: pd.Series) -> bool:
-        """檢查MACD賣出信號"""
-        try:
-            return (
-                previous_row['macd_hist'] > 0 and
-                previous_row['macd'] >= previous_row['macd_signal'] and
-                current_row['macd_signal'] > current_row['macd'] and
-                current_row['macd'] > 0 and
-                current_row['macd_signal'] > 0
-            )
-        except Exception as e:
-            logger.error(f"MACD賣出信號檢查失敗: {e}")
-            return False

@@ -1,0 +1,54 @@
+{
+  "test_suite": "AImax_Complete_Test_Suite",
+  "timestamp": "2025-08-06T22:00:17.005789",
+  "summary": {
+    "total_test_suites": 5,
+    "passed_suites": 2,
+    "failed_suites": 3,
+    "success_rate": 40.0,
+    "total_duration": 0.9110815525054932,
+    "overall_status": "FAILED",
+    "total_execution_time": 0.9110815525054932
+  },
+  "test_results": [
+    {
+      "test_name": "單元測試",
+      "module": "unit_tests",
+      "status": "FAILED",
+      "duration": 0.7468886375427246,
+      "success": false
+    },
+    {
+      "test_name": "集成測試",
+      "module": "integration_tests",
+      "status": "FAILED",
+      "duration": 0.02704906463623047,
+      "success": false
+    },
+    {
+      "test_name": "端到端測試",
+      "module": "e2e_tests",
+      "status": "PASSED",
+      "duration": 0.0450139045715332,
+      "success": true
+    },
+    {
+      "test_name": "模擬交易測試",
+      "module": "simulation_tests",
+      "status": "PASSED",
+      "duration": 0.01668262481689453,
+      "success": true
+    },
+    {
+      "test_name": "綜合測試",
+      "module": "comprehensive_tests",
+      "status": "FAILED",
+      "duration": 0.07544732093811035,
+      "success": false
+    }
+  ],
+  "recommendations": [
+    "部分測試失敗，建議檢查失敗的測試套件",
+    "成功率低於80%，建議進行系統檢查和修復"
+  ]
+}

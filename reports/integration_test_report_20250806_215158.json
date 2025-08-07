@@ -1,0 +1,388 @@
+{
+  "github_actions": {
+    "workflow_syntax": {
+      "data-management.yml": {
+        "syntax_valid": true,
+        "checks": {
+          "has_name": true,
+          "has_on": true,
+          "has_jobs": true,
+          "has_runs_on": true,
+          "has_steps": true
+        },
+        "size": 26969
+      },
+      "deploy-pages.yml": {
+        "syntax_valid": true,
+        "checks": {
+          "has_name": true,
+          "has_on": true,
+          "has_jobs": true,
+          "has_runs_on": true,
+          "has_steps": true
+        },
+        "size": 15958
+      },
+      "error-handling.yml": {
+        "syntax_valid": true,
+        "checks": {
+          "has_name": true,
+          "has_on": true,
+          "has_jobs": true,
+          "has_runs_on": true,
+          "has_steps": true
+        },
+        "size": 10672
+      },
+      "fetch-max-api.yml": {
+        "syntax_valid": true,
+        "checks": {
+          "has_name": true,
+          "has_on": true,
+          "has_jobs": true,
+          "has_runs_on": true,
+          "has_steps": true
+        },
+        "size": 6637
+      },
+      "high-frequency-trading.yml": {
+        "syntax_valid": true,
+        "checks": {
+          "has_name": true,
+          "has_on": true,
+          "has_jobs": true,
+          "has_runs_on": true,
+          "has_steps": true
+        },
+        "size": 13120
+      },
+      "keep-alive.yml": {
+        "syntax_valid": true,
+        "checks": {
+          "has_name": true,
+          "has_on": true,
+          "has_jobs": true,
+          "has_runs_on": true,
+          "has_steps": true
+        },
+        "size": 9033
+      },
+      "main-trading.yml": {
+        "syntax_valid": true,
+        "checks": {
+          "has_name": true,
+          "has_on": true,
+          "has_jobs": true,
+          "has_runs_on": true,
+          "has_steps": true
+        },
+        "size": 5543
+      },
+      "max-api-proxy.yml": {
+        "syntax_valid": true,
+        "checks": {
+          "has_name": true,
+          "has_on": true,
+          "has_jobs": true,
+          "has_runs_on": true,
+          "has_steps": true
+        },
+        "size": 8045
+      },
+      "monitoring.yml": {
+        "syntax_valid": true,
+        "checks": {
+          "has_name": true,
+          "has_on": true,
+          "has_jobs": true,
+          "has_runs_on": true,
+          "has_steps": true
+        },
+        "size": 4738
+      },
+      "resource-monitoring.yml": {
+        "syntax_valid": true,
+        "checks": {
+          "has_name": true,
+          "has_on": true,
+          "has_jobs": true,
+          "has_runs_on": true,
+          "has_steps": true
+        },
+        "size": 12248
+      },
+      "simple-trading.yml": {
+        "syntax_valid": true,
+        "checks": {
+          "has_name": true,
+          "has_on": true,
+          "has_jobs": true,
+          "has_runs_on": true,
+          "has_steps": true
+        },
+        "size": 788
+      },
+      "telegram-notifications.yml": {
+        "syntax_valid": true,
+        "checks": {
+          "has_name": true,
+          "has_on": true,
+          "has_jobs": true,
+          "has_runs_on": true,
+          "has_steps": true
+        },
+        "size": 14273
+      },
+      "testing.yml": {
+        "syntax_valid": true,
+        "checks": {
+          "has_name": true,
+          "has_on": true,
+          "has_jobs": true,
+          "has_runs_on": true,
+          "has_steps": true
+        },
+        "size": 8872
+      }
+    },
+    "secrets_config": {
+      "template": {
+        "exists": true,
+        "secrets_count": 7,
+        "has_max_api": false,
+        "has_telegram": true
+      },
+      "usage": {
+        "data-management.yml": {
+          "uses_secrets": false,
+          "secret_count": 0
+        },
+        "deploy-pages.yml": {
+          "uses_secrets": false,
+          "secret_count": 0
+        },
+        "error-handling.yml": {
+          "uses_secrets": false,
+          "secret_count": 0
+        },
+        "fetch-max-api.yml": {
+          "uses_secrets": true,
+          "secret_count": 1
+        },
+        "high-frequency-trading.yml": {
+          "uses_secrets": false,
+          "secret_count": 0
+        },
+        "keep-alive.yml": {
+          "uses_secrets": false,
+          "secret_count": 0
+        },
+        "main-trading.yml": {
+          "uses_secrets": false,
+          "secret_count": 0
+        },
+        "max-api-proxy.yml": {
+          "uses_secrets": true,
+          "secret_count": 1
+        },
+        "monitoring.yml": {
+          "uses_secrets": false,
+          "secret_count": 0
+        },
+        "resource-monitoring.yml": {
+          "uses_secrets": true,
+          "secret_count": 3
+        },
+        "simple-trading.yml": {
+          "uses_secrets": false,
+          "secret_count": 0
+        },
+        "telegram-notifications.yml": {
+          "uses_secrets": true,
+          "secret_count": 2
+        },
+        "testing.yml": {
+          "uses_secrets": true,
+          "secret_count": 4
+        }
+      }
+    },
+    "deployment": {
+      "exists": true,
+      "deployment_ready": true,
+      "checks": {
+        "has_github_pages": true,
+        "has_build_step": true,
+        "has_deploy_step": true,
+        "has_permissions": true,
+        "has_artifact_upload": true
+      }
+    }
+  },
+  "web_dashboard": {
+    "functionality": {
+      "index.html": {
+        "exists": true,
+        "valid_html": true,
+        "checks": {
+          "has_doctype": true,
+          "has_html_tag": true,
+          "has_head": true,
+          "has_body": true,
+          "has_title": true
+        },
+        "size": 9363
+      },
+      "secure-login.html": {
+        "exists": true,
+        "valid_html": true,
+        "checks": {
+          "has_doctype": true,
+          "has_html_tag": true,
+          "has_head": true,
+          "has_body": true,
+          "has_title": true
+        },
+        "size": 13829
+      },
+      "help.html": {
+        "exists": true,
+        "valid_html": true,
+        "checks": {
+          "has_doctype": true,
+          "has_html_tag": true,
+          "has_head": true,
+          "has_body": true,
+          "has_title": true
+        },
+        "size": 19596
+      }
+    },
+    "authentication": {
+      "config_valid": false,
+      "checks": {
+        "has_users": false,
+        "has_session_timeout": true,
+        "has_target_user": false,
+        "user_hash_valid": false
+      },
+      "session_timeout": 3600
+    },
+    "api_endpoints": {
+      "api_integration": {
+        "auth-manager.js": {
+          "has_fetch": false,
+          "has_github_api": false,
+          "has_error_handling": false,
+          "size": 3426
+        },
+        "auth.js": {
+          "has_fetch": false,
+          "has_github_api": false,
+          "has_error_handling": false,
+          "size": 3307
+        },
+        "config.js": {
+          "has_fetch": false,
+          "has_github_api": true,
+          "has_error_handling": false,
+          "size": 1176
+        },
+        "cors-proxy.js": {
+          "has_fetch": true,
+          "has_github_api": false,
+          "has_error_handling": true,
+          "size": 1678
+        },
+        "dashboard-fix.js": {
+          "has_fetch": false,
+          "has_github_api": false,
+          "has_error_handling": true,
+          "size": 5057
+        },
+        "dashboard.js": {
+          "has_fetch": false,
+          "has_github_api": false,
+          "has_error_handling": true,
+          "size": 14827
+        },
+        "force-max-price.js": {
+          "has_fetch": true,
+          "has_github_api": false,
+          "has_error_handling": true,
+          "size": 5647
+        },
+        "github-actions-monitor.js": {
+          "has_fetch": true,
+          "has_github_api": true,
+          "has_error_handling": true,
+          "size": 8591
+        },
+        "github-api-adapter.js": {
+          "has_fetch": true,
+          "has_github_api": false,
+          "has_error_handling": true,
+          "size": 13844
+        },
+        "github-api.js": {
+          "has_fetch": true,
+          "has_github_api": true,
+          "has_error_handling": true,
+          "size": 8519
+        },
+        "max-api-price.js": {
+          "has_fetch": true,
+          "has_github_api": false,
+          "has_error_handling": true,
+          "size": 10574
+        },
+        "price-fix.js": {
+          "has_fetch": true,
+          "has_github_api": false,
+          "has_error_handling": true,
+          "size": 7510
+        },
+        "simple-price.js": {
+          "has_fetch": true,
+          "has_github_api": false,
+          "has_error_handling": true,
+          "size": 6679
+        }
+      }
+    }
+  },
+  "trading_system": {
+    "end_to_end_flow": {
+      "data_fetch": {
+        "success": true,
+        "time": 0.0020020008087158203,
+        "data_points": 100
+      },
+      "signal_generation": {
+        "success": true,
+        "time": 0.011297464370727539,
+        "signals_count": 0
+      },
+      "simulation_trading": {
+        "success": false,
+        "reason": "No signals generated"
+      },
+      "report_generation": {
+        "success": true,
+        "report_length": 240
+      }
+    },
+    "github_actions_simulation": {
+      "script_exists": true,
+      "script_valid": true,
+      "checks": {
+        "has_main_function": true,
+        "has_error_handling": true,
+        "has_logging": true,
+        "has_data_fetch": true,
+        "has_signal_detection": true
+      },
+      "size": 5212
+    }
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "test_suite": "simulation_tests",
+  "start_time": "2025-08-06 22:00:16.914830",
+  "tests": [
+    {
+      "test_name": "basic_simulation_environment",
+      "status": "PASSED",
+      "details": {
+        "initial_balance": 10000.0,
+        "risk_limits_configured": true,
+        "environment_ready": true
+      }
+    },
+    {
+      "test_name": "mock_data_generation",
+      "status": "PASSED",
+      "details": {
+        "data_points": 100,
+        "columns": [
+          "timestamp",
+          "open",
+          "high",
+          "low",
+          "close",
+          "volume"
+        ],
+        "price_range": {
+          "min": 38341.10449681935,
+          "max": 54078.09939981787
+        }
+      }
+    },
+    {
+      "test_name": "risk_control_system",
+      "status": "PASSED",
+      "details": {
+        "risk_check_result": {
+          "allowed": true,
+          "checks": {
+            "position_size_ok": true,
+            "daily_trades_ok": true,
+            "drawdown_ok": true,
+            "balance_ok": true
+          },
+          "reason": "All checks passed"
+        },
+        "risk_limits": {
+          "max_position_size": 0.1,
+          "max_daily_trades": 50,
+          "stop_loss_pct": 0.05,
+          "max_drawdown_pct": 0.2
+        }
+      }
+    },
+    {
+      "test_name": "simulation_trade_execution",
+      "status": "PASSED",
+      "details": {
+        "trade_result": {
+          "success": true,
+          "trade_id": 1,
+          "action": "buy",
+          "price": 50000,
+          "quantity": 0.018000000000000002,
+          "cost": 900.0000000000001,
+          "remaining_balance": 9100.0
+        },
+        "account_balance_after": 9100.0,
+        "open_positions": 1
+      }
+    },
+    {
+      "test_name": "backtest_simulation",
+      "status": "PASSED",
+      "details": {
+        "symbol": "BTCUSDT",
+        "duration_days": 3,
+        "execution_time": 0.011001825332641602,
+        "data_points": 72,
+        "signals_generated": 0,
+        "trades_executed": 0,
+        "account_performance": {
+          "initial_balance": 10000.0,
+          "current_balance": 9100.0,
+          "total_return_pct": -9.0,
+          "total_trades": 1,
+          "winning_trades": 0,
+          "losing_trades": 0,
+          "win_rate_pct": 0.0,
+          "total_profit": 0.0,
+          "avg_profit": 0,
+          "avg_loss": 0,
+          "profit_loss_ratio": 0,
+          "open_positions": 1
+        },
+        "simulation_results": [],
+        "risk_metrics": {
+          "error": "沒有已關閉的交易記錄"
+        }
+      }
+    },
+    {
+      "test_name": "performance_report_generation",
+      "status": "PASSED",
+      "details": {
+        "report_length": 450,
+        "report_preview": "🎯 AImax 模擬交易報告\n==================================================\n\n📊 帳戶概況:\n   初始資金: $10,000.00\n   當前餘額: $9,100.00\n   總回報率: -9.00%\n   總盈虧: $+0.00\n\n📈 交易統計:\n   總交易數: 1\n   獲利交易: 0\n   虧損交易: 0\n   勝率: 0.0%\n ..."
+      }
+    }
+  ],
+  "end_time": "2025-08-06 22:00:16.927958",
+  "total_duration": 0.013128,
+  "summary": {
+    "total_tests": 6,
+    "passed_tests": 6,
+    "failed_tests": 0,
+    "success_rate": 100.0
+  }
+}

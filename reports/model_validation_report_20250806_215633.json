@@ -1,0 +1,305 @@
+{
+  "report_metadata": {
+    "generated_at": "2025-08-06T21:56:33.590965",
+    "report_version": "1.0",
+    "models_evaluated": 2,
+    "successful_validations": 2,
+    "generator": "AImax Model Validation Report System"
+  },
+  "executive_summary": {
+    "best_overall_model": "lstm_predictor",
+    "model_count": 2,
+    "average_accuracy": 0.475,
+    "top_recommendation": "⚠️ lstm_predictor 表現一般，建議進一步優化",
+    "comparison_summary": "本次比較涵蓋 2 個模型 | 綜合表現最佳的模型是 lstm_predictor | 其準確率為 45.00%，穩定性分數為 0.853 | 所有模型的平均準確率為 47.50% | 模型間性能差異較小，可根據具體需求選擇 | 模型排名: lstm_predictor(第1名), ensemble_scorer(第2名)"
+  },
+  "detailed_results": {
+    "lstm_predictor": {
+      "model_type": "deep_learning",
+      "metrics": {
+        "model_name": "LSTM Price Predictor (Simulated)",
+        "model_type": "deep_learning",
+        "prediction_count": 20,
+        "processing_time": 0.4,
+        "predictions_per_second": 50.0,
+        "confidence_avg": 0.49210395099226834,
+        "confidence_std": 0.13219865382452484,
+        "confidence_min": 0.29251018510032434,
+        "confidence_max": 0.8538762300220483,
+        "high_confidence_ratio": 0.05,
+        "prediction_distribution": {
+          "HOLD": 18,
+          "BUY": 1,
+          "SELL": 1
+        },
+        "prediction_diversity": 3,
+        "accuracy": 0.45,
+        "precision": 0.16666666666666666,
+        "recall": 0.27272727272727276,
+        "f1_score": 0.2068965517241379,
+        "macro_f1": 0.2068965517241379,
+        "class_metrics": {
+          "SELL": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1_score": 0,
+            "support": 8
+          },
+          "HOLD": {
+            "precision": 0.5,
+            "recall": 0.8181818181818182,
+            "f1_score": 0.6206896551724137,
+            "support": 11
+          },
+          "BUY": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1_score": 0,
+            "support": 1
+          }
+        },
+        "correct_predictions": 9,
+        "total_predictions": 20,
+        "stability_score": 0.8532774187843931,
+        "success_rate": 0.1,
+        "memory_usage_mb": 2.0
+      },
+      "validation_details": {
+        "test_samples": 20,
+        "successful_predictions": 2,
+        "average_confidence": 0.49210395099226834,
+        "simulation_note": "This is a simulated LSTM model for testing purposes"
+      },
+      "processing_info": {
+        "processing_time": 0.4,
+        "predictions_count": 20,
+        "average_confidence": 0.49210395099226834
+      }
+    },
+    "ensemble_scorer": {
+      "model_type": "ensemble",
+      "metrics": {
+        "model_name": "Ensemble Scorer (Simulated)",
+        "model_type": "ensemble",
+        "prediction_count": 20,
+        "processing_time": 0.6,
+        "predictions_per_second": 33.333333333333336,
+        "confidence_avg": 0.5468375664320566,
+        "confidence_std": 0.08081569892070092,
+        "confidence_min": 0.3978653690944861,
+        "confidence_max": 0.7421714572864605,
+        "high_confidence_ratio": 0.0,
+        "prediction_distribution": {
+          "HOLD": 19,
+          "SELL": 1
+        },
+        "prediction_diversity": 2,
+        "accuracy": 0.5,
+        "precision": 0.17543859649122806,
+        "recall": 0.30303030303030304,
+        "f1_score": 0.2222222222222222,
+        "macro_f1": 0.2222222222222222,
+        "class_metrics": {
+          "SELL": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1_score": 0,
+            "support": 8
+          },
+          "HOLD": {
+            "precision": 0.5263157894736842,
+            "recall": 0.9090909090909091,
+            "f1_score": 0.6666666666666666,
+            "support": 11
+          },
+          "BUY": {
+            "precision": 0,
+            "recall": 0.0,
+            "f1_score": 0,
+            "support": 1
+          }
+        },
+        "correct_predictions": 10,
+        "total_predictions": 20,
+        "stability_score": 0.9047080832124743,
+        "success_rate": 0.05,
+        "memory_usage_mb": 2.0,
+        "model_agreement": 0.8499041949884814,
+        "weight_effectiveness": 0.7917467237996656,
+        "reliability_score": 0.7804201600482418
+      },
+      "validation_details": {
+        "prediction_count": 20,
+        "success_rate": 1.0,
+        "model_agreement": 0.8499041949884814,
+        "simulation_note": "This is a simulated ensemble scorer for testing purposes"
+      },
+      "processing_info": {
+        "processing_time": 0.6,
+        "predictions_count": 20,
+        "average_confidence": 0.5468375664320566
+      }
+    }
+  },
+  "comparison_analysis": {
+    "best_overall_model": "lstm_predictor",
+    "best_accuracy_model": "ensemble_scorer",
+    "best_stability_model": "ensemble_scorer",
+    "best_speed_model": "lstm_predictor",
+    "model_rankings": {
+      "lstm_predictor": 1,
+      "ensemble_scorer": 2
+    },
+    "performance_matrix": {
+      "lstm_predictor": {
+        "accuracy": 0.45,
+        "f1_score": 0.2068965517241379,
+        "confidence_avg": 0.49210395099226834,
+        "stability_score": 0.8532774187843931,
+        "processing_time": 0.4,
+        "predictions_per_second": 50.0,
+        "success_rate": 0.1,
+        "reliability_score": 0,
+        "overall_score": 0.4706865158113268
+      },
+      "ensemble_scorer": {
+        "accuracy": 0.5,
+        "f1_score": 0.2222222222222222,
+        "confidence_avg": 0.5468375664320566,
+        "stability_score": 0.9047080832124743,
+        "processing_time": 0.6,
+        "predictions_per_second": 33.333333333333336,
+        "success_rate": 0.05,
+        "reliability_score": 0.7804201600482418,
+        "overall_score": 0.4613429585577907
+      }
+    },
+    "recommendations": [
+      "⚠️ lstm_predictor 表現一般，建議進一步優化",
+      "🔄 考慮組合使用 ensemble_scorer 和 lstm_predictor 以提升整體性能",
+      "📈 lstm_predictor 準確率偏低，建議重新訓練或調整參數",
+      "🎯 lstm_predictor 信心度偏低，建議優化信心度計算方法",
+      "🎯 ensemble_scorer 信心度偏低，建議優化信心度計算方法"
+    ],
+    "comparison_summary": "本次比較涵蓋 2 個模型 | 綜合表現最佳的模型是 lstm_predictor | 其準確率為 45.00%，穩定性分數為 0.853 | 所有模型的平均準確率為 47.50% | 模型間性能差異較小，可根據具體需求選擇 | 模型排名: lstm_predictor(第1名), ensemble_scorer(第2名)"
+  },
+  "performance_matrix": {
+    "lstm_predictor": {
+      "accuracy": 0.45,
+      "f1_score": 0.2068965517241379,
+      "confidence_avg": 0.49210395099226834,
+      "stability_score": 0.8532774187843931,
+      "processing_time": 0.4,
+      "predictions_per_second": 50.0,
+      "success_rate": 0.1,
+      "reliability_score": 0,
+      "overall_score": 0.4706865158113268
+    },
+    "ensemble_scorer": {
+      "accuracy": 0.5,
+      "f1_score": 0.2222222222222222,
+      "confidence_avg": 0.5468375664320566,
+      "stability_score": 0.9047080832124743,
+      "processing_time": 0.6,
+      "predictions_per_second": 33.333333333333336,
+      "success_rate": 0.05,
+      "reliability_score": 0.7804201600482418,
+      "overall_score": 0.4613429585577907
+    }
+  },
+  "recommendations": {
+    "primary_recommendations": [
+      "⚠️ lstm_predictor 表現一般，建議進一步優化",
+      "🔄 考慮組合使用 ensemble_scorer 和 lstm_predictor 以提升整體性能",
+      "📈 lstm_predictor 準確率偏低，建議重新訓練或調整參數",
+      "🎯 lstm_predictor 信心度偏低，建議優化信心度計算方法",
+      "🎯 ensemble_scorer 信心度偏低，建議優化信心度計算方法"
+    ],
+    "model_selection_guide": {
+      "high_accuracy_scenario": "需要高準確率時選擇: ensemble_scorer",
+      "high_stability_scenario": "需要高穩定性時選擇: ensemble_scorer",
+      "high_speed_scenario": "需要高速度時選擇: lstm_predictor",
+      "balanced_scenario": "平衡考慮時選擇: lstm_predictor",
+      "ensemble_recommendation": "集成使用: lstm_predictor + ensemble_scorer"
+    },
+    "optimization_suggestions": [
+      "lstm_predictor: 提升準確率 - 考慮增加訓練數據或調整模型參數",
+      "lstm_predictor: 提升信心度 - 優化信心度計算方法",
+      "ensemble_scorer: 提升準確率 - 考慮增加訓練數據或調整模型參數",
+      "ensemble_scorer: 提升信心度 - 優化信心度計算方法",
+      "考慮增加更多模型以提供更多選擇"
+    ]
+  },
+  "statistical_summary": {
+    "model_count": 2,
+    "accuracy_stats": {
+      "mean": 0.475,
+      "std": 0.024999999999999994,
+      "min": 0.45,
+      "max": 0.5,
+      "median": 0.475
+    },
+    "confidence_stats": {
+      "mean": 0.5194707587121625,
+      "std": 0.027366807719894137,
+      "min": 0.49210395099226834,
+      "max": 0.5468375664320566
+    },
+    "stability_stats": {
+      "mean": 0.8789927509984337,
+      "std": 0.025715332214040598,
+      "min": 0.8532774187843931,
+      "max": 0.9047080832124743
+    },
+    "performance_stats": {
+      "avg_processing_time": 0.5,
+      "total_processing_time": 1.0,
+      "fastest_model": "LSTM Price Predictor (Simulated)",
+      "slowest_model": "Ensemble Scorer (Simulated)"
+    }
+  },
+  "charts": {
+    "radar_chart": {
+      "lstm_predictor": {
+        "accuracy": 0.45,
+        "stability": 0.8532774187843931,
+        "confidence": 0.49210395099226834,
+        "speed": 0.5,
+        "success_rate": 0.1
+      },
+      "ensemble_scorer": {
+        "accuracy": 0.5,
+        "stability": 0.9047080832124743,
+        "confidence": 0.5468375664320566,
+        "speed": 0.33333333333333337,
+        "success_rate": 0.05
+      }
+    },
+    "bar_chart": {
+      "accuracy": {
+        "lstm_predictor": 0.45,
+        "ensemble_scorer": 0.5
+      },
+      "stability_score": {
+        "lstm_predictor": 0.8532774187843931,
+        "ensemble_scorer": 0.9047080832124743
+      },
+      "confidence_avg": {
+        "lstm_predictor": 0.49210395099226834,
+        "ensemble_scorer": 0.5468375664320566
+      },
+      "success_rate": {
+        "lstm_predictor": 0.1,
+        "ensemble_scorer": 0.05
+      }
+    },
+    "processing_time_chart": {
+      "lstm_predictor": 0.4,
+      "ensemble_scorer": 0.6
+    },
+    "ranking_pie": {
+      "lstm_predictor": 1,
+      "ensemble_scorer": 2
+    }
+  }
+}
