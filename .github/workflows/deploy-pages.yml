@@ -124,7 +124,7 @@ jobs:
           # 優化所有HTML文件
           html_files = [
               ('static/secure-login-fixed.html', '_site/index.html'),
-              ('static/dashboard-fixed.html', '_site/dashboard.html'),
+              ('static/smart-balanced-dashboard-static.html', '_site/dashboard.html'),
               ('static/test-max-api.html', '_site/test-max-api.html'),
               ('static/clean-dashboard.html', '_site/clean.html'),
               ('static/simple-max-dashboard.html', '_site/simple.html'),
