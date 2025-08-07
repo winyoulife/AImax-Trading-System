@@ -241,26 +241,26 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>💰 總資產價值</h3>
-                <div class="stat-value positive" id="total-value">NT$ 102,900</div>
+                <div class="stat-value positive" id="total-value">NT$ 98,998</div>
                 <div class="stat-subtitle">初始資金: NT$ 100,000</div>
             </div>
             
             <div class="stat-card">
                 <h3>📈 總獲利</h3>
-                <div class="stat-value positive" id="total-return">NT$ +2,900</div>
-                <div class="stat-subtitle" id="return-percentage">報酬率: +2.9%</div>
+                <div class="stat-value neutral" id="total-return">NT$ -1,002</div>
+                <div class="stat-subtitle" id="return-percentage">報酬率: -1.0% (等待賣出)</div>
             </div>
             
             <div class="stat-card">
                 <h3>💵 現金餘額</h3>
-                <div class="stat-value neutral" id="current-balance">NT$ 90,000</div>
+                <div class="stat-value neutral" id="current-balance">NT$ 98,998</div>
                 <div class="stat-subtitle">可用於交易</div>
             </div>
             
             <div class="stat-card">
                 <h3>💼 持倉價值</h3>
-                <div class="stat-value neutral" id="position-value">NT$ 12,900</div>
-                <div class="stat-subtitle" id="position-details">BTCTWD: 0.030000</div>
+                <div class="stat-value neutral" id="position-value">NT$ 0</div>
+                <div class="stat-subtitle" id="position-details">BTCTWD: 0.010544 持倉中</div>
             </div>
             
             <div class="stat-card">
@@ -302,14 +302,6 @@
                             <td><span class="trade-buy">買入</span></td>
                             <td>NT$ 94,840</td>
                             <td>0.010544</td>
-                            <td>NT$ 1,000</td>
-                            <td>NT$ 15</td>
-                        </tr>
-                        <tr>
-                            <td>08/06 19:41</td>
-                            <td><span class="trade-buy">買入</span></td>
-                            <td>NT$ 50,000</td>
-                            <td>0.020000</td>
                             <td>NT$ 1,000</td>
                             <td>NT$ 15</td>
                         </tr>
@@ -424,7 +416,7 @@
             
             // 顯示歡迎訊息
             setTimeout(() => {
-                alert('🎉 歡迎使用 AImax 智能平衡交易系統！\n\n📊 當前狀態:\n• 策略: 83.3%勝率智能平衡策略\n• 總獲利: +NT$ 2,900 (+2.9%)\n• 交易次數: 2筆\n• 系統狀態: 正常運行\n\n🔄 數據每30秒自動更新');
+                alert('🎉 歡迎使用 AImax 智能平衡交易系統！\n\n📊 當前狀態:\n• 策略: 83.3%勝率智能平衡策略 (一買一賣邏輯)\n• 當前餘額: NT$ 98,998\n• 持倉: 0.010544 BTC (等待賣出信號)\n• 交易次數: 1筆 (已修正重複買入)\n• 系統狀態: 正常運行\n\n🔄 數據每30秒自動更新');
             }, 1000);
         });
     </script>
