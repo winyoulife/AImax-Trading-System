@@ -368,7 +368,7 @@ def detect_hybrid_trading_signals(hourly_df: pd.DataFrame, dynamic_df: pd.DataFr
         (signals_df, statistics)
     """
     engine = HybridSignalDetectionEngine(dynamic_timeframe, observation_hours)
-    signals_df = engine.detect_signals(hourly_df, dynamic_df)
+    signals_df = engine.detect_smart_balanced_signals(hourly_df, dynamic_df)
     statistics = engine.get_statistics()
     
     return signals_df, statistics 

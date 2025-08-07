@@ -16,7 +16,7 @@ import logging
 
 # 導入策略模組
 from src.data.live_macd_service import LiveMACDService
-from src.core.clean_ultimate_signals import UltimateOptimizedVolumeEnhancedMACDSignals
+from src.core.smart_balanced_volume_macd_signals import SmartBalancedVolumeEnhancedMACDSignals
 
 # 設置日誌
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -138,7 +138,7 @@ async def test_clean_ultimate_strategy():
     try:
         # 初始化服務和策略
         service = LiveMACDService()
-        strategy = UltimateOptimizedVolumeEnhancedMACDSignals()
+        strategy = SmartBalancedVolumeEnhancedMACDSignals()
         
         print(f"📊 策略配置:")
         print(f"   最低信心度: {strategy.min_confidence:.1%}")
@@ -164,7 +164,7 @@ async def test_clean_ultimate_strategy():
         
         # 執行信號檢測
         print(f"\n🎯 執行信號檢測...")
-        signals = strategy.detect_signals(df)
+        signals = strategy.detect_smart_balanced_signals(df)
         
         # 計算策略績效
         performance = calculate_strategy_performance(signals, df)

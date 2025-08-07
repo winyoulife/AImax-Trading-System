@@ -307,7 +307,7 @@ class TelegramBot:
             
             if df is not None and not df.empty:
                 macd_df = self._calculate_macd_data(df)
-                signals_df = self.signal_engine.detect_signals(macd_df)
+                signals_df = self.signal_engine.detect_smart_balanced_signals(macd_df)
                 
                 # 找到最近的信號
                 recent_signals = signals_df[signals_df['signal_type'].isin(['buy', 'sell'])].tail(3)

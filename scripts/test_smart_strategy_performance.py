@@ -333,7 +333,7 @@ async def test_smart_balanced_strategy():
         
         # 執行信號檢測
         print(f"\n🎯 執行信號檢測...")
-        signals = strategy.detect_signals(df)
+        signals = strategy.detect_smart_balanced_signals(df)
         
         # 計算策略績效
         performance = calculate_strategy_performance(signals, df)

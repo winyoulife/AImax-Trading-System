@@ -20,7 +20,7 @@ from src.core.volume_enhanced_macd_signals import VolumeEnhancedMACDSignals
 from src.core.advanced_volume_macd_signals import AdvancedVolumeEnhancedMACDSignals
 from src.core.ultra_advanced_volume_macd_signals import UltraAdvancedVolumeEnhancedMACDSignals
 from src.core.smart_balanced_volume_macd_signals import SmartBalancedVolumeEnhancedMACDSignals
-from src.core.ultimate_optimized_volume_macd_signals import UltimateOptimizedVolumeEnhancedMACDSignals
+from src.core.smart_balanced_volume_macd_signals import SmartBalancedVolumeEnhancedMACDSignals
 
 # 設置日誌
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -127,7 +127,7 @@ def main():
         ("進階版本", AdvancedVolumeEnhancedMACDSignals(), "detect_advanced_signals"),
         ("超級版本", UltraAdvancedVolumeEnhancedMACDSignals(), "detect_ultra_advanced_signals"),
         ("智能平衡版本", SmartBalancedVolumeEnhancedMACDSignals(), "detect_smart_balanced_signals"),
-        ("終極優化版本", UltimateOptimizedVolumeEnhancedMACDSignals(), "detect_ultimate_optimized_signals")
+        ("終極優化版本", SmartBalancedVolumeEnhancedMACDSignals(), "detect_ultimate_optimized_signals")
     ]
     
     results = {}

@@ -347,7 +347,7 @@ class TradingDataManager:
             'last_updated': datetime.now().isoformat(),
             'trading_status': {
                 'is_active': True,
-                'current_strategy': 'ultimate_optimized_85_percent',
+                'current_strategy': 'smart_balanced_83.3_percent',
                 'execution_mode': 'high_frequency',
                 'last_execution': None,
                 'next_scheduled': None,
@@ -417,7 +417,7 @@ if __name__ == "__main__":
     
     # 測試保存交易執行記錄
     execution_data = {
-        'strategy': 'ultimate_optimized_85_percent',
+        'strategy': 'smart_balanced_83.3_percent',
         'btc_price': 3425000,
         'volatility_level': 'high',
         'signal': 'buy',

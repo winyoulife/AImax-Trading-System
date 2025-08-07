@@ -127,13 +127,13 @@ class BacktestEngine:
         try:
             # 根據策略類型生成信號
             if strategy.strategy_type.value == 'macd':
-                from src.core.clean_ultimate_signals import UltimateOptimizedVolumeEnhancedMACDSignals
-                signal_generator = UltimateOptimizedVolumeEnhancedMACDSignals()
+                from src.core.smart_balanced_volume_macd_signals import SmartBalancedVolumeEnhancedMACDSignals
+                signal_generator = SmartBalancedVolumeEnhancedMACDSignals()
                 
                 # 應用策略配置
                 signal_generator.min_confidence = strategy.macd_config.min_confidence
                 
-                signals = signal_generator.detect_signals(df)
+                signals = signal_generator.detect_smart_balanced_signals(df)
                 
                 # 過濾信號
                 filtered_signals = []

@@ -39,11 +39,11 @@ class EndToEndTestSuite:
             # 步驟1: 初始化系統
             step1_start = time.time()
             from src.data.simple_data_fetcher import DataFetcher
-            from src.core.clean_ultimate_signals import UltimateOptimizedVolumeEnhancedMACDSignals
+            from src.core.smart_balanced_volume_macd_signals import SmartBalancedVolumeEnhancedMACDSignals
             from src.trading.simulation_manager import SimulationTradingManager
             
             fetcher = DataFetcher()
-            strategy = UltimateOptimizedVolumeEnhancedMACDSignals()
+            strategy = SmartBalancedVolumeEnhancedMACDSignals()
             sim_manager = SimulationTradingManager()
             
             results['steps'].append({
@@ -71,7 +71,7 @@ class EndToEndTestSuite:
             
             # 步驟3: 生成交易信號
             step3_start = time.time()
-            signals = strategy.detect_signals(historical_data)
+            signals = strategy.detect_smart_balanced_signals(historical_data)
             
             results['steps'].append({
                 'step': 3,
@@ -359,8 +359,8 @@ class EndToEndTestSuite:
             
             # 測試2: 數據異常處理
             try:
-                from src.core.clean_ultimate_signals import UltimateOptimizedVolumeEnhancedMACDSignals
-                strategy = UltimateOptimizedVolumeEnhancedMACDSignals()
+                from src.core.smart_balanced_volume_macd_signals import SmartBalancedVolumeEnhancedMACDSignals
+                strategy = SmartBalancedVolumeEnhancedMACDSignals()
                 
                 # 創建異常數據
                 import pandas as pd
@@ -369,7 +369,7 @@ class EndToEndTestSuite:
                 # 空數據測試
                 empty_df = pd.DataFrame()
                 try:
-                    signals = strategy.detect_signals(empty_df)
+                    signals = strategy.detect_smart_balanced_signals(empty_df)
                     empty_data_handled = len(signals) == 0
                 except:
                     empty_data_handled = True

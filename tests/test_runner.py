@@ -116,9 +116,9 @@ class AIMaxTestRunner:
             assert 'close' in df.columns, "數據應包含收盤價"
             
             # 測試交易信號
-            from src.core.clean_ultimate_signals import UltimateOptimizedVolumeEnhancedMACDSignals
-            strategy = UltimateOptimizedVolumeEnhancedMACDSignals()
-            signals = strategy.detect_signals(df)
+            from src.core.smart_balanced_volume_macd_signals import SmartBalancedVolumeEnhancedMACDSignals
+            strategy = SmartBalancedVolumeEnhancedMACDSignals()
+            signals = strategy.detect_smart_balanced_signals(df)
             
             self.test_results.append(TestResult(
                 test_name="核心功能測試",
@@ -189,16 +189,16 @@ class AIMaxTestRunner:
         
         try:
             from src.data.simple_data_fetcher import DataFetcher
-            from src.core.clean_ultimate_signals import UltimateOptimizedVolumeEnhancedMACDSignals
+            from src.core.smart_balanced_volume_macd_signals import SmartBalancedVolumeEnhancedMACDSignals
             
             fetcher = DataFetcher()
-            strategy = UltimateOptimizedVolumeEnhancedMACDSignals()
+            strategy = SmartBalancedVolumeEnhancedMACDSignals()
             
             # 獲取測試數據
             df = fetcher.get_historical_data('BTCUSDT', '1h', 100)
             
             # 測試信號檢測
-            signals = strategy.detect_signals(df)
+            signals = strategy.detect_smart_balanced_signals(df)
             
             # 驗證信號質量
             signal_quality = {
@@ -434,10 +434,10 @@ class AIMaxTestRunner:
         
         try:
             from src.data.simple_data_fetcher import DataFetcher
-            from src.core.clean_ultimate_signals import UltimateOptimizedVolumeEnhancedMACDSignals
+            from src.core.smart_balanced_volume_macd_signals import SmartBalancedVolumeEnhancedMACDSignals
             
             fetcher = DataFetcher()
-            strategy = UltimateOptimizedVolumeEnhancedMACDSignals()
+            strategy = SmartBalancedVolumeEnhancedMACDSignals()
             
             # 測試數據獲取性能
             data_start = time.time()
@@ -446,7 +446,7 @@ class AIMaxTestRunner:
             
             # 測試信號檢測性能
             signal_start = time.time()
-            signals = strategy.detect_signals(df)
+            signals = strategy.detect_smart_balanced_signals(df)
             signal_time = time.time() - signal_start
             
             performance_ok = data_time < 10 and signal_time < 5  # 性能閾值
@@ -478,17 +478,17 @@ class AIMaxTestRunner:
         try:
             # 測試完整的交易流程
             from src.data.simple_data_fetcher import DataFetcher
-            from src.core.clean_ultimate_signals import UltimateOptimizedVolumeEnhancedMACDSignals
+            from src.core.smart_balanced_volume_macd_signals import SmartBalancedVolumeEnhancedMACDSignals
             from src.trading.simulation_manager import SimulationTradingManager
             
             # 初始化組件
             fetcher = DataFetcher()
-            strategy = UltimateOptimizedVolumeEnhancedMACDSignals()
+            strategy = SmartBalancedVolumeEnhancedMACDSignals()
             sim_manager = SimulationTradingManager()
             
             # 執行完整流程
             df = fetcher.get_historical_data('BTCUSDT', '1h', 100)
-            signals = strategy.detect_signals(df)
+            signals = strategy.detect_smart_balanced_signals(df)
             
             # 模擬交易
             trades_executed = 0

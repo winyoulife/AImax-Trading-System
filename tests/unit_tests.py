@@ -52,10 +52,10 @@ class TestTradingSignals(unittest.TestCase):
     def setUp(self):
         """測試設置"""
         try:
-            from src.core.clean_ultimate_signals import UltimateOptimizedVolumeEnhancedMACDSignals
+            from src.core.smart_balanced_volume_macd_signals import SmartBalancedVolumeEnhancedMACDSignals
             from src.data.simple_data_fetcher import DataFetcher
             
-            self.strategy = UltimateOptimizedVolumeEnhancedMACDSignals()
+            self.strategy = SmartBalancedVolumeEnhancedMACDSignals()
             self.fetcher = DataFetcher()
         except ImportError:
             self.skipTest("交易信號模塊不可用")
@@ -79,7 +79,7 @@ class TestTradingSignals(unittest.TestCase):
     def test_detect_signals(self):
         """測試信號檢測"""
         df = self.fetcher.get_historical_data('BTCUSDT', '1h', 100)
-        signals = self.strategy.detect_signals(df)
+        signals = self.strategy.detect_smart_balanced_signals(df)
         
         self.assertIsInstance(signals, list)
         

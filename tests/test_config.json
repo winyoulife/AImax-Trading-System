@@ -38,7 +38,7 @@
       "retry_count": 2,
       "required_modules": [
         "src.data.simple_data_fetcher",
-        "src.core.clean_ultimate_signals",
+        "src.core.smart_balanced_volume_macd_signals",
         "src.trading.simulation_manager"
       ],
       "test_cases": [

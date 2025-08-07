@@ -58,7 +58,7 @@ def test_original_macd_strategy():
         # 使用你原本的信號檢測引擎
         print("\n🔍 檢測MACD交易信號...")
         engine = SignalDetectionEngine()
-        result_df = engine.detect_signals(hourly_data)
+        result_df = engine.detect_smart_balanced_signals(hourly_data)
         
         # 獲取統計信息
         stats = engine.get_statistics()

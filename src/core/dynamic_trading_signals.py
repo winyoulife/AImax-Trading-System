@@ -458,7 +458,7 @@ def detect_dynamic_trading_signals(df: pd.DataFrame, observation_minutes: int = 
     # 將分鐘轉換為小時（向下取整）
     observation_hours = max(1, observation_minutes // 60)
     engine = DynamicSignalDetectionEngine(observation_hours)
-    df_with_signals = engine.detect_signals(df)
+    df_with_signals = engine.detect_smart_balanced_signals(df)
     statistics = engine.get_statistics()
     
     return df_with_signals, statistics

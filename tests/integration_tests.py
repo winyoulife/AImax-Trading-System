@@ -255,11 +255,11 @@ class TradingSystemIntegrationTest:
             }
             
             # 測試信號生成
-            from src.core.clean_ultimate_signals import UltimateOptimizedVolumeEnhancedMACDSignals
-            strategy = UltimateOptimizedVolumeEnhancedMACDSignals()
+            from src.core.smart_balanced_volume_macd_signals import SmartBalancedVolumeEnhancedMACDSignals
+            strategy = SmartBalancedVolumeEnhancedMACDSignals()
             
             start_time = time.time()
-            signals = strategy.detect_signals(df)
+            signals = strategy.detect_smart_balanced_signals(df)
             signal_time = time.time() - start_time
             
             results['signal_generation'] = {

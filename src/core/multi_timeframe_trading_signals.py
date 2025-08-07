@@ -1117,7 +1117,7 @@ def detect_multi_timeframe_trading_signals(hourly_df: pd.DataFrame, timeframe_df
         (signals_dict, statistics, tracker)
     """
     engine = MultiTimeframeSignalDetectionEngine(confirmation_timeout_hours)
-    signals_dict = engine.detect_signals(hourly_df, timeframe_dfs)
+    signals_dict = engine.detect_smart_balanced_signals(hourly_df, timeframe_dfs)
     statistics = engine.get_statistics()
     
     return signals_dict, statistics, engine.tracker 

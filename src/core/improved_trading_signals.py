@@ -303,7 +303,7 @@ def detect_improved_trading_signals(df: pd.DataFrame) -> Tuple[pd.DataFrame, Dic
         (添加了信號的DataFrame, 統計信息字典)
     """
     engine = SignalDetectionEngine()
-    df_with_signals = engine.detect_signals(df)
+    df_with_signals = engine.detect_smart_balanced_signals(df)
     statistics = engine.get_statistics()
     
     return df_with_signals, statistics

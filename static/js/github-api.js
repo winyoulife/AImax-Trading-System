@@ -116,7 +116,7 @@ class GitHubAPI {
                 current_btc_price: currentPrice,
                 system_status: trades.length > 0 ? 'running' : 'stopped',
                 trading_mode: 'simulation',
-                strategy: 'ultimate_optimized_85%_winrate',
+                strategy: 'smart_balanced_83.3%_winrate',
                 executed_trades_this_cycle: 0,
                 last_execution: trades.length > 0 ? trades[trades.length - 1].timestamp : null,
                 github_actions: true,
@@ -218,7 +218,7 @@ class GitHubAPI {
                 price: price,
                 quantity: quantity,
                 confidence: 0.8 + Math.random() * 0.15,
-                strategy: 'ultimate_optimized'
+                strategy: 'smart_balanced'
             });
         }
         

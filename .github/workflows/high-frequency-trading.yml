@@ -255,7 +255,7 @@ jobs:
             'btc_price': float('${{ needs.smart-frequency-control.outputs.btc_price }}'),
             'volatility_level': '${{ needs.smart-frequency-control.outputs.volatility_level }}',
             'execution_interval': int('${{ needs.smart-frequency-control.outputs.execution_interval }}'),
-            'strategy': 'ultimate_optimized_85_percent',
+            'strategy': 'smart_balanced_83.3_percent',
             'signal': 'hold',  # buy/sell/hold
             'confidence': 0.85,
             'risk_level': 'low'

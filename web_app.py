@@ -20,7 +20,7 @@ import time
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from src.trading.safe_trading_manager import SafeTradingManager
-from src.core.ultimate_optimized_volume_macd_signals import UltimateOptimizedVolumeEnhancedMACDSignals
+from src.core.smart_balanced_volume_macd_signals import SmartBalancedVolumeEnhancedMACDSignals
 from src.data.data_fetcher import DataFetcher
 
 app = Flask(__name__)
@@ -36,7 +36,7 @@ class WebTradingController:
     
     def __init__(self):
         self.trading_manager = SafeTradingManager()
-        self.signal_detector = UltimateOptimizedVolumeEnhancedMACDSignals()
+        self.signal_detector = SmartBalancedVolumeEnhancedMACDSignals()
         self.data_fetcher = DataFetcher()
         self.is_running = False
         self.last_update = datetime.now()

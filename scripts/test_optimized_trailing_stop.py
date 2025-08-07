@@ -57,7 +57,7 @@ def test_multiple_strategies():
     # 測試原始策略作為基準
     print("\n🔵 基準：原始MACD策略")
     original_engine = SignalDetectionEngine()
-    original_results = original_engine.detect_signals(macd_df)
+    original_results = original_engine.detect_smart_balanced_signals(macd_df)
     
     # 計算原始策略統計
     original_trades = []
@@ -101,7 +101,7 @@ def test_multiple_strategies():
             trailing_pct=strategy['trailing']
         )
         
-        trailing_results = trailing_engine.detect_signals(macd_df)
+        trailing_results = trailing_engine.detect_smart_balanced_signals(macd_df)
         stats = trailing_engine.get_statistics()
         
         print(f"   📈 總獲利: ${stats['total_profit']:,.0f}")

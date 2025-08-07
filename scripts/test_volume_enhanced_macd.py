@@ -77,7 +77,7 @@ class VolumeEnhancedMACDTester:
         """測試原始MACD策略"""
         try:
             # 使用原始MACD策略檢測信號
-            signals_df = self.original_macd.detect_signals(df)
+            signals_df = self.original_macd.detect_smart_balanced_signals(df)
             
             if signals_df.empty:
                 return {

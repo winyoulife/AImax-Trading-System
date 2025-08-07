@@ -61,7 +61,7 @@ def compare_strategies():
     # 測試原始MACD策略
     print("\n🔵 測試原始MACD策略...")
     original_engine = SignalDetectionEngine()
-    original_results = original_engine.detect_signals(macd_df)
+    original_results = original_engine.detect_smart_balanced_signals(macd_df)
     original_stats = original_engine.position_tracker.get_status()
     
     # 計算原始策略統計
@@ -94,7 +94,7 @@ def compare_strategies():
         profit_trigger_pct=0.03, # 3% 開始移動停損
         trailing_pct=0.02        # 2% 移動幅度
     )
-    trailing_results = trailing_engine.detect_signals(macd_df)
+    trailing_results = trailing_engine.detect_smart_balanced_signals(macd_df)
     trailing_stats = trailing_engine.get_statistics()
     
     # 顯示比較結果

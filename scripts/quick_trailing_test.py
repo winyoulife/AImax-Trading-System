@@ -44,7 +44,7 @@ def quick_test():
     
     # 原始策略
     original_engine = SignalDetectionEngine()
-    original_results = original_engine.detect_signals(macd_df)
+    original_results = original_engine.detect_smart_balanced_signals(macd_df)
     
     original_trades = []
     position = None
@@ -68,7 +68,7 @@ def quick_test():
         trailing_pct=0.008       # 0.8% 移動幅度
     )
     
-    trailing_results = trailing_engine.detect_signals(macd_df)
+    trailing_results = trailing_engine.detect_smart_balanced_signals(macd_df)
     stats = trailing_engine.get_statistics()
     
     print(f"🟢 移動停損: ${stats['total_profit']:,.0f} ({stats['complete_pairs']}對)")

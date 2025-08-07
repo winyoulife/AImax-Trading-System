@@ -508,7 +508,7 @@ if __name__ == "__main__":
         
         # 測試執行通知
         execution_data = {
-            'strategy': 'ultimate_optimized_85_percent',
+            'strategy': 'smart_balanced_83.3_percent',
             'btc_price': 3425000,
             'volatility_level': 'high',
             'signal': 'buy',

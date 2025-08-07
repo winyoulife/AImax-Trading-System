@@ -23,10 +23,10 @@ logger = logging.getLogger(__name__)
 def test_clean_macd_strategy(df):
     """測試乾淨版MACD策略"""
     try:
-        from src.core.clean_ultimate_signals import UltimateOptimizedVolumeEnhancedMACDSignals
+        from src.core.smart_balanced_volume_macd_signals import SmartBalancedVolumeEnhancedMACDSignals
         
-        detector = UltimateOptimizedVolumeEnhancedMACDSignals()
-        signals = detector.detect_signals(df)
+        detector = SmartBalancedVolumeEnhancedMACDSignals()
+        signals = detector.detect_smart_balanced_signals(df)
         
         # 計算績效
         if not signals:
@@ -70,7 +70,7 @@ def test_volume_enhanced_strategy(df):
         from src.core.volume_enhanced_macd_signals import VolumeEnhancedMACDSignals
         
         detector = VolumeEnhancedMACDSignals()
-        signals = detector.detect_signals(df)
+        signals = detector.detect_smart_balanced_signals(df)
         
         if not signals:
             return {'name': 'Volume Enhanced', 'trades': 0, 'profit': 0, 'win_rate': 0}

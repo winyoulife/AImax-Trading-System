@@ -62,7 +62,7 @@ def check_latest_trades():
         
         # 生成交易信號
         print("📡 生成交易信號...")
-        signals_df = signal_engine.detect_signals(macd_df)
+        signals_df = signal_engine.detect_smart_balanced_signals(macd_df)
         
         # 統計信號
         buy_signals = signals_df[signals_df['signal_type'] == 'buy']

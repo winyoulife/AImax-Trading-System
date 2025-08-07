@@ -162,7 +162,7 @@ async def main():
             return
         
         hourly_df = timeframe_data['1h']
-        signals = signal_detector.detect_signals(hourly_df, timeframe_data)
+        signals = signal_detector.detect_smart_balanced_signals(hourly_df, timeframe_data)
         
         # 分析每個時間框架的獲利
         results = []

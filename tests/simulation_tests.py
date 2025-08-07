@@ -264,13 +264,13 @@ class SafeSimulationEnvironment:
         
         # 初始化策略
         try:
-            from src.core.clean_ultimate_signals import UltimateOptimizedVolumeEnhancedMACDSignals
-            strategy = UltimateOptimizedVolumeEnhancedMACDSignals()
+            from src.core.smart_balanced_volume_macd_signals import SmartBalancedVolumeEnhancedMACDSignals
+            strategy = SmartBalancedVolumeEnhancedMACDSignals()
         except ImportError:
             return {'error': '無法載入交易策略'}
         
         # 生成信號
-        signals = strategy.detect_signals(df)
+        signals = strategy.detect_smart_balanced_signals(df)
         
         # 執行模擬交易
         simulation_results = []

@@ -49,7 +49,7 @@ def test_original_macd_strategy(df: pd.DataFrame) -> Dict:
         df['datetime'] = df['timestamp']
     
     # 使用你原本的信號檢測引擎
-    result_df = engine.detect_signals(df)
+    result_df = engine.detect_smart_balanced_signals(df)
     
     # 獲取統計信息
     stats = engine.get_statistics()

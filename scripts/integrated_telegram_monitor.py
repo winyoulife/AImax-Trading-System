@@ -82,7 +82,7 @@ class IntegratedTelegramMonitor:
             
             # 計算MACD和信號
             macd_df = self._calculate_macd_data(df)
-            signals_df = self.signal_engine.detect_signals(macd_df)
+            signals_df = self.signal_engine.detect_smart_balanced_signals(macd_df)
             
             # 檢查最新信號
             latest = signals_df.iloc[-1]
@@ -216,7 +216,7 @@ class IntegratedTelegramMonitor:
             
             # 計算MACD信號
             macd_df = self._calculate_macd_data(df)
-            signals_df = self.signal_engine.detect_signals(macd_df)
+            signals_df = self.signal_engine.detect_smart_balanced_signals(macd_df)
             
             # 統計今日信號
             today_signals = signals_df[signals_df['signal_type'].isin(['buy', 'sell'])]
