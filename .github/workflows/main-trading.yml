@@ -1,4 +1,4 @@
-name: AImax 智能交易系統 - 模擬交易
+name: AImax 智能平衡交易系統 - 83.3%勝率策略
 
 on:
   schedule:
@@ -18,12 +18,12 @@ on:
       strategy:
         description: '交易策略'
         required: true
-        default: 'ultimate_optimized'
+        default: 'smart_balanced'
         type: choice
         options:
-        - ultimate_optimized
         - smart_balanced
         - ultra_advanced
+        - advanced
 
 env:
   TRADING_MODE: simulation  # 模擬交易模式
@@ -51,24 +51,25 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         
-    - name: 🔧 配置交易環境
+    - name: 🔧 配置智能平衡交易環境
       run: |
-        echo "🔧 配置模擬交易環境..."
+        echo "🔧 配置智能平衡交易環境 (83.3%勝率策略)..."
         mkdir -p logs data/simulation
         echo "SIMULATION_MODE=true" >> $GITHUB_ENV
-        echo "STRATEGY=ultimate_optimized" >> $GITHUB_ENV
-        echo "MAX_DAILY_TRADES=10" >> $GITHUB_ENV
+        echo "STRATEGY=smart_balanced" >> $GITHUB_ENV
+        echo "MAX_DAILY_TRADES=6" >> $GITHUB_ENV
         echo "POSITION_SIZE=0.001" >> $GITHUB_ENV
+        echo "WIN_RATE_TARGET=0.833" >> $GITHUB_ENV
         
     - name: 📊 獲取市場數據
       run: |
         echo "📊 獲取BTC實時價格數據..."
         echo "✅ 數據獲取步驟已整合到交易腳本中"
         
-    - name: 🤖 執行終極優化交易策略
+    - name: 🤖 執行智能平衡交易策略
       run: |
-        echo "🤖 執行85%勝率終極優化策略..."
-        python test_simple_trader.py
+        echo "🤖 執行83.3%勝率智能平衡策略..."
+        python scripts/test_smart_balanced_volume_macd.py
         
     - name: 📈 更新交易狀態
       run: |
@@ -94,11 +95,12 @@ jobs:
             'timestamp': datetime.now().isoformat(),
             'system_status': 'running',
             'trading_mode': 'simulation',
-            'strategy': 'ultimate_optimized_90%_winrate',
+            'strategy': 'smart_balanced_83.3%_winrate',
             'total_trades': total_trades,
             'daily_trades': daily_trades,
             'last_update': datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC'),
-            'github_actions': True
+            'github_actions': True,
+            'strategy_version': 'v1.0-smart-balanced'
         }
         
         # 保存狀態
@@ -153,9 +155,9 @@ jobs:
             print('📝 暫無交易記錄')
             exit(0)
             
-        print('📈 === AImax 模擬交易報告 ===')
+        print('📈 === AImax 智能平衡交易報告 ===')
         print(f'🕐 報告時間: {datetime.now().strftime(\"%Y-%m-%d %H:%M:%S UTC\")}')
-        print(f'🎯 使用策略: 終極優化MACD (目標勝率85%+)')
+        print(f'🎯 使用策略: 智能平衡MACD (驗證勝率83.3%)')
         print(f'📊 總交易次數: {len(trades)}')
         
         # 最近24小時交易

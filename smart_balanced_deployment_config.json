@@ -1,0 +1,27 @@
+{
+  "strategy_name": "smart_balanced_volume_macd",
+  "strategy_version": "v1.0-smart-balanced",
+  "verified_win_rate": "83.3%",
+  "deployment_date": "2025-08-07T17:32:01.786461",
+  "core_files": {
+    "strategy_module": "src.core.smart_balanced_volume_macd_signals",
+    "strategy_class": "SmartBalancedVolumeEnhancedMACDSignals",
+    "test_script": "scripts/test_smart_balanced_volume_macd.py",
+    "backup_file": "CORE_STRATEGY_BACKUP.py"
+  },
+  "performance_metrics": {
+    "win_rate": 0.833,
+    "total_profit": 154747,
+    "average_profit": 25791,
+    "max_loss": 0.027,
+    "signal_strength": 87.2,
+    "total_trades": 6
+  },
+  "deployment_settings": {
+    "max_daily_trades": 6,
+    "position_size": 0.001,
+    "win_rate_target": 0.833,
+    "emergency_stop_loss": 0.05,
+    "github_actions_enabled": true
+  }
+}

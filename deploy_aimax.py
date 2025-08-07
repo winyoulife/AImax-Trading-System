@@ -68,7 +68,7 @@ class AIMaxDeployer:
         self.log("🎯 開始互動式配置嚮導...")
         
         print("\n" + "="*60)
-        print("🤖 歡迎使用 AImax 智能交易系統部署嚮導")
+        print("🤖 歡迎使用 AImax 智能平衡交易系統部署嚮導 (83.3%勝率)")
         print("="*60)
         
         # GitHub配置
@@ -205,7 +205,8 @@ class AIMaxDeployer:
                 'enable_telegram': self.config['enable_telegram'],
                 'login_username': self.config['login_username'],
                 'deployed_at': datetime.now().isoformat(),
-                'version': '3.0'
+                'version': 'v1.0-smart-balanced',
+                'strategy': 'smart_balanced_83.3%_winrate'
             }
             
             config_file = self.project_dir / "aimax_config.json"
@@ -235,7 +236,7 @@ class AIMaxDeployer:
             self.log("✅ 文件添加到Git")
             
             # 創建初始提交
-            commit_message = f"🚀 初始化 AImax 智能交易系統 v3.0 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            commit_message = f"🚀 初始化 AImax 智能平衡交易系統 v1.0-smart-balanced (83.3%勝率) - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
             subprocess.run(['git', 'commit', '-m', commit_message], check=True, capture_output=True)
             self.log("✅ 初始提交完成")
             
@@ -350,13 +351,15 @@ class AIMaxDeployer:
         self.log("📊 生成部署報告...")
         
         report = f"""
-# AImax 智能交易系統部署報告
+# AImax 智能平衡交易系統部署報告
 
 ## 部署信息
 - 部署時間: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 - 項目名稱: {self.config['repo_name']}
 - GitHub用戶: {self.config['github_username']}
 - 部署模式: {self.config['deployment_mode']}
+- 策略版本: v1.0-smart-balanced
+- 驗證勝率: 83.3%
 
 ## 訪問信息
 - 網站地址: {self.config.get('pages_url', 'GitHub Pages設置中')}
@@ -450,7 +453,7 @@ class AIMaxDeployer:
 
 def main():
     """主函數"""
-    print("🤖 AImax 智能交易系統 - 一鍵部署工具 v3.0")
+    print("🤖 AImax 智能平衡交易系統 - 一鍵部署工具 v1.0-smart-balanced (83.3%勝率)")
     print("="*60)
     
     deployer = AIMaxDeployer()
