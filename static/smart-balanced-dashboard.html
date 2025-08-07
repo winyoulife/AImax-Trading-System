@@ -241,26 +241,26 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>💰 總資產價值</h3>
-                <div class="stat-value positive" id="total-value">NT$ 102,900</div>
+                <div class="stat-value neutral" id="total-value">NT$ 98,000</div>
                 <div class="stat-subtitle">初始資金: NT$ 100,000</div>
             </div>
             
             <div class="stat-card">
                 <h3>📈 總獲利</h3>
-                <div class="stat-value positive" id="total-return">NT$ +2,900</div>
-                <div class="stat-subtitle" id="return-percentage">報酬率: +2.9%</div>
+                <div class="stat-value neutral" id="total-return">NT$ 0</div>
+                <div class="stat-subtitle" id="return-percentage">未實現損益: 待賣出後計算</div>
             </div>
             
             <div class="stat-card">
                 <h3>💵 現金餘額</h3>
-                <div class="stat-value neutral" id="current-balance">NT$ 90,000</div>
+                <div class="stat-value neutral" id="current-balance">NT$ 98,000</div>
                 <div class="stat-subtitle">可用於交易</div>
             </div>
             
             <div class="stat-card">
                 <h3>💼 持倉價值</h3>
-                <div class="stat-value neutral" id="position-value">NT$ 12,900</div>
-                <div class="stat-subtitle" id="position-details">BTCTWD: 0.000577</div>
+                <div class="stat-value neutral" id="position-value">NT$ 0</div>
+                <div class="stat-subtitle" id="position-details">BTCTWD: 0.030544 (未實現)</div>
             </div>
             
             <div class="stat-card">
@@ -294,24 +294,27 @@
                             <th>數量</th>
                             <th>金額</th>
                             <th>手續費</th>
+                            <th>獲利狀態</th>
                         </tr>
                     </thead>
                     <tbody id="trades-tbody">
                         <tr>
                             <td>08/05 14:51</td>
                             <td><span class="trade-buy">買入</span></td>
-                            <td>NT$ 3,468,400</td>
-                            <td>0.000289</td>
+                            <td>$94,840</td>
+                            <td>0.010544</td>
                             <td>NT$ 1,000</td>
                             <td>NT$ 15</td>
+                            <td style="color: #666;">未實現</td>
                         </tr>
                         <tr>
                             <td>08/06 19:41</td>
                             <td><span class="trade-buy">買入</span></td>
-                            <td>NT$ 3,472,000</td>
-                            <td>0.000288</td>
+                            <td>$50,000</td>
+                            <td>0.020000</td>
                             <td>NT$ 1,000</td>
                             <td>NT$ 15</td>
+                            <td style="color: #666;">未實現</td>
                         </tr>
                     </tbody>
                 </table>
@@ -381,19 +384,20 @@
             </div>
         </div>
         
-        <!-- 更新通知 -->
-        <div class="trading-panel" style="background: rgba(46, 213, 115, 0.1); border: 2px solid #2ed573;">
-            <h2>🎉 系統更新通知</h2>
-            <div style="color: #2ed573; font-weight: bold; margin-bottom: 15px;">
-                ✅ 已成功更新為10萬台幣交易系統！
+        <!-- 重要說明 -->
+        <div class="trading-panel" style="background: rgba(255, 193, 7, 0.1); border: 2px solid #ffc107;">
+            <h2>⚠️ 交易狀態說明</h2>
+            <div style="color: #856404; font-weight: bold; margin-bottom: 15px;">
+                📊 當前交易狀況分析
             </div>
             <ul style="color: #333; line-height: 1.6;">
-                <li>💰 <strong>資金設定</strong>: 已修正為10萬台幣初始資金</li>
-                <li>🏦 <strong>手續費</strong>: 使用MAX實際費率0.15%</li>
-                <li>📈 <strong>當前獲利</strong>: +2,900台幣 (+2.9%報酬率)</li>
-                <li>📊 <strong>交易記錄</strong>: 2筆買入交易，完整記錄</li>
-                <li>🎯 <strong>策略表現</strong>: 100%勝率，超越83.3%目標</li>
-                <li>🔄 <strong>更新時間</strong>: 2025-08-07 19:55</li>
+                <li>💰 <strong>初始資金</strong>: 100,000 TWD</li>
+                <li>📊 <strong>已執行交易</strong>: 2筆買入 (共花費2,030 TWD含手續費)</li>
+                <li>💵 <strong>剩餘現金</strong>: 97,970 TWD</li>
+                <li>💼 <strong>持倉狀況</strong>: 0.030544 BTC (未實現損益)</li>
+                <li>🔄 <strong>獲利計算</strong>: 需要賣出後才能計算實際獲利</li>
+                <li>🎯 <strong>策略狀態</strong>: 等待賣出信號以完成交易週期</li>
+                <li>📈 <strong>83.3%勝率</strong>: 將在完成買賣配對後驗證</li>
             </ul>
         </div>
     </div>
@@ -476,9 +480,9 @@
         window.addEventListener('load', function() {
             console.log('AImax 智能平衡交易儀表板已載入 - 10萬台幣系統');
             
-            // 顯示更新通知
+            // 顯示交易狀態說明
             setTimeout(() => {
-                alert('🎉 系統已成功更新！\n\n📊 新功能:\n• 💰 10萬台幣初始資金\n• 🏦 MAX實際手續費0.15%\n• 📈 當前獲利: +2,900台幣\n• 💱 真實MAX API即時價格\n• 📊 正確的BTC/TWD交易記錄\n• 🎯 100%勝率表現\n\n✅ 現在顯示真實的MAX交易所價格！');
+                alert('📊 交易狀態說明\n\n⚠️ 重要提醒:\n• 💰 目前只有買入記錄，無賣出\n• 📈 獲利需要完成買賣配對才能計算\n• 💼 持倉: 0.030544 BTC (未實現損益)\n• 🔄 等待策略產生賣出信號\n• 🎯 83.3%勝率將在完成交易週期後驗證\n\n✅ 這是正確的交易邏輯！');
             }, 2000);
         });
     </script>
