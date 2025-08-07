@@ -312,8 +312,9 @@
                     </div>
                     <div>
                         <strong>📈 數據更新頻率:</strong><br>
-                        <span style="color: #00ff88; font-size: 1.1em;">每30秒</span><br>
-                        <small>確保數據即時性</small>
+                        <span style="color: #00ff88; font-size: 1.1em;">每30秒 (混合)</span><br>
+                        <small>前端30秒 + 後端2分鐘</small><br>
+                        <small>來源: <span id="price-source" style="color: #ffaa00;">載入中...</span></small>
                     </div>
                 </div>
                 <div style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 5px;">
@@ -426,56 +427,142 @@
         }
         
         // 格式化數字
-        function formatNumber(num) {
-            return new Intl.NumberFormat('zh-TW').format(num);
-        }
         
         // 獲取真實的MAX API BTC價格
         async function fetchRealBTCPrice() {
             try {
-                // 使用CORS代理獲取MAX API數據
                 const proxyUrl = 'https://api.allorigins.win/raw?url=';
                 const maxApiUrl = 'https://max-api.maicoin.com/api/v2/tickers/btctwd';
                 
                 const response = await fetch(proxyUrl + encodeURIComponent(maxApiUrl));
                 const data = await response.json();
                 
-                if (data && data.last) {
-                    const btcPrice = parseFloat(data.last);
+                if (data && data.ticker && data.ticker.last) {
+                    const btcPrice = parseFloat(data.ticker.last);
                     document.getElementById('btc-price').textContent = `NT$ ${formatNumber(btcPrice)}`;
                     
-                    // 更新後端狀態顯示
-                    const backendPriceElement = document.getElementById('backend-btc-price');
-                    if (backendPriceElement) {
-                        backendPriceElement.textContent = `NT$ ${formatNumber(btcPrice)}`;
-                    }
-                    
-                    // 更新持倉價值
-                    const btcAmount = 0.010544; // 當前持倉
+                    const btcAmount = 0.010544;
                     const positionValue = btcPrice * btcAmount;
                     document.getElementById('position-value').textContent = `NT$ ${formatNumber(Math.round(positionValue))}`;
                     
-                    console.log(`✅ BTC價格已更新: NT$ ${formatNumber(btcPrice)} (後端狀態已同步)`);
+                    console.log(`✅ BTC價格已更新: NT$ ${formatNumber(btcPrice)}`);
                 } else {
                     throw new Error('API數據格式錯誤');
                 }
             } catch (error) {
                 console.error('❌ 獲取BTC價格失敗:', error);
-                // 使用備用價格
-                const fallbackPrice = 3491828; // 300萬台幣作為備用價格
+                const fallbackPrice = 3000000;
                 document.getElementById('btc-price').textContent = `NT$ ${formatNumber(fallbackPrice)} (備用)`;
             }
         }
+
+        function formatNumber(num) {
+            return new Intl.NumberFormat('zh-TW').format(num);
+        }
+        
+        // 🚀 混合高頻價格更新策略 (每30秒)
+        let priceUpdateInterval;
+        let lastUpdateTime = 0;
+        let consecutiveFailures = 0;
+        let priceSource = '';
+        
+        async function fetchBTCPriceHybrid() {
+            const now = Date.now();
+            
+            // 防止過於頻繁的請求
+            if (now - lastUpdateTime < 25000) { // 至少間隔25秒
+                return;
+            }
+            
+            try {
+                // 方法1: 嘗試CORS代理 (最快，實時性最好)
+                const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=';
+                const maxApiUrl = 'https://max-api.maicoin.com/api/v2/tickers/btctwd';
+                
+                const response = await fetch(proxyUrl + maxApiUrl, {
+                    method: 'GET',
+                    signal: AbortSignal.timeout(8000)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data && data.last) {
+                        const btcPrice = parseFloat(data.last);
+                        updatePriceDisplay(btcPrice, 'CORS代理 (實時)');
+                        consecutiveFailures = 0;
+                        lastUpdateTime = now;
+                        return;
+                    }
+                }
+                
+                throw new Error('CORS代理失敗');
+                
+            } catch (error) {
+                consecutiveFailures++;
+                console.warn(`⚠️ CORS代理失敗 (${consecutiveFailures}次):`, error);
+                
+                // 方法2: 使用GitHub Actions更新的數據 (每2分鐘更新)
+                try {
+                    const githubResponse = await fetch('https://raw.githubusercontent.com/winyoulife/AImax-Trading-System/main/data/latest_btc_price.json?' + now);
+                    
+                    if (githubResponse.ok) {
+                        const githubData = await githubResponse.json();
+                        const btcPrice = parseFloat(githubData.price);
+                        updatePriceDisplay(btcPrice, 'GitHub數據 (2分鐘)');
+                        lastUpdateTime = now;
+                        return;
+                    }
+                } catch (githubError) {
+                    console.warn('⚠️ GitHub數據獲取失敗:', githubError);
+                }
+                
+                // 方法3: 使用備用價格 (僅在連續失敗時)
+                if (consecutiveFailures >= 3) {
+                    const fallbackPrice = 3489643;
+                    updatePriceDisplay(fallbackPrice, '備用價格');
+                }
+            }
+        }
+        
+        function updatePriceDisplay(price, source) {
+            priceSource = source;
+            document.getElementById('btc-price').textContent = `NT$ ${formatNumber(price)}`;
+            
+            const backendPriceElement = document.getElementById('backend-btc-price');
+            if (backendPriceElement) {
+                backendPriceElement.textContent = `NT$ ${formatNumber(price)}`;
+            }
+            
+            // 更新持倉價值
+            const btcAmount = 0.010544;
+            const positionValue = price * btcAmount;
+            document.getElementById('position-value').textContent = `NT$ ${formatNumber(Math.round(positionValue))}`;
+            
+            // 更新數據來源顯示
+            const sourceElement = document.getElementById('price-source');
+            if (sourceElement) {
+                sourceElement.textContent = source;
+            }
+            
+            console.log(`✅ 價格更新: NT$ ${formatNumber(price)} (來源: ${source})`);
+        }
         
         function refreshData() {
-            // 獲取真實的MAX API BTC價格
             fetchRealBTCPrice();
-            
-            // 更新時間
-            document.getElementById('last-update').textContent = 
-                new Date().toLocaleString('zh-TW');
-            
+            document.getElementById('last-update').textContent = new Date().toLocaleString('zh-TW');
             console.log('數據已刷新');
+        }
+        
+        // 啟動混合高頻價格更新
+        function startHybridPriceUpdates() {
+            // 立即執行一次
+            fetchBTCPriceHybrid();
+            
+            // 每30秒更新一次
+            priceUpdateInterval = setInterval(fetchBTCPriceHybrid, 30000);
+            
+            console.log('🚀 混合高頻價格更新已啟動 (每30秒)');
         }
         
         // 初始化
@@ -484,7 +571,12 @@
         
         // 定期更新
         setInterval(updateTime, 1000);
-        setInterval(refreshData, 30000); // 每30秒更新一次價格
+        
+        // 啟動混合高頻價格更新 (每30秒)
+        startHybridPriceUpdates();
+        
+        // 備用的定期刷新 (每60秒)
+        setInterval(refreshData, 60000);
         
         // 頁面載入完成
         window.addEventListener('load', function() {
