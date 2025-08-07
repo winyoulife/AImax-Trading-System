@@ -1,0 +1,67 @@
+name: 🚀 簡單部署到GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔄 檢出代碼
+        uses: actions/checkout@v4
+        
+      - name: 🔧 設置Pages
+        uses: actions/configure-pages@v4
+        
+      - name: 📁 準備部署文件
+        run: |
+          echo "📁 準備部署文件..."
+          
+          # 創建部署目錄
+          mkdir -p _site
+          
+          # 複製所有靜態文件
+          cp -r static/* _site/
+          
+          # 創建.nojekyll文件
+          touch _site/.nojekyll
+          
+          # 創建robots.txt
+          cat > _site/robots.txt << 'EOF'
+          User-agent: *
+          Disallow: /
+          EOF
+          
+          # 顯示文件列表
+          echo "📋 部署文件列表:"
+          find _site -type f | sort
+          
+      - name: 📤 上傳Pages構建產物
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+          
+      - name: 🚀 部署到GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        
+      - name: ✅ 部署完成
+        run: |
+          echo "🎉 部署完成！"
+          echo "🌐 訪問地址: ${{ steps.deployment.outputs.page_url }}"
+          echo "📅 部署時間: $(date)"

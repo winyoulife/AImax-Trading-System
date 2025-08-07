@@ -1,11 +1,7 @@
-name: 🚀 AImax 智能交易系統 - 優化部署到GitHub Pages
+name: 🚀 AImax 智能交易系統 - 優化部署到GitHub Pages (已停用)
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'static/**'
-      - '.github/workflows/deploy-pages.yml'
+  # 已停用自動觸發
   workflow_dispatch:
     inputs:
       deploy_mode:
