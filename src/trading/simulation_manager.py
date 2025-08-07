@@ -109,15 +109,21 @@ class SimulationTradingManager:
             logger.error(f"❌ 保存模擬狀態失敗: {e}")
             
     def execute_simulation_trade(self, signal: Dict) -> Dict:
-        """執行模擬交易"""
+        """執行模擬交易 - 嚴格的一買一賣配對邏輯"""
         try:
             action = signal['action']
             price = signal['price']
             symbol = signal.get('symbol', 'BTCUSDT')
             confidence = signal.get('confidence', 0.0)
             
+            current_position = self.positions.get(symbol, 0)
+            
             # 計算交易數量
             if action == 'buy':
+                # 🚨 重要：只有在無持倉時才能買入
+                if current_position > 0:
+                    logger.warning(f"⚠️ 已有持倉 {current_position:.6f} {symbol}，跳過買入信號")
+                    return {'success': False, 'reason': f'已有持倉 {current_position:.6f} {symbol}，跳過買入信號'}
                 # 使用固定金額購買 (台幣計價)
                 trade_amount = min(10000.0, self.current_balance * 0.1)  # 最多使用10%資金，單筆最多1萬
                 
@@ -132,7 +138,7 @@ class SimulationTradingManager:
                     
                     # 執行買入
                     self.current_balance -= total_cost
-                    self.positions[symbol] = self.positions.get(symbol, 0) + quantity
+                    self.positions[symbol] = quantity  # 直接設定，不累加
                     
                     trade_record = {
                         'timestamp': datetime.now().isoformat(),
@@ -161,24 +167,25 @@ class SimulationTradingManager:
                     return {'success': False, 'reason': '資金不足'}
                     
             elif action == 'sell':
-                # 賣出持有的部分或全部
-                current_position = self.positions.get(symbol, 0)
+                # 🚨 重要：只有在有持倉時才能賣出
+                if current_position <= 0:
+                    logger.warning(f"⚠️ 無持倉，跳過賣出信號")
+                    return {'success': False, 'reason': '無持倉，跳過賣出信號'}
                 
-                if current_position > 0:
-                    # 賣出50%持倉
-                    sell_quantity = current_position * 0.5
-                    sell_amount = sell_quantity * price
-                    
-                    # 計算手續費
-                    fee_rate = get_trading_fee('taker')  # 使用MAX實際手續費 0.15%
-                    fee_amount = sell_amount * fee_rate
-                    net_proceeds = sell_amount - fee_amount
-                    
-                    # 執行賣出
-                    self.current_balance += net_proceeds
-                    self.positions[symbol] = current_position - sell_quantity
-                    
-                    trade_record = {
+                # 賣出全部持倉 (完整的交易週期)
+                sell_quantity = current_position
+                sell_amount = sell_quantity * price
+                
+                # 計算手續費
+                fee_rate = get_trading_fee('taker')  # 使用MAX實際手續費 0.15%
+                fee_amount = sell_amount * fee_rate
+                net_proceeds = sell_amount - fee_amount
+                
+                # 執行賣出
+                self.current_balance += net_proceeds
+                self.positions[symbol] = 0  # 清空持倉
+                
+                trade_record = {
                         'timestamp': datetime.now().isoformat(),
                         'action': 'sell',
                         'symbol': symbol,
@@ -193,16 +200,13 @@ class SimulationTradingManager:
                         'position_after': self.positions.get(symbol, 0),
                         'exchange': 'MAX',
                         'currency': 'TWD'
-                    }
-                    
-                    self.trade_history.append(trade_record)
-                    self.save_trade_record(trade_record)
-                    
-                    logger.info(f"✅ 模擬賣出: {sell_quantity:.6f} {symbol} @ ${price:.2f}")
-                    return {'success': True, 'trade': trade_record}
-                else:
-                    logger.warning(f"⚠️ 無持倉，無法賣出 {symbol}")
-                    return {'success': False, 'reason': '無持倉'}
+                }
+                
+                self.trade_history.append(trade_record)
+                self.save_trade_record(trade_record)
+                
+                logger.info(f"✅ 模擬賣出: {sell_quantity:.6f} {symbol} @ ${price:.2f}")
+                return {'success': True, 'trade': trade_record}
                     
             # 保存狀態
             self.save_simulation_state()

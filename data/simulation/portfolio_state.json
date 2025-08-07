@@ -1,8 +1,10 @@
 {
-  "balance": 100000.0,
-  "positions": {},
-  "last_update": "2025-08-07T19:25:00.000000",
-  "total_trades": 0,
+  "balance": 98998.5,
+  "positions": {
+    "BTCTWD": 0.010544122273890604
+  },
+  "last_update": "2025-08-07T20:44:48.060134",
+  "total_trades": 1,
   "initial_balance": 100000.0,
   "currency": "TWD",
   "exchange": "MAX",
