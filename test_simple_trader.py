@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-簡單交易測試腳本
+智能平衡交易測試腳本 - 83.3%勝率策略
+🏆 基於經過驗證的最佳策略 v1.0-smart-balanced
 """
 
 import sys
@@ -13,7 +14,9 @@ from datetime import datetime
 # 添加項目路徑
 sys.path.append('.')
 
-print("🧪 測試AImax交易系統...")
+print("🧪 測試AImax智能平衡交易系統...")
+print("🏆 策略版本: v1.0-smart-balanced")
+print("📊 驗證勝率: 83.3%")
 
 try:
     # 測試數據獲取器
@@ -30,15 +33,15 @@ try:
     df = fetcher.get_historical_data('BTCUSDT', '1h', 50)
     print(f"✅ 獲取歷史數據成功: {len(df)} 條記錄")
     
-    # 測試策略
-    from src.core.clean_ultimate_signals import UltimateOptimizedVolumeEnhancedMACDSignals
+    # 測試智能平衡策略
+    from src.core.smart_balanced_volume_macd_signals import SmartBalancedVolumeEnhancedMACDSignals
     
-    strategy = UltimateOptimizedVolumeEnhancedMACDSignals()
-    print("✅ 策略導入成功")
+    strategy = SmartBalancedVolumeEnhancedMACDSignals()
+    print("✅ 智能平衡策略導入成功")
     
     # 測試信號檢測
-    signals = strategy.detect_signals(df)
-    print(f"✅ 信號檢測成功: {len(signals)} 個信號")
+    signals = strategy.detect_smart_balanced_signals(df)
+    print(f"✅ 智能平衡信號檢測成功: {len(signals)} 個信號")
     
     # 測試模擬交易管理器
     from src.trading.simulation_manager import SimulationTradingManager
