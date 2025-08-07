@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AImax 智能平衡交易儀表板 - 83.3%勝率策略</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 10px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: rgba(255,255,255,0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #6c5ce7;
+            font-size: 2.2em;
+            margin-bottom: 5px;
+        }
+        
+        .header .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .user-info {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin: 10px auto;
+            display: inline-block;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00b894;
+            box-shadow: 0 0 10px rgba(0,184,148,0.5);
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.offline {
+            background: #e17055;
+            box-shadow: 0 0 10px rgba(225,112,85,0.5);
+        }
+        
+        .status-dot.warning {
+            background: #f39c12;
+            box-shadow: 0 0 10px rgba(243,156,18,0.5);
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .big-number {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #00b894;
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .metric {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .metric-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .metric-value {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .refresh-btn {
+            background: #6c5ce7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.3s;
+            margin: 10px 5px;
+        }
+        
+        .refresh-btn:hover {
+            background: #5a4fcf;
+        }
+        
+        .refresh-btn.logout {
+            background: #e17055;
+        }
+        
+        .refresh-btn.logout:hover {
+            background: #d63031;
+        }
+        
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+        
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .big-number {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AImax 智能平衡交易儀表板</h1>
+            <p class="subtitle">83.3%勝率策略 • 智能平衡交易系統 • 即時數據監控</p>
+            <div class="user-info" id="userInfo">🔐 載入中...</div>
+        </div>
+        
+        <div class="dashboard-grid">
+            <!-- BTC價格卡片 -->
+            <div class="card">
+                <div class="card-title">
+                    💰 BTC/TWD 即時價格
+                    <span class="status-dot" id="priceStatus"></span>
+                </div>
+                <div class="big-number" id="btcPrice">載入中...</div>
+                <div class="metric-grid">
+                    <div class="metric">
+                        <div class="metric-label">買入價</div>
+                        <div class="metric-value" id="buyPrice">--</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">賣出價</div>
+                        <div class="metric-value" id="sellPrice">--</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">24H變化</div>
+                        <div class="metric-value" id="priceChange24h">--</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">成交量</div>
+                        <div class="metric-value" id="volume24h">--</div>
+                    </div>
+                </div>
+                <div id="priceAlert"></div>
+            </div>
+            
+            <!-- 交易系統狀態 -->
+            <div class="card">
+                <div class="card-title">
+                    🚀 智能平衡交易系統
+                    <span class="status-dot" id="tradingStatus"></span>
+                </div>
+                <div class="metric-grid">
+                    <div class="metric">
+                        <div class="metric-label">系統狀態</div>
+                        <div class="metric-value" id="systemStatus">載入中...</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">最後執行</div>
+                        <div class="metric-value" id="lastExecution">載入中...</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">今日執行</div>
+                        <div class="metric-value" id="todayExecutions">載入中...</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">成功率</div>
+                        <div class="metric-value" id="successRate">載入中...</div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <div style="color: #00b894; font-weight: 600; margin-bottom: 5px;">🎯 目標勝率: 85%+</div>
+                    <div style="font-size: 0.9em; color: #666;" id="nextExecution">下次執行: 載入中...</div>
+                </div>
+            </div>
+            
+            <!-- 系統健康監控 -->
+            <div class="card">
+                <div class="card-title">
+                    🏥 系統健康監控
+                    <span class="status-dot" id="systemHealthStatus"></span>
+                </div>
+                <div class="metric-grid">
+                    <div class="metric">
+                        <div class="metric-label">高頻交易</div>
+                        <div class="metric-value" id="highFreqStatus">載入中...</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">主交易系統</div>
+                        <div class="metric-value" id="mainTradingStatus">載入中...</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">監控系統</div>
+                        <div class="metric-value" id="monitoringStatus">載入中...</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">數據管理</div>
+                        <div class="metric-value" id="dataManagementStatus">載入中...</div>
+                    </div>
+                </div>
+                <div id="workflowDetails" style="margin-top: 15px; font-size: 0.9em; color: #666;"></div>
+            </div>
+        </div>
+        
+        <!-- 控制面板 -->
+        <div class="card">
+            <div class="card-title">🎛️ 系統控制面板</div>
+            <div style="text-align: center; margin: 20px 0;">
+                <button class="refresh-btn" onclick="refreshAllData()">🔄 刷新所有數據</button>
+                <button class="refresh-btn" onclick="toggleUpdateFrequency()">⚡ 切換更新頻率</button>
+                <button class="refresh-btn" onclick="viewGitHubActions()">⚙️ GitHub Actions</button>
+                <button class="refresh-btn" onclick="viewTelegramGuide()">📱 Telegram設置</button>
+                <button class="refresh-btn" onclick="emergencyStop()">🚨 緊急停止</button>
+                <button class="refresh-btn logout" onclick="logout()">🚪 安全登出</button>
+            </div>
+            <div id="controlPanelStatus"></div>
+        </div>
+    </div>
+
+    <!-- 引入GitHub Actions監控模組 -->
+    <script src="./js/github-actions-monitor.js"></script>
+    
+    <script>
+        // 簡單的認證檢查
+        function checkAuth() {
+            const isAuthenticated = localStorage.getItem('aimax_authenticated') === 'true';
+            const sessionExpiry = localStorage.getItem('aimax_session_expiry');
+            const username = localStorage.getItem('aimax_username');
+            
+            if (!isAuthenticated || !sessionExpiry || !username) {
+                console.log('🔐 未授權訪問，重定向到登入頁面');
+                window.location.href = './secure-login-fixed.html';
+                return false;
+            }
+            
+            const expiryDate = new Date(sessionExpiry);
+            const now = new Date();
+            
+            if (now >= expiryDate) {
+                console.log('🔐 會話已過期，重定向到登入頁面');
+                localStorage.removeItem('aimax_authenticated');
+                localStorage.removeItem('aimax_username');
+                localStorage.removeItem('aimax_session_expiry');
+                localStorage.removeItem('aimax_login_time');
+                window.location.href = './secure-login-fixed.html';
+                return false;
+            }
+            
+            return { username, sessionExpiry: expiryDate };
+        }
+        
+        // 更新BTC價格
+        async function updateBTCPrice() {
+            try {
+                const proxyUrl = 'https://api.allorigins.win/get?url=' + 
+                    encodeURIComponent('https://max-api.maicoin.com/api/v2/tickers/btctwd');
+                
+                const response = await fetch(proxyUrl);
+                const proxyData = await response.json();
+                
+                if (proxyData.status.http_code === 200) {
+                    const data = JSON.parse(proxyData.contents);
+                    
+                    document.getElementById('btcPrice').textContent = `NT$${parseFloat(data.last).toLocaleString()}`;
+                    document.getElementById('buyPrice').textContent = `NT$${parseFloat(data.buy).toLocaleString()}`;
+                    document.getElementById('sellPrice').textContent = `NT$${parseFloat(data.sell).toLocaleString()}`;
+                    document.getElementById('volume24h').textContent = `${parseFloat(data.vol).toFixed(2)} BTC`;
+                    
+                    if (data.open) {
+                        const change = ((parseFloat(data.last) - parseFloat(data.open)) / parseFloat(data.open)) * 100;
+                        const changeElement = document.getElementById('priceChange24h');
+                        changeElement.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+                        changeElement.style.color = change >= 0 ? '#00b894' : '#e17055';
+                    }
+                    
+                    document.getElementById('priceStatus').className = 'status-dot';
+                    console.log('✅ BTC價格更新成功');
+                } else {
+                    throw new Error('MAX API響應異常');
+                }
+                
+            } catch (error) {
+                console.error('❌ BTC價格更新失敗:', error);
+                document.getElementById('btcPrice').textContent = '無法連接';
+                document.getElementById('priceStatus').className = 'status-dot offline';
+                document.getElementById('priceAlert').innerHTML = 
+                    '<div class="alert error">❌ 無法獲取BTC價格數據</div>';
+            }
+        }
+        
+        // 更新GitHub Actions交易狀態
+        async function updateTradingSystemStatus() {
+            try {
+                console.log('🔄 更新交易系統狀態...');
+                
+                // 獲取高頻交易狀態
+                const tradingStatus = await window.githubMonitor.getHighFrequencyTradingStatus();
+                const todayStats = await window.githubMonitor.getTodayTradingStats();
+                const allWorkflows = await window.githubMonitor.getAllTradingStatus();
+                
+                // 更新交易系統狀態
+                if (tradingStatus.status) {
+                    const statusIcon = window.githubMonitor.getStatusIcon(tradingStatus.status, tradingStatus.conclusion);
+                    const statusText = tradingStatus.isRunning ? '🔄 運行中' : 
+                        (tradingStatus.conclusion === 'success' ? '✅ 正常' : '⚠️ 待檢查');
+                    
+                    document.getElementById('systemStatus').textContent = statusText;
+                    document.getElementById('lastExecution').textContent = 
+                        window.githubMonitor.formatRunTime(tradingStatus.lastRun);
+                    
+                    // 更新狀態指示器
+                    const statusDot = document.getElementById('tradingStatus');
+                    statusDot.className = tradingStatus.isRunning ? 'status-dot' : 
+                        (tradingStatus.conclusion === 'success' ? 'status-dot' : 'status-dot warning');
+                }
+                
+                // 更新今日統計
+                if (todayStats) {
+                    document.getElementById('todayExecutions').textContent = todayStats.totalExecutions;
+                    document.getElementById('successRate').textContent = 
+                        `${todayStats.successRate.toFixed(1)}%`;
+                    
+                    if (todayStats.nextScheduledRun) {
+                        const nextRun = window.githubMonitor.formatRunTime(todayStats.nextScheduledRun);
+                        document.getElementById('nextExecution').textContent = `下次執行: ${nextRun}`;
+                    }
+                }
+                
+                // 更新工作流狀態
+                const workflowMap = {
+                    'high-frequency-trading': 'highFreqStatus',
+                    'main-trading': 'mainTradingStatus', 
+                    'monitoring': 'monitoringStatus',
+                    'data-management': 'dataManagementStatus'
+                };
+                
+                allWorkflows.forEach(workflow => {
+                    const elementId = workflowMap[workflow.workflow];
+                    if (elementId) {
+                        const element = document.getElementById(elementId);
+                        if (element) {
+                            const icon = window.githubMonitor.getStatusIcon(workflow.status, workflow.conclusion);
+                            const status = workflow.isRunning ? '運行中' : 
+                                (workflow.conclusion === 'success' ? '正常' : '待檢查');
+                            element.textContent = `${icon} ${status}`;
+                        }
+                    }
+                });
+                
+                // 更新系統健康狀態
+                const healthyWorkflows = allWorkflows.filter(w => w.conclusion === 'success').length;
+                const totalWorkflows = allWorkflows.length;
+                const healthStatus = document.getElementById('systemHealthStatus');
+                
+                if (healthyWorkflows === totalWorkflows) {
+                    healthStatus.className = 'status-dot';
+                } else if (healthyWorkflows > totalWorkflows / 2) {
+                    healthStatus.className = 'status-dot warning';
+                } else {
+                    healthStatus.className = 'status-dot offline';
+                }
+                
+                // 顯示詳細信息
+                const details = document.getElementById('workflowDetails');
+                if (details && todayStats.lastExecution) {
+                    details.innerHTML = `最後執行: ${todayStats.lastExecution.toLocaleString('zh-TW')} | 
+                        今日成功: ${todayStats.successfulExecutions}/${todayStats.totalExecutions}`;
+                }
+                
+                console.log('✅ 交易系統狀態更新成功');
+                
+            } catch (error) {
+                console.error('❌ 交易系統狀態更新失敗:', error);
+                
+                // 顯示錯誤狀態
+                document.getElementById('systemStatus').textContent = '❌ 連接失敗';
+                document.getElementById('tradingStatus').className = 'status-dot offline';
+                document.getElementById('systemHealthStatus').className = 'status-dot offline';
+            }
+        }
+        
+        // 刷新所有數據
+        async function refreshAllData() {
+            console.log('🔄 開始刷新所有數據...');
+            
+            try {
+                // 並行更新所有數據
+                await Promise.all([
+                    updateBTCPrice(),
+                    updateTradingSystemStatus()
+                ]);
+                
+                const now = new Date();
+                document.getElementById('controlPanelStatus').innerHTML = 
+                    `<div class="alert success">✅ 數據更新完成 - ${now.toLocaleString('zh-TW')}</div>`;
+                
+                console.log('✅ 所有數據更新完成');
+                
+            } catch (error) {
+                console.error('❌ 數據更新失敗:', error);
+                document.getElementById('controlPanelStatus').innerHTML = 
+                    `<div class="alert error">❌ 數據更新失敗: ${error.message}</div>`;
+            }
+        }
+        
+        // 查看GitHub Actions
+        function viewGitHubActions() {
+            window.open('https://github.com/winyoulife/AImax-Trading-System/actions', '_blank');
+        }
+        
+        // 查看Telegram設置指南
+        function viewTelegramGuide() {
+            window.open('https://github.com/winyoulife/AImax-Trading-System/blob/main/TELEGRAM_SETUP_GUIDE.md', '_blank');
+        }
+        
+        // 緊急停止
+        function emergencyStop() {
+            if (confirm('⚠️ 確定要執行緊急停止嗎？\\n\\n這將暫停所有交易活動。')) {
+                alert('🚨 緊急停止功能需要通過GitHub Actions手動觸發\\n\\n請前往Actions頁面執行緊急停止工作流');
+                viewGitHubActions();
+            }
+        }
+        
+        // 登出功能
+        function logout() {
+            if (confirm('🔐 確定要安全登出嗎？')) {
+                localStorage.removeItem('aimax_authenticated');
+                localStorage.removeItem('aimax_username');
+                localStorage.removeItem('aimax_session_expiry');
+                localStorage.removeItem('aimax_login_time');
+                window.location.href = './secure-login-fixed.html';
+            }
+        }
+        
+        // 頁面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 AImax 終極智能儀表板啟動...');
+            
+            // 檢查認證狀態
+            const authInfo = checkAuth();
+            if (!authInfo) {
+                return;
+            }
+            
+            // 顯示用戶信息
+            document.getElementById('userInfo').textContent = `👤 歡迎回來, ${authInfo.username}!`;
+            
+            // 立即更新一次數據
+            refreshAllData();
+            
+            // 保守的前端更新 - 不影響交易決策
+            setInterval(refreshAllData, 30000); // 30秒更新，純顯示用途
+            
+            console.log('📱 前端儀表板：純顯示模式，不影響83.3%勝率交易決策');
+            
+            console.log('✅ 儀表板初始化完成');
+        });
+    </script>
+</body>
+</html>
