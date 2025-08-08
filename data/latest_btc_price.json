@@ -1,0 +1,14 @@
+{
+  "price": 3477342.4,
+  "timestamp": "2025-08-08T14:12:52.315871",
+  "source": "MAX_API_DIRECT",
+  "currency": "TWD",
+  "symbol": "BTCTWD",
+  "additional_data": {
+    "buy": 3476823.6,
+    "sell": 3477889.9,
+    "high": 3497177.8,
+    "low": 3416782.5,
+    "vol": 29.2884
+  }
+}
