@@ -1,0 +1,16 @@
+{
+  "version": "v2.3-hybrid-20250808144009",
+  "timestamp": "20250808144009",
+  "update_time": "2025/08/08 14:40",
+  "features": [
+    "混合高頻價格更新策略",
+    "每30秒CORS代理實時數據",
+    "每2分鐘GitHub Actions備援",
+    "三層容錯機制",
+    "強制緩存刷新"
+  ],
+  "urls": [
+    "https://winyoulife.github.io/AImax-Trading-System/smart-balanced-dashboard.html?v=20250808144009",
+    "https://winyoulife.github.io/AImax-Trading-System/smart-balanced-dashboard-20250808144009.html"
+  ]
+}
