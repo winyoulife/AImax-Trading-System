@@ -1,0 +1,44 @@
+name: 🎯 簡單更新
+
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: '更新訊息'
+        required: false
+        default: '手動更新'
+
+jobs:
+  simple-update:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔄 檢出代碼
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 📊 更新時間戳
+        run: |
+          echo "更新時間: $(date)" > static/last_update.txt
+          echo "✅ 時間戳已更新"
+      
+      - name: 📝 提交更新
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          git add static/last_update.txt
+          
+          if git diff --staged --quiet; then
+            echo "沒有變更需要提交"
+          else
+            git commit -m "🔄 簡單更新 - $(date)"
+            git push
+            echo "✅ 更新已推送"
+          fi
+      
+      - name: 📊 完成
+        run: |
+          echo "🎯 85%勝率策略系統更新完成"
+          echo "🌐 訪問: https://winyoulife.github.io/AImax-Trading-System/"
