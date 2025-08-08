@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 混合高頻策略測試頁面</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .price-display {
+            font-size: 2em;
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+        }
+        .status {
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+        .log {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 0.9em;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 混合高頻策略測試頁面</h1>
+        <p>這個頁面專門測試混合高頻價格更新策略</p>
+        
+        <div class="price-display" id="btc-price">載入中...</div>
+        
+        <div class="status">
+            <strong>數據來源:</strong> <span id="price-source">檢測中...</span><br>
+            <strong>更新時間:</strong> <span id="last-update">--</span><br>
+            <strong>響應時間:</strong> <span id="response-time">--</span><br>
+            <strong>失敗次數:</strong> <span id="failure-count">0</span>
+        </div>
+        
+        <div class="log" id="log">
+            <div>🚀 混合高頻策略啟動中...</div>
+        </div>
+    </div>
+
+    <script>
+        // 🚀 混合高頻價格更新策略
+        let priceUpdateInterval;
+        let lastUpdateTime = 0;
+        let consecutiveFailures = 0;
+        let priceSource = '';
+        
+        function log(message) {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString('zh-TW');
+            logElement.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function formatNumber(num) {
+            return new Intl.NumberFormat('zh-TW').format(num);
+        }
+        
+        async function fetchBTCPriceHybrid() {
+            const now = Date.now();
+            const startTime = now;
+            
+            // 防止過於頻繁的請求
+            if (now - lastUpdateTime < 25000) {
+                log('⏸️ 請求間隔太短，跳過此次更新');
+                return;
+            }
+            
+            try {
+                // 方法1: 嘗試CORS代理 (最快，實時性最好)
+                const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=';
+                const maxApiUrl = 'https://max-api.maicoin.com/api/v2/tickers/btctwd';
+                
+                log('📡 嘗試CORS代理獲取實時數據...');
+                
+                const response = await fetch(proxyUrl + maxApiUrl, {
+                    method: 'GET',
+                    signal: AbortSignal.timeout(8000)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data && data.last) {
+                        const btcPrice = parseFloat(data.last);
+                        const responseTime = Date.now() - startTime;
+                        updatePriceDisplay(btcPrice, 'CORS代理 (實時)', responseTime);
+                        consecutiveFailures = 0;
+                        lastUpdateTime = now;
+                        log(`✅ CORS代理成功: NT$ ${formatNumber(btcPrice)} (${responseTime}ms)`);
+                        return;
+                    }
+                }
+                
+                throw new Error('CORS代理失敗');
+                
+            } catch (error) {
+                consecutiveFailures++;
+                log(`⚠️ CORS代理失敗 (${consecutiveFailures}次): ${error.message}`);
+                
+                // 方法2: 使用GitHub Actions更新的數據 (每2分鐘更新)
+                try {
+                    log('📊 嘗試GitHub Actions備援數據...');
+                    const githubResponse = await fetch('https://raw.githubusercontent.com/winyoulife/AImax-Trading-System/main/data/latest_btc_price.json?' + now);
+                    
+                    if (githubResponse.ok) {
+                        const githubData = await githubResponse.json();
+                        const btcPrice = parseFloat(githubData.price);
+                        const responseTime = Date.now() - startTime;
+                        updatePriceDisplay(btcPrice, 'GitHub數據 (2分鐘)', responseTime);
+                        lastUpdateTime = now;
+                        log(`✅ GitHub備援成功: NT$ ${formatNumber(btcPrice)} (${responseTime}ms)`);
+                        return;
+                    }
+                } catch (githubError) {
+                    log(`⚠️ GitHub數據獲取失敗: ${githubError.message}`);
+                }
+                
+                // 方法3: 使用備用價格 (僅在連續失敗時)
+                if (consecutiveFailures >= 3) {
+                    const fallbackPrice = 3489643;
+                    const responseTime = Date.now() - startTime;
+                    updatePriceDisplay(fallbackPrice, '備用價格', responseTime);
+                    log(`🔄 使用備用價格: NT$ ${formatNumber(fallbackPrice)}`);
+                }
+            }
+        }
+        
+        function updatePriceDisplay(price, source, responseTime) {
+            priceSource = source;
+            document.getElementById('btc-price').textContent = `NT$ ${formatNumber(price)}`;
+            document.getElementById('price-source').textContent = source;
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString('zh-TW');
+            document.getElementById('response-time').textContent = `${responseTime}ms`;
+            document.getElementById('failure-count').textContent = consecutiveFailures;
+        }
+        
+        // 啟動混合高頻價格更新
+        function startHybridPriceUpdates() {
+            log('🚀 混合高頻價格更新已啟動 (每30秒)');
+            
+            // 立即執行一次
+            fetchBTCPriceHybrid();
+            
+            // 每30秒更新一次
+            priceUpdateInterval = setInterval(fetchBTCPriceHybrid, 30000);
+        }
+        
+        // 頁面載入完成後啟動
+        document.addEventListener('DOMContentLoaded', function() {
+            startHybridPriceUpdates();
+        });
+    </script>
+</body>
+</html>
