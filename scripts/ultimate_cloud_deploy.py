@@ -43,7 +43,7 @@ class UltimateCloudDeploy:
         # 檢查關鍵文件
         required_files = [
             "static/smart-balanced-dashboard.html",
-            ".github/workflows/simple-deploy.yml"
+            ".github/workflows/ultimate-deploy.yml"
         ]
         
         for file in required_files:

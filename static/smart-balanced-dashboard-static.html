@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
         <!-- 部署信息 -->
+        <meta name="deploy-version" content="v3.0-ultimate-20250808145311">
+        <meta name="deploy-timestamp" content="20250808145311">
+        <meta name="deploy-time" content="2025/08/08 14:53">
+        
+        <!-- 部署信息 -->
         <meta name="deploy-version" content="v3.0-ultimate-20250808144447">
         <meta name="deploy-timestamp" content="20250808144447">
         <meta name="deploy-time" content="2025/08/08 14:44">
@@ -245,7 +250,7 @@
         <div>
             <h1>🤖 AImax 智能平衡交易儀表板</h1>
             <div style="font-size: 0.7em; opacity: 0.8; margin-top: 5px;">
-                📅 版本: v3.0-ultimate-20250808144447 | 更新時間: 2025/08/08 14:44 | 🔥 真實BTC價格 ✅
+                📅 版本: v3.0-ultimate-20250808145311 | 更新時間: 2025/08/08 14:53 | 🔥 真實BTC價格 ✅
             </div>
         </div>
         <div class="header-info">
@@ -284,7 +289,7 @@
             
             <div class="stat-card">
                 <h3>📊 總交易次數</h3>
-                <div class="stat-value neutral" id="total-trades">2</div>
+                <div class="stat-value neutral" id="total-trades">1</div>
                 <div class="stat-subtitle" id="today-trades">今日: 1</div>
             </div>
             
@@ -544,10 +549,49 @@
                 backendPriceElement.textContent = `NT$ ${formatNumber(price)}`;
             }
             
-            // 更新持倉價值
-            const btcAmount = 0.010544;
+            // 交易數據
+            const initialFunds = 100000;  // 初始資金
+            const btcAmount = 0.010544;   // 持倉數量
+            const cashBalance = 98985;    // 現金餘額 (100000 - 1015)
+            const tradingFee = 15;        // 交易手續費
+            const buyPrice = 94840;       // 買入價格
+            const totalTrades = 1;        // 總交易次數
+            
+            // 計算持倉價值
             const positionValue = price * btcAmount;
             document.getElementById('position-value').textContent = `NT$ ${formatNumber(Math.round(positionValue))}`;
+            
+            // 計算總資產價值
+            const totalValue = cashBalance + positionValue;
+            document.getElementById('total-value').textContent = `NT$ ${formatNumber(Math.round(totalValue))}`;
+            
+            // 計算總獲利
+            const totalReturn = totalValue - initialFunds;
+            const returnPercentage = (totalReturn / initialFunds * 100).toFixed(3);
+            
+            document.getElementById('total-return').textContent = `NT$ ${formatNumber(Math.round(totalReturn))}`;
+            
+            // 更新報酬率顯示
+            const returnElement = document.getElementById('return-percentage');
+            if (totalReturn >= 0) {
+                returnElement.textContent = `報酬率: +${returnPercentage}% (持倉中)`;
+                document.getElementById('total-return').className = 'stat-value positive';
+            } else {
+                returnElement.textContent = `報酬率: ${returnPercentage}% (持倉中，等待賣出)`;
+                document.getElementById('total-return').className = 'stat-value negative';
+            }
+            
+            // 更新持倉詳情
+            const positionDetails = document.getElementById('position-details');
+            if (positionDetails) {
+                const unrealizedPnL = positionValue - (buyPrice * btcAmount);
+                const pnlText = unrealizedPnL >= 0 ? `+${formatNumber(Math.round(unrealizedPnL))}` : formatNumber(Math.round(unrealizedPnL));
+                positionDetails.textContent = `BTCTWD: ${btcAmount} (未實現損益: NT$ ${pnlText})`;
+            }
+            
+            // 更新交易次數
+            document.getElementById('total-trades').textContent = totalTrades;
+            document.getElementById('today-trades').textContent = `今日: ${totalTrades}`;
             
             // 更新數據來源顯示
             const sourceElement = document.getElementById('price-source');
@@ -556,6 +600,7 @@
             }
             
             console.log(`✅ 價格更新: NT$ ${formatNumber(price)} (來源: ${source})`);
+            console.log(`📊 總資產: NT$ ${formatNumber(Math.round(totalValue))}, 獲利: NT$ ${formatNumber(Math.round(totalReturn))} (${returnPercentage}%)`);
         }
         
         function refreshData() {
@@ -594,14 +639,14 @@
             
             // 顯示歡迎訊息
             setTimeout(() => {
-                alert('🎉 歡迎使用 AImax 智能平衡交易系統！\n\n📊 當前狀態:\n• 策略: 83.3%勝率智能平衡策略 (v2.1-stable)\n• GitHub Actions: 已修正並正常運行 ✅\n• 當前餘額: NT$ 98,985\n• 持倉: 0.010544 BTC (價值約NT$ 1,014)\n• 交易邏輯: 嚴格一買一賣配對\n• 系統狀態: 穩定運行\n\n🔄 數據每30秒自動更新');
+                alert('🎉 歡迎使用 AImax 智能平衡交易系統！\n\n📊 當前狀態:\n• 策略: 83.3%勝率混合高頻策略 (v3.0-ultimate)\n• 價格更新: 混合高頻 (30秒實時 + 2分鐘備援) ✅\n• 當前餘額: NT$ 98,985\n• 持倉: 0.010544 BTC (動態計算價值)\n• 交易記錄: 1筆買入交易\n• 系統狀態: 終極雲端部署運行\n\n🚀 混合高頻策略已啟動，數據實時更新中...');
             }, 1000);
         });
     </script>
     
     <!-- 版本信息 -->
     <div style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 8px 12px; border-radius: 5px; font-size: 0.8em; z-index: 1000;">
-        🔄 v3.0-ultimate-20250808144447 | 2025/08/08 14:44 | 🔥 強制更新
+        🔄 v3.0-ultimate-20250808145311 | 2025/08/08 14:53 | 🔥 強制更新
     </div>
 </body>
 </html>
