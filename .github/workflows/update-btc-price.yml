@@ -1,10 +1,11 @@
-name: 🔄 更新BTC價格數據
+# 已停用 - 改用 update-85-strategy.yml
+# name: 🔄 更新BTC價格數據
 
-on:
-  schedule:
-    # 每5分鐘更新一次BTC價格 - 平衡頻率和穩定性
-    - cron: '*/5 * * * *'
-  workflow_dispatch:
+# on:
+#   schedule:
+#     # 每5分鐘更新一次BTC價格 - 平衡頻率和穩定性
+#     - cron: '*/5 * * * *'
+#   workflow_dispatch:
     inputs:
       force_update:
         description: '強制更新'
