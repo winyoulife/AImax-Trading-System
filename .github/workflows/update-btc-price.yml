@@ -2,8 +2,8 @@ name: 🔄 更新BTC價格數據
 
 on:
   schedule:
-    # 每5分鐘更新一次BTC價格
-    - cron: '*/5 * * * *'
+    # 每2分鐘更新一次BTC價格 - 混合高頻策略
+    - cron: '*/2 * * * *'
   workflow_dispatch:
     inputs:
       force_update:
