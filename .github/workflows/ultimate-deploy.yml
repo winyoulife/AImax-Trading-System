@@ -35,8 +35,8 @@ jobs:
         
       - name: 📁 準備部署文件
         run: |
-          echo "🚀 終極雲端部署 - v3.0-ultimate-20250808145701"
-          echo "📅 部署時間: 2025/08/08 14:57"
+          echo "🚀 終極雲端部署 - v3.0-ultimate-20250808150329"
+          echo "📅 部署時間: 2025/08/08 15:03"
           
           # 創建部署目錄
           mkdir -p _site
@@ -101,7 +101,7 @@ jobs:
           echo "🎉 終極雲端部署完成！"
           echo "🌐 訪問地址: ${{ steps.deployment.outputs.page_url }}"
           echo "📅 部署時間: $(date)"
-          echo "🔢 版本: v3.0-ultimate-20250808145701"
+          echo "🔢 版本: v3.0-ultimate-20250808150329"
           
           # 等待部署生效
           echo "⏳ 等待部署生效..."
@@ -109,4 +109,4 @@ jobs:
           
           # 驗證部署結果
           echo "🔍 驗證部署結果..."
-          curl -s "${{ steps.deployment.outputs.page_url }}smart-balanced-dashboard.html" | grep -q "v3.0-ultimate-20250808145701" && echo "✅ 版本驗證成功" || echo "⚠️ 版本驗證失敗"
+          curl -s "${{ steps.deployment.outputs.page_url }}smart-balanced-dashboard.html" | grep -q "v3.0-ultimate-20250808150329" && echo "✅ 版本驗證成功" || echo "⚠️ 版本驗證失敗"

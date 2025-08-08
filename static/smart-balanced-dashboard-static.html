@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
         <!-- 部署信息 -->
+        <meta name="deploy-version" content="v3.0-ultimate-20250808150329">
+        <meta name="deploy-timestamp" content="20250808150329">
+        <meta name="deploy-time" content="2025/08/08 15:03">
+        
+        <!-- 部署信息 -->
         <meta name="deploy-version" content="v3.0-ultimate-20250808145701">
         <meta name="deploy-timestamp" content="20250808145701">
         <meta name="deploy-time" content="2025/08/08 14:57">
@@ -255,7 +260,7 @@
         <div>
             <h1>🤖 AImax 智能平衡交易儀表板</h1>
             <div style="font-size: 0.7em; opacity: 0.8; margin-top: 5px;">
-                📅 版本: v3.0-ultimate-20250808145701 | 更新時間: 2025/08/08 14:57 | 🔥 真實BTC價格 ✅
+                📅 版本: v3.0-ultimate-20250808150329 | 更新時間: 2025/08/08 15:03 | 🔥 真實BTC價格 ✅
             </div>
         </div>
         <div class="header-info">
@@ -372,6 +377,29 @@
                         </tr>
                     </tbody>
                 </table>
+                
+                <!-- 交易摘要 -->
+                <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                    <h3>📊 交易摘要說明</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.9em;">
+                        <div>
+                            <strong>💰 投資成本:</strong><br>
+                            • 買入金額: NT$ 1,000<br>
+                            • 手續費: NT$ 15<br>
+                            • 總成本: NT$ 1,015
+                        </div>
+                        <div>
+                            <strong>📈 當前狀況:</strong><br>
+                            • 持倉價值: <span id="summary-position-value">計算中...</span><br>
+                            • 未實現獲利: <span id="summary-unrealized-pnl">計算中...</span><br>
+                            • 獲利率: <span id="summary-pnl-percentage">計算中...</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; padding: 10px; background: rgba(0,255,136,0.1); border-radius: 5px;">
+                        <strong>💡 說明:</strong> 你在 08/05 以 NT$ 1,000 買入 0.010544 BTC，當時BTC價格約 NT$ 94,840。
+                        現在BTC價格上漲，所以你的投資有獲利！
+                    </div>
+                </div>
             </div>
             
             <!-- 控制面板 -->
@@ -589,14 +617,39 @@
             // 更新持倉詳情
             const positionDetails = document.getElementById('position-details');
             if (positionDetails) {
-                const unrealizedPnL = positionValue - (buyPrice * btcAmount);
+                const buyCost = 1000; // 實際買入成本 (不含手續費)
+                const unrealizedPnL = positionValue - buyCost;
                 const pnlText = unrealizedPnL >= 0 ? `+${formatNumber(Math.round(unrealizedPnL))}` : formatNumber(Math.round(unrealizedPnL));
-                positionDetails.textContent = `BTCTWD: ${btcAmount} (未實現損益: NT$ ${pnlText})`;
+                const currentPrice = Math.round(price);
+                positionDetails.textContent = `BTCTWD: ${btcAmount} (當前價格: NT$ ${formatNumber(currentPrice)}, 未實現獲利: NT$ ${pnlText})`;
             }
             
             // 更新交易次數
             document.getElementById('total-trades').textContent = totalTrades;
             document.getElementById('today-trades').textContent = `今日: ${totalTrades}`;
+            
+            // 更新交易摘要
+            const buyCost = 1000; // 實際買入成本
+            const unrealizedPnL = positionValue - buyCost;
+            const pnlPercentage = (unrealizedPnL / buyCost * 100).toFixed(2);
+            
+            const summaryPositionElement = document.getElementById('summary-position-value');
+            const summaryPnLElement = document.getElementById('summary-unrealized-pnl');
+            const summaryPercentageElement = document.getElementById('summary-pnl-percentage');
+            
+            if (summaryPositionElement) {
+                summaryPositionElement.textContent = `NT$ ${formatNumber(Math.round(positionValue))}`;
+            }
+            if (summaryPnLElement) {
+                const pnlText = unrealizedPnL >= 0 ? `+NT$ ${formatNumber(Math.round(unrealizedPnL))}` : `NT$ ${formatNumber(Math.round(unrealizedPnL))}`;
+                summaryPnLElement.textContent = pnlText;
+                summaryPnLElement.style.color = unrealizedPnL >= 0 ? '#00ff88' : '#ff6b6b';
+            }
+            if (summaryPercentageElement) {
+                const percentageText = unrealizedPnL >= 0 ? `+${pnlPercentage}%` : `${pnlPercentage}%`;
+                summaryPercentageElement.textContent = percentageText;
+                summaryPercentageElement.style.color = unrealizedPnL >= 0 ? '#00ff88' : '#ff6b6b';
+            }
             
             // 更新數據來源顯示
             const sourceElement = document.getElementById('price-source');
@@ -651,7 +704,7 @@
     
     <!-- 版本信息 -->
     <div style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 8px 12px; border-radius: 5px; font-size: 0.8em; z-index: 1000;">
-        🔄 v3.0-ultimate-20250808145701 | 2025/08/08 14:57 | 🔥 強制更新
+        🔄 v3.0-ultimate-20250808150329 | 2025/08/08 15:03 | 🔥 強制更新
     </div>
 </body>
 </html>
