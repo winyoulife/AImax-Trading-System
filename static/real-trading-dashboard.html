@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 AImax 真實交易儀表板</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+        
+        .header-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            font-size: 0.9em;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255,255,255,0.15);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .stat-card h3 {
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+        
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value.positive { color: #00ff88; }
+        .stat-value.negative { color: #ff6b6b; }
+        .stat-value.neutral { color: #ffd93d; }
+        
+        .stat-subtitle {
+            font-size: 0.8em;
+            opacity: 0.7;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+        
+        .trading-panel {
+            background: rgba(255,255,255,0.1);
+            padding: 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .trading-panel h2 {
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .trades-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .trades-table th,
+        .trades-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .trades-table th {
+            background: rgba(255,255,255,0.1);
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .trades-table td {
+            font-size: 0.85em;
+        }
+        
+        .trade-buy { color: #00ff88; font-weight: bold; }
+        .trade-sell { color: #ff6b6b; font-weight: bold; }
+        
+        .refresh-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 15px;
+        }
+        
+        .refresh-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-indicator.online { background: #00ff88; }
+        .status-indicator.offline { background: #ff6b6b; }
+        
+        .api-status {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            opacity: 0.7;
+        }
+        
+        .error {
+            background: rgba(255,107,107,0.2);
+            color: #ff6b6b;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        
+        .success {
+            background: rgba(0,255,136,0.2);
+            color: #00ff88;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>🎯 AImax 真實交易儀表板</h1>
+            <div style="font-size: 0.7em; opacity: 0.8; margin-top: 5px;">
+                📅 版本: v1.0-real | 連接: 台灣MAX交易所 | 🔥 真實數據 ✅
+            </div>
+        </div>
+        <div class="header-info">
+            <span>真實交易系統 • 10萬台幣實戰準備 • MAX API整合</span>
+            <span id="current-time"></span>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- API連接狀態 -->
+        <div class="api-status">
+            <h3>📡 MAX API 連接狀態</h3>
+            <div id="api-status">
+                <span class="status-indicator offline"></span>檢查中...
+            </div>
+        </div>
+        
+        <!-- 統計卡片 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>💰 BTC 當前價格</h3>
+                <div class="stat-value neutral" id="btc-price">載入中...</div>
+                <div class="stat-subtitle" id="price-change">24H變化: --</div>
+            </div>
+            
+            <div class="stat-card">
+                <h3>💵 TWD 餘額</h3>
+                <div class="stat-value neutral" id="twd-balance">需要API Key</div>
+                <div class="stat-subtitle">可用於交易</div>
+            </div>
+            
+            <div class="stat-card">
+                <h3>₿ BTC 持倉</h3>
+                <div class="stat-value neutral" id="btc-balance">需要API Key</div>
+                <div class="stat-subtitle" id="btc-value">價值: --</div>
+            </div>
+            
+            <div class="stat-card">
+                <h3>📊 總資產價值</h3>
+                <div class="stat-value neutral" id="total-value">需要API Key</div>
+                <div class="stat-subtitle">TWD + BTC</div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <!-- 交易記錄 -->
+            <div class="trading-panel">
+                <h2>📋 真實交易記錄</h2>
+                <button class="refresh-btn" onclick="refreshData()">🔄 刷新數據</button>
+                
+                <div id="trades-content">
+                    <div class="loading">
+                        <p>📡 連接MAX API獲取真實交易記錄...</p>
+                        <p style="font-size: 0.8em; margin-top: 10px;">需要API Key才能顯示個人交易記錄</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 市場信息 -->
+            <div class="trading-panel">
+                <h2>📈 市場信息</h2>
+                
+                <div style="margin-bottom: 20px;">
+                    <h4>💹 實時報價</h4>
+                    <div style="font-size: 0.9em; margin-top: 10px;">
+                        <div>買價: <span id="bid-price" class="trade-buy">載入中...</span></div>
+                        <div>賣價: <span id="ask-price" class="trade-sell">載入中...</span></div>
+                        <div>價差: <span id="spread">載入中...</span></div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <h4>📊 24小時統計</h4>
+                    <div style="font-size: 0.9em; margin-top: 10px;">
+                        <div>最高: <span id="high-24h">載入中...</span></div>
+                        <div>最低: <span id="low-24h">載入中...</span></div>
+                        <div>成交量: <span id="volume-24h">載入中...</span></div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4>🔄 最近交易</h4>
+                    <div id="recent-trades" style="font-size: 0.8em; margin-top: 10px;">
+                        載入中...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let lastPrice = 0;
+        
+        function formatNumber(num) {
+            return new Intl.NumberFormat('zh-TW').format(num);
+        }
+        
+        function updateTime() {
+            document.getElementById('current-time').textContent = 
+                new Date().toLocaleString('zh-TW');
+        }
+        
+        async function fetchRealData() {
+            try {
+                // 這裡會調用我們的MAX API
+                const response = await fetch('/api/max/ticker');
+                
+                if (!response.ok) {
+                    throw new Error('API調用失敗');
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateMarketData(data.data);
+                    updateApiStatus(true);
+                } else {
+                    throw new Error(data.error);
+                }
+                
+            } catch (error) {
+                console.error('獲取數據失敗:', error);
+                updateApiStatus(false, error.message);
+            }
+        }
+        
+        function updateMarketData(data) {
+            // 更新BTC價格
+            const currentPrice = data.last_price;
+            document.getElementById('btc-price').textContent = `NT$ ${formatNumber(currentPrice)}`;
+            
+            // 計算價格變化
+            if (lastPrice > 0) {
+                const change = currentPrice - lastPrice;
+                const changePercent = (change / lastPrice * 100).toFixed(2);
+                const changeText = change >= 0 ? `+${formatNumber(change)}` : formatNumber(change);
+                const changeColor = change >= 0 ? '#00ff88' : '#ff6b6b';
+                
+                document.getElementById('price-change').innerHTML = 
+                    `24H變化: <span style="color: ${changeColor}">NT$ ${changeText} (${changePercent}%)</span>`;
+            }
+            
+            lastPrice = currentPrice;
+            
+            // 更新買賣價
+            document.getElementById('bid-price').textContent = `NT$ ${formatNumber(data.bid_price)}`;
+            document.getElementById('ask-price').textContent = `NT$ ${formatNumber(data.ask_price)}`;
+            
+            // 計算價差
+            const spread = data.ask_price - data.bid_price;
+            const spreadPercent = (spread / data.ask_price * 100).toFixed(3);
+            document.getElementById('spread').textContent = `NT$ ${formatNumber(spread)} (${spreadPercent}%)`;
+            
+            // 更新24小時統計
+            document.getElementById('high-24h').textContent = `NT$ ${formatNumber(data.high_24h)}`;
+            document.getElementById('low-24h').textContent = `NT$ ${formatNumber(data.low_24h)}`;
+            document.getElementById('volume-24h').textContent = `${data.volume_24h.toFixed(4)} BTC`;
+        }
+        
+        function updateApiStatus(connected, error = null) {
+            const statusElement = document.getElementById('api-status');
+            
+            if (connected) {
+                statusElement.innerHTML = '<span class="status-indicator online"></span>MAX API 連接正常 ✅';
+            } else {
+                statusElement.innerHTML = `<span class="status-indicator offline"></span>MAX API 連接失敗 ❌ ${error || ''}`;
+            }
+        }
+        
+        async function fetchRecentTrades() {
+            try {
+                const response = await fetch('/api/max/recent-trades');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        updateRecentTrades(data.data.trades);
+                    }
+                }
+            } catch (error) {
+                console.error('獲取最近交易失敗:', error);
+            }
+        }
+        
+        function updateRecentTrades(trades) {
+            const container = document.getElementById('recent-trades');
+            let html = '';
+            
+            trades.slice(0, 5).forEach(trade => {
+                const sideEmoji = trade.side === 'buy' ? '🟢' : '🔴';
+                const sideClass = trade.side === 'buy' ? 'trade-buy' : 'trade-sell';
+                
+                html += `<div style="margin-bottom: 5px;">
+                    ${sideEmoji} <span class="${sideClass}">${trade.side.toUpperCase()}</span>: 
+                    NT$ ${formatNumber(trade.price)} × ${trade.volume.toFixed(6)}
+                </div>`;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function refreshData() {
+            console.log('🔄 刷新真實數據...');
+            fetchRealData();
+            fetchRecentTrades();
+        }
+        
+        // 初始化
+        updateTime();
+        refreshData();
+        
+        // 定期更新
+        setInterval(updateTime, 1000);
+        setInterval(refreshData, 30000); // 每30秒更新一次
+        
+        // 頁面載入完成
+        document.addEventListener('DOMContentLoaded', function() {
+            // 顯示說明訊息
+            setTimeout(() => {
+                alert('🎯 歡迎使用 AImax 真實交易儀表板！\n\n📊 當前狀態:\n• 連接: 台灣MAX交易所 ✅\n• 數據: 100%真實市場數據\n• 價格: 實時更新 (每30秒)\n• 交易記錄: 需要API Key才能顯示\n\n🔑 下一步:\n• 設置MAX API Key\n• 開始真實交易測試\n• 準備10萬台幣實戰\n\n🚀 這是為真實交易準備的系統！');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

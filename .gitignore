@@ -19,7 +19,6 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
 # Virtual Environment
 .venv/
@@ -32,44 +31,32 @@ env/
 .idea/
 *.swp
 *.swo
-*~
 
 # OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 
-# Trading System Specific
-trading_status.json
-EMERGENCY_STOP
+# Data files
+data/
+*.csv
+*.json
 *.log
-logs/
-
-# Data files (keep structure but not actual data)
-data/*.csv
-data/*.json
-!data/.gitkeep
 
 # Config files with sensitive info
-config/api_keys.py
-config/private_config.json
+config/telegram_config.py
+config/max_exchange_config.py
 
 # Temporary files
-*.tmp
-*.temp
 temp/
+tmp/
+*.tmp
 
-# Backup files
-*.bak
-*.backup
+# Reports
+reports/
 
-# Docker
-.dockerignore
+# Deployment
+cloud_deployment_*/
+*.zip
 
-# Deployment specific
-deploy.sh
-*.service
+# Cache
+.cache/

@@ -245,6 +245,10 @@ class DataFetcher:
         """內部異步獲取數據方法"""
         async with DataFetcher() as fetcher:
             return await fetcher.get_klines(market, period, limit)
+    
+    def get_kline_data(self, market='btctwd', timeframe='1h', limit=100):
+        """獲取K線數據 (同步方法，兼容舊版本)"""
+        return self.fetch_data(market.upper(), timeframe, limit)
 
 # 便捷函數
 async def fetch_btc_data(period: str = '60', limit: int = 1000) -> Optional[pd.DataFrame]:
@@ -272,43 +276,6 @@ async def fetch_current_price(market: str = 'btctwd') -> Optional[float]:
     async with DataFetcher() as fetcher:
         ticker = await fetcher.get_ticker(market)
         return ticker['last'] if ticker else None
-
-    def fetch_data(self, symbol: str = 'BTCTWD', timeframe: str = '1h', limit: int = 1000) -> Optional[pd.DataFrame]:
-        """同步獲取數據方法 - 兼容舊版本接口
-        
-        Args:
-            symbol: 交易對 (BTCTWD, BTCUSDT等)
-            timeframe: 時間框架 (1h, 5m等)
-            limit: 數據條數
-            
-        Returns:
-            包含OHLCV數據的DataFrame
-        """
-        # 轉換symbol格式
-        if symbol.upper() == 'BTCTWD':
-            market = 'btctwd'
-        else:
-            market = symbol.lower()
-        
-        # 轉換timeframe格式
-        period_map = {
-            '1m': '1',
-            '5m': '5', 
-            '15m': '15',
-            '30m': '30',
-            '1h': '60',
-            '4h': '240',
-            '1d': '1440'
-        }
-        period = period_map.get(timeframe, '60')
-        
-        # 使用異步方法獲取數據
-        return asyncio.run(self._fetch_data_async(market, period, limit))
-    
-    async def _fetch_data_async(self, market: str, period: str, limit: int) -> Optional[pd.DataFrame]:
-        """內部異步獲取數據方法"""
-        async with DataFetcher() as fetcher:
-            return await fetcher.get_klines(market, period, limit)
 
 # 同步版本的便捷函數
 def get_btc_data_sync(period: str = '60', limit: int = 1000) -> Optional[pd.DataFrame]:

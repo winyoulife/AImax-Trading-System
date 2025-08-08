@@ -1,0 +1,10 @@
+{"timestamp": "2025-08-06T21:16:19.081828", "level": "INFO", "category": "system", "message": "實時監控器初始化完成", "module": "src.logging.structured_logger", "function": "info", "line_number": 264, "thread_id": "MainThread", "process_id": 5452, "extra_data": {}, "stack_trace": null, "correlation_id": null}
+[system] 實時監控器初始化完成
+[system] 實時監控已啟動
+{"timestamp": "2025-08-06T21:16:19.083826", "level": "INFO", "category": "system", "message": "實時監控已啟動", "module": "src.logging.structured_logger", "function": "info", "line_number": 264, "thread_id": "MainThread", "process_id": 5452, "extra_data": {}, "stack_trace": null, "correlation_id": null}
+{"timestamp": "2025-08-06T21:16:20.365650", "level": "WARNING", "category": "trading", "message": "警告: 沒有活躍的交易策略", "module": "src.logging.structured_logger", "function": "warning", "line_number": 268, "thread_id": "Thread-4 (_monitoring_loop)", "process_id": 5452, "extra_data": {"total_strategies": 4}, "stack_trace": null, "correlation_id": null}
+[trading] 警告: 沒有活躍的交易策略
+[trading] 警告: 這是一個測試警告
+{"timestamp": "2025-08-06T21:16:29.131381", "level": "INFO", "category": "trading", "message": "警告: 這是一個測試警告", "module": "src.logging.structured_logger", "function": "info", "line_number": 264, "thread_id": "MainThread", "process_id": 5452, "extra_data": {"test": true}, "stack_trace": null, "correlation_id": null}
+[system] 實時監控已停止
+{"timestamp": "2025-08-06T21:16:31.656394", "level": "INFO", "category": "system", "message": "實時監控已停止", "module": "src.logging.structured_logger", "function": "info", "line_number": 264, "thread_id": "MainThread", "process_id": 5452, "extra_data": {}, "stack_trace": null, "correlation_id": null}
