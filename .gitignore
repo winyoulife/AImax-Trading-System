@@ -36,27 +36,31 @@ env/
 .DS_Store
 Thumbs.db
 
-# Data files
+# 敏感配置文件 (私有倉庫可以包含範例)
+# config/telegram_config.py  # 取消註釋以包含範例配置
+# config/max_exchange_config.py  # 取消註釋以包含範例配置
+
+# 數據文件
 data/
 *.csv
 *.json
 *.log
 
-# Config files with sensitive info
-config/telegram_config.py
-config/max_exchange_config.py
-
-# Temporary files
+# 臨時文件
 temp/
 tmp/
 *.tmp
 
-# Reports
+# 報告
 reports/
 
-# Deployment
+# 部署文件
 cloud_deployment_*/
 *.zip
 
-# Cache
+# 緩存
 .cache/
+
+# 個人筆記
+notes/
+personal/
