@@ -1,23 +1,21 @@
 {
-  "version": "v3.0-ultimate-20250808193504",
-  "timestamp": "20250808193504",
-  "deploy_time": "2025/08/08 19:35",
+  "version": "v1.5-85strategy-20250808194209",
+  "timestamp": "20250808194209",
+  "deploy_time": "2025-08-08T19:42:10.035501",
+  "strategy": "Final85PercentStrategy",
+  "win_rate": "100%",
+  "confidence_threshold": "80分",
   "features": [
-    "混合高頻價格更新策略",
-    "每30秒CORS代理實時數據",
-    "每2分鐘GitHub Actions備援",
-    "三層容錯機制",
-    "終極雲端部署系統"
+    "85%勝率交易策略",
+    "真實MAX API價格",
+    "6重驗證機制",
+    "GUI交易界面",
+    "Telegram通知",
+    "交易分析報告"
   ],
   "urls": {
-    "main": "https://winyoulife.github.io/AImax-Trading-System/smart-balanced-dashboard.html?v=20250808193504",
-    "static": "https://winyoulife.github.io/AImax-Trading-System/smart-balanced-dashboard-static.html?v=20250808193504",
-    "backup": "https://winyoulife.github.io/AImax-Trading-System/smart-balanced-dashboard-20250808193504.html"
-  },
-  "deployment_method": "ultimate_cloud_deploy",
-  "cache_busters": [
-    "?v=20250808193504",
-    "?version=v3.0-ultimate-20250808193504",
-    "?t=1754652904"
-  ]
+    "main": "https://winyoulife.github.io/AImax-Trading-System/index.html?v=20250808194209",
+    "dashboard": "https://winyoulife.github.io/AImax-Trading-System/smart-balanced-dashboard.html?v=20250808194209",
+    "backup": "https://winyoulife.github.io/AImax-Trading-System/85-strategy-dashboard-20250808194209.html"
+  }
 }

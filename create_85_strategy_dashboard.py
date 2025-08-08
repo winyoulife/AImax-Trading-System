@@ -1,4 +1,16 @@
-<!DOCTYPE html>
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+🎯 創建85%勝率策略專用雲端儀表板
+"""
+
+import os
+from datetime import datetime
+
+def create_85_strategy_dashboard():
+    """創建85%勝率策略雲端儀表板"""
+    
+    dashboard_html = """<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -351,4 +363,15 @@
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
-</html>
+</html>"""
+    
+    # 保存到static目錄
+    with open('static/85-strategy-dashboard.html', 'w', encoding='utf-8') as f:
+        f.write(dashboard_html)
+    
+    print("✅ 85%勝率策略雲端儀表板已創建: static/85-strategy-dashboard.html")
+    
+    return dashboard_html
+
+if __name__ == "__main__":
+    create_85_strategy_dashboard()
