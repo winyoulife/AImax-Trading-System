@@ -1,0 +1,112 @@
+name: 🚀 終極雲端部署
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: '強制部署'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔄 檢出代碼
+        uses: actions/checkout@v4
+        
+      - name: 🔧 設置Pages
+        uses: actions/configure-pages@v4
+        
+      - name: 📁 準備部署文件
+        run: |
+          echo "🚀 終極雲端部署 - v3.0-ultimate-20250808144447"
+          echo "📅 部署時間: 2025/08/08 14:44"
+          
+          # 創建部署目錄
+          mkdir -p _site
+          
+          # 複製所有靜態文件
+          cp -r static/* _site/
+          
+          # 創建.nojekyll文件 (禁用Jekyll)
+          touch _site/.nojekyll
+          
+          # 創建robots.txt
+          cat > _site/robots.txt << 'EOF'
+          User-agent: *
+          Disallow: /admin
+          Allow: /
+          EOF
+          
+          # 創建緩存控制文件
+          cat > _site/.htaccess << 'EOF'
+          <IfModule mod_expires.c>
+            ExpiresActive on
+            ExpiresByType text/html "access plus 0 seconds"
+            ExpiresByType application/json "access plus 0 seconds"
+          </IfModule>
+          
+          <IfModule mod_headers.c>
+            Header set Cache-Control "no-cache, no-store, must-revalidate"
+            Header set Pragma "no-cache"
+            Header set Expires "0"
+          </IfModule>
+          EOF
+          
+          # 顯示部署文件列表
+          echo "📋 部署文件列表:"
+          find _site -type f | sort
+          
+          # 驗證關鍵文件
+          if [ -f "_site/smart-balanced-dashboard.html" ]; then
+            echo "✅ 主儀表板文件存在"
+            if grep -q "fetchBTCPriceHybrid" "_site/smart-balanced-dashboard.html"; then
+              echo "✅ 混合高頻策略已包含"
+            else
+              echo "❌ 混合高頻策略缺失"
+              exit 1
+            fi
+          else
+            echo "❌ 主儀表板文件不存在"
+            exit 1
+          fi
+          
+      - name: 📤 上傳Pages構建產物
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+          
+      - name: 🚀 部署到GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        
+      - name: ✅ 部署完成通知
+        run: |
+          echo "🎉 終極雲端部署完成！"
+          echo "🌐 訪問地址: ${{ steps.deployment.outputs.page_url }}"
+          echo "📅 部署時間: $(date)"
+          echo "🔢 版本: v3.0-ultimate-20250808144447"
+          
+          # 等待部署生效
+          echo "⏳ 等待部署生效..."
+          sleep 30
+          
+          # 驗證部署結果
+          echo "🔍 驗證部署結果..."
+          curl -s "${{ steps.deployment.outputs.page_url }}smart-balanced-dashboard.html" | grep -q "v3.0-ultimate-20250808144447" && echo "✅ 版本驗證成功" || echo "⚠️ 版本驗證失敗"
