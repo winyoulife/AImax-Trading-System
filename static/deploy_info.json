@@ -1,7 +1,7 @@
 {
-  "version": "v3.0-ultimate-20250808145311",
-  "timestamp": "20250808145311",
-  "deploy_time": "2025/08/08 14:53",
+  "version": "v3.0-ultimate-20250808145701",
+  "timestamp": "20250808145701",
+  "deploy_time": "2025/08/08 14:57",
   "features": [
     "混合高頻價格更新策略",
     "每30秒CORS代理實時數據",
@@ -10,14 +10,14 @@
     "終極雲端部署系統"
   ],
   "urls": {
-    "main": "https://winyoulife.github.io/AImax-Trading-System/smart-balanced-dashboard.html?v=20250808145311",
-    "static": "https://winyoulife.github.io/AImax-Trading-System/smart-balanced-dashboard-static.html?v=20250808145311",
-    "backup": "https://winyoulife.github.io/AImax-Trading-System/smart-balanced-dashboard-20250808145311.html"
+    "main": "https://winyoulife.github.io/AImax-Trading-System/smart-balanced-dashboard.html?v=20250808145701",
+    "static": "https://winyoulife.github.io/AImax-Trading-System/smart-balanced-dashboard-static.html?v=20250808145701",
+    "backup": "https://winyoulife.github.io/AImax-Trading-System/smart-balanced-dashboard-20250808145701.html"
   },
   "deployment_method": "ultimate_cloud_deploy",
   "cache_busters": [
-    "?v=20250808145311",
-    "?version=v3.0-ultimate-20250808145311",
-    "?t=1754635991"
+    "?v=20250808145701",
+    "?version=v3.0-ultimate-20250808145701",
+    "?t=1754636222"
   ]
 }

@@ -2,8 +2,8 @@ name: 🔄 更新BTC價格數據
 
 on:
   schedule:
-    # 每2分鐘更新一次BTC價格 - 混合高頻策略
-    - cron: '*/2 * * * *'
+    # 每5分鐘更新一次BTC價格 - 平衡頻率和穩定性
+    - cron: '*/5 * * * *'
   workflow_dispatch:
     inputs:
       force_update:
@@ -31,65 +31,80 @@ jobs:
           pip install requests
       
       - name: 💰 獲取BTC價格
+        continue-on-error: true
         run: |
           python -c "
           import requests
           import json
           import os
+          import time
           from datetime import datetime
           
-          try:
-              # 直接調用MAX API
-              response = requests.get('https://max-api.maicoin.com/api/v2/tickers/btctwd', timeout=10)
-              
-              if response.status_code == 200:
-                  data = response.json()
+          # 重試機制
+          max_retries = 3
+          retry_delay = 5
+          
+          for attempt in range(max_retries):
+              try:
+                  print(f'嘗試獲取BTC價格 (第{attempt + 1}次)...')
                   
-                  if 'last' in data:
-                      price = float(data['last'])
+                  # 直接調用MAX API
+                  response = requests.get('https://max-api.maicoin.com/api/v2/tickers/btctwd', timeout=15)
+              
+                  if response.status_code == 200:
+                      data = response.json()
                       
-                      # 創建價格數據
-                      price_data = {
-                          'price': price,
-                          'timestamp': datetime.now().isoformat(),
-                          'source': 'MAX_API_DIRECT',
-                          'currency': 'TWD',
-                          'symbol': 'BTCTWD',
-                          'additional_data': {
-                              'buy': float(data.get('buy', 0)),
-                              'sell': float(data.get('sell', 0)),
-                              'high': float(data.get('high', 0)),
-                              'low': float(data.get('low', 0)),
-                              'vol': float(data.get('vol', 0))
+                      if 'last' in data:
+                          price = float(data['last'])
+                          
+                          # 創建價格數據
+                          price_data = {
+                              'price': price,
+                              'timestamp': datetime.now().isoformat(),
+                              'source': 'MAX_API_DIRECT',
+                              'currency': 'TWD',
+                              'symbol': 'BTCTWD',
+                              'additional_data': {
+                                  'buy': float(data.get('buy', 0)),
+                                  'sell': float(data.get('sell', 0)),
+                                  'high': float(data.get('high', 0)),
+                                  'low': float(data.get('low', 0)),
+                                  'vol': float(data.get('vol', 0))
+                              }
                           }
-                      }
-                      
-                      # 確保目錄存在
-                      os.makedirs('data', exist_ok=True)
-                      
-                      # 保存價格數據
-                      with open('data/latest_btc_price.json', 'w', encoding='utf-8') as f:
-                          json.dump(price_data, f, indent=2, ensure_ascii=False)
-                      
-                      print(f'✅ BTC價格已更新: NT$ {price:,.0f}')
-                      
-                      # 設置環境變量供後續步驟使用
-                      with open(os.environ['GITHUB_ENV'], 'a') as f:
-                          f.write(f'BTC_PRICE={price}\n')
-                          f.write(f'UPDATE_SUCCESS=true\n')
+                          
+                          # 確保目錄存在
+                          os.makedirs('data', exist_ok=True)
+                          
+                          # 保存價格數據
+                          with open('data/latest_btc_price.json', 'w', encoding='utf-8') as f:
+                              json.dump(price_data, f, indent=2, ensure_ascii=False)
+                          
+                          print(f'✅ BTC價格已更新: NT$ {price:,.0f}')
+                          
+                          # 設置環境變量供後續步驟使用
+                          with open(os.environ['GITHUB_ENV'], 'a') as f:
+                              f.write(f'BTC_PRICE={price}\\n')
+                              f.write(f'UPDATE_SUCCESS=true\\n')
+                          
+                          # 成功，跳出重試循環
+                          break
+                      else:
+                          print(f'❌ API響應格式錯誤 (第{attempt + 1}次)')
                   else:
-                      print('❌ API響應格式錯誤')
-                      with open(os.environ['GITHUB_ENV'], 'a') as f:
-                          f.write('UPDATE_SUCCESS=false\n')
-              else:
-                  print(f'❌ API調用失敗: {response.status_code}')
-                  with open(os.environ['GITHUB_ENV'], 'a') as f:
-                      f.write('UPDATE_SUCCESS=false\n')
+                      print(f'❌ API調用失敗: {response.status_code} (第{attempt + 1}次)')
                       
-          except Exception as e:
-              print(f'❌ 獲取價格失敗: {e}')
-              with open(os.environ['GITHUB_ENV'], 'a') as f:
-                  f.write('UPDATE_SUCCESS=false\n')
+              except Exception as e:
+                  print(f'❌ 獲取價格失敗: {e} (第{attempt + 1}次)')
+              
+              # 如果不是最後一次嘗試，等待後重試
+              if attempt < max_retries - 1:
+                  print(f'等待 {retry_delay} 秒後重試...')
+                  time.sleep(retry_delay)
+              else:
+                  print('❌ 所有重試都失敗了')
+                  with open(os.environ['GITHUB_ENV'], 'a') as f:
+                      f.write('UPDATE_SUCCESS=false\\n')
           "
       
       - name: 📊 更新儀表板狀態
